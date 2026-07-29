@@ -1,0 +1,20 @@
+version: "3.1"
+
+stories:
+  - story: Luồng xin nghỉ học đầy đủ
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - intent: xin_nghi_hoc
+      - action: utter_huong_dan_xin_nghi
+      - intent: cung_cap_thong_tin
+      - action: utter_xac_nhan_thong_tin
+      - intent: goodbye
+      - action: utter_goodbye
+
+  - story: Tra cứu quy định rồi xin nghỉ
+    steps:
+      - intent: quy_dinh_nghi_hoc
+      - action: utter_quy_dinh_nghi_hoc
+      - intent: xin_nghi_hoc
+      - action: utter_huong_dan_xin_nghi

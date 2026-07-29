@@ -1,0 +1,27 @@
+version: "3.1"
+
+rules:
+  - rule: Chào hỏi
+    steps:
+      - intent: greet
+      - action: utter_greet
+
+  - rule: Tạm biệt
+    steps:
+      - intent: goodbye
+      - action: utter_goodbye
+
+  - rule: Hướng dẫn xin nghỉ học
+    steps:
+      - intent: xin_nghi_hoc
+      - action: utter_huong_dan_xin_nghi
+
+  - rule: Phản hồi quy định
+    steps:
+      - intent: quy_dinh_nghi_hoc
+      - action: utter_quy_dinh_nghi_hoc
+
+  - rule: Tiếp nhận thông tin từ sinh viên
+    steps:
+      - intent: cung_cap_thong_tin
+      - action: utter_xac_nhan_thong_tin
