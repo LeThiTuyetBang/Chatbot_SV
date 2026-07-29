@@ -1,0 +1,68 @@
+version: "3.1"
+
+intents:
+  - time
+  - greet
+  - goodbye
+  - xin_nghi_hoc
+  - cung_cap_thong_tin
+  - quy_dinh_nghi_hoc
+
+entities:
+  - mssv
+  - ma_lop
+  - ma_mon
+  - ma_mon_hoc
+  - time
+
+slots:
+  time:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: time
+  mssv:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: mssv
+  ma_lop:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: ma_lop
+  ma_mon:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: ma_mon
+  ma_mon_hoc:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: ma_mon_hoc
+
+responses:
+  utter_greet:
+    - text: "Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?"
+
+  utter_goodbye:
+    - text: "Tạm biệt bạn! Chúc bạn học tập tốt và giữ gìn sức khỏe nhé."
+
+  utter_huong_dan_xin_nghi:
+    - text: "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng (giấy khám bệnh, xác nhận của gia đình...). Bạn vui lòng cung cấp MSSV, Mã lớp và Môn học để hệ thống ghi nhận nhé."
+
+  utter_quy_dinh_nghi_hoc:
+    - text: "Theo quy định: Sinh viên không được vắng quá 20% tổng số tiết của môn học. Nếu vắng quá 20% (dù có phép hay không phép), bạn sẽ bị cấm thi kết thúc học phần và phải học lại môn đó."
+
+  utter_xac_nhan_thong_tin:
+    - text: "Hệ thống đã nhận thông tin của bạn. Vui lòng đảm bảo bạn đã gửi minh chứng đầy đủ cho giảng viên bộ môn!"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
