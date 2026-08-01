@@ -1,10 +1,11 @@
 version: "3.1"
 
 nlu:
+  # --- 1. REGEX ---
   - regex: mssv
     examples: |
-      - \b[0-9]{8,10}\b
-      - \bSV[0-9]{6,8}\b
+      - \b[0-9]{8,15}\b
+      - \bSV[0-9]{6,10}\b
 
   - regex: ma_lop
     examples: |
@@ -13,8 +14,10 @@ nlu:
 
   - regex: ma_mon
     examples: |
-      - \b[A-Za-z]{2,4}[0-9]{3,5}\b
+      - \b[A-Z]{2,4}[0-9]{3,5}\b
+      - ^[A-Z]{2,4}\d{3,4}$
 
+  # --- 2. LOOKUP TABLES ---
   - lookup: ma_mon_hoc
     examples: |
       - Lập trình Python
@@ -26,6 +29,177 @@ nlu:
       - Trí tuệ nhân tạo
       - Hệ quản trị CSDL
       - Thực tập tốt nghiệp
+
+  # --- 3. INTENTS ---
+  # Intent Xin nghỉ học (Đã gộp inform_absence và xin_nghi_hoc)
+  - intent: inform_absence
+    examples: |
+      - em muốn xin nghỉ học
+      - xin phép nghỉ học ạ
+      - cho em nghỉ học buổi tới
+      - em bị bệnh nên xin nghỉ học
+      - em xin nghỉ học môn [Mạng máy tính](ma_mon_hoc)
+      - cho em xin nghỉ buổi học ngày mai
+      - em muốn nộp đơn xin nghỉ học
+      - em xin phép vắng mặt buổi học tới
+      - hôm nay em xin phép vắng mặt được không
+      - thầy ơi cho em xin nghỉ buổi hôm nay với
+      - làm sao để làm đơn xin nghỉ học vậy ạ
+      - em bị bệnh nên muốn xin vắng học
+      - em có việc bận gia đình nên xin phép nghỉ buổi học
+      - quy trình xin nghỉ học như thế nào
+      - nghỉ học thì phải báo ai ạ
+      - em xin vắng môn [Lập trình Python](ma_mon_hoc) hôm nay
+      - em xin phép nghỉ học môn [Cơ sở dữ liệu](ma_mon_hoc)
+      - em bị sốt nên muốn xin nghỉ buổi học hôm nay
+      - MSSV của em là [2151050001](mssv) em xin phép nghỉ học
+      - em học lớp [DH21IT01](ma_lop) xin nghỉ học hôm nay
+      - em muốn nộp minh chứng xin vắng buổi học
+      - hôm nay em đi khám bệnh nên xin vắng mặt
+      - xin phép cô cho em nghỉ môn [Mạng máy tính](ma_mon_hoc)
+      - làm đơn xin vắng học ở đâu vậy bot
+      - em bị tai nạn nhẹ xin nghỉ học tuần này
+      - nhà em có việc đột xuất cho em xin nghỉ học
+      - nghỉ học môn [Kiểm thử phần mềm](ma_mon_hoc) cần giấy tờ gì
+      - em mang mã sinh viên [2021601234](mssv) xin phép nghỉ
+      - thầy ơi em xin nghỉ học lớp [IT001-M12](ma_lop)
+      - em bị ốm không đi học được xin phép vắng
+      - làm sao để xin vắng học có lý do
+      - em xin phép vắng học ngày hôm nay
+      - cô ơi em xin nghỉ buổi học chiều nay
+      - mã môn [INT1339](ma_mon) em muốn xin nghỉ
+      - em xin nghỉ môn [Trí tuệ nhân tạo](ma_mon_hoc) hôm nay
+      - em xin nghỉ học môn [CSDL102](ma_mon)
+      - em bận đi công tác gia đình xin vắng học
+      - hướng dẫn em xin phép nghỉ học
+      - em xin vắng mặt lớp [DH22SE02](ma_lop)
+      - xin vắng học trực tuyến có được không
+      - em nghỉ học vì lý do sức khỏe
+      - gửi đơn xin nghỉ cho ai vậy ạ
+      - em bị cách ly y tế xin nghỉ học
+      - MSSV [191200123](mssv) xin nghỉ vắng hôm nay
+      - xin nghỉ học môn [Software Testing](ma_mon_hoc)
+      - em muốn xin vắng tiết 1 2 hôm nay
+      - cho em xin nghỉ học 1 buổi
+      - xin nghỉ học 2 ngày thì làm thủ tục gì
+      - em bị hỏng xe không đến lớp được xin vắng
+      - em xin nghỉ học buổi sáng nay
+      - em muốn nghỉ học có phép
+
+  # Intent Xem trạng thái đơn
+  - intent: check_absence_status
+    examples: |
+      - kiểm tra trạng thái đơn xin nghỉ
+      - đơn xin nghỉ của em được duyệt chưa
+      - xem lịch sử nộp đơn
+      - tra cứu đơn xin nghỉ học
+      - đơn nghỉ học hôm qua thế nào rồi
+      - cho em xem danh sách đơn đã nộp
+
+  # Intent Hủy đơn xin nghỉ
+  - intent: cancel_absence
+    examples: |
+      - em muốn hủy đơn xin nghỉ
+      - rút lại đơn xin nghỉ học
+      - hủy giúp em cái đơn nghỉ vừa nộp
+      - em đi học lại được rồi nên muốn hủy đơn
+      - làm sao để hủy đơn xin nghỉ học ạ
+
+  # Intent Cung cấp thông tin bổ sung
+  - intent: cung_cap_thong_tin
+    examples: |
+      - mssv của em là [2151012345](mssv)
+      - mã số sinh viên [20110099](mssv)
+      - mã lớp [DH21CN01](ma_lop)
+      - em học lớp [IT002-K15](ma_lop)
+      - mã môn là [CSDL201](ma_mon)
+      - môn học [Cấu trúc dữ liệu và giải thuật](ma_mon_hoc)
+      - mssv [19110012](mssv) lớp [DH20CS01](ma_lop)
+      - [2151050999](mssv)
+      - [DH22SE01](ma_lop)
+      - [INT2204](ma_mon)
+      - môn [Lập trình Python](ma_mon_hoc)
+      - mã môn học [NET101](ma_mon)
+      - mã sinh viên [SV2021001](mssv)
+      - em mã số [2151050123](mssv)
+      - lớp của em là [DH21T02](ma_lop)
+      - môn [Hệ quản trị CSDL](ma_mon_hoc)
+      - mã môn [AI301](ma_mon)
+      - em ở lớp [SE101-N01](ma_lop)
+      - MSSV: [20120345](mssv)
+      - Mã môn: [PRJ101](ma_mon)
+      - Lớp: [DH23IT03](ma_lop)
+      - mssv là [2251010001](mssv)
+      - môn [Trí tuệ nhân tạo](ma_mon_hoc)
+      - mã lớp em [CL01-DH21](ma_lop)
+      - [SV2022099](mssv)
+      - mã sinh viên của em [2151058888](mssv)
+      - [SE102-M01](ma_lop)
+      - môn học [Kiểm thử phần mềm](ma_mon_hoc)
+      - mã môn [SWE302](ma_mon)
+      - mssv em [2051010022](mssv)
+
+  # Intent Hỏi quy định nghỉ học
+  - intent: quy_dinh_nghi_hoc
+    examples: |
+      - nghỉ bao nhiêu buổi thì bị cấm thi
+      - quy định vắng học như thế nào ạ
+      - nghỉ học có bị trừ điểm rèn luyện không
+      - nghỉ có lý do có bị tính là vắng không
+      - nghỉ quá 20% số tiết thì sao
+      - vắng bao nhiêu tiết thì bị hủy học phần
+      - quy chế nghỉ học của trường như thế nào
+      - xin nghỉ có phép có được tính chuyên cần không
+      - bị ốm nghỉ học có được tính là hợp lệ không
+      - vắng học không phép phạt thế nào
+      - nghỉ bao nhiêu % thì bị rớt môn
+      - có minh chứng bác sĩ thì có bị trừ điểm không
+      - quy định về việc nộp đơn xin nghỉ học
+      - thời hạn nộp đơn xin vắng học là bao lâu
+      - nghỉ thi giữa kỳ thì làm sao
+      - vắng 3 buổi có bị cấm thi không
+      - vắng học bao nhiêu tiết thì cấm thi môn [Lập trình Python](ma_mon_hoc)
+      - quy định điểm chuyên cần khi vắng học
+      - nghỉ học có minh chứng có được đi học bù không
+      - quy định nghỉ học tạm thời
+      - vắng 20% số tiết là mấy buổi
+      - bị cấm thi do vắng học thì xử lý ra sao
+      - xin nghỉ học muộn có được chấp nhận không
+      - nộp giấy khám bệnh sau buổi học có được chấp nhận không
+      - nghỉ học có lý do chính đáng được vắng tối đa bao nhiêu tiết
+      - vắng thực hành có được bù không
+      - quy định nghỉ vắng đối với môn [Cơ sở dữ liệu](ma_mon_hoc)
+      - vắng bao nhiêu buổi thì điểm chuyên cần bằng 0
+      - điều kiện để xin nghỉ học có phép
+      - nghỉ học nhiều có bị cảnh báo học tập không
+      - quy định vắng mặt trong buổi kiểm tra
+      - vắng mặt không lý do bị phạt gì
+      - nghỉ học do tai nạn xử lý thế nào
+      - nghỉ có phép có bị hạ xếp loại rèn luyện không
+      - quy định nghỉ học áp dụng cho lớp [DH21IT01](ma_lop)
+      - được vắng tối đa bao nhiêu buổi
+      - nghỉ 1 buổi có bị ảnh hưởng gì không
+      - vắng thi có được thi lại không
+      - làm sao biết mình đã vắng bao nhiêu tiết
+      - quy định điểm danh của trường
+
+  # Intent Chào hỏi / Tạm biệt / Đồng ý / Từ chối
+  - intent: affirm
+    examples: |
+      - đúng rồi
+      - xác nhận
+      - dĩ nhiên
+      - chuẩn rồi ạ
+      - đúng thế
+      - okie
+
+  - intent: deny
+    examples: |
+      - không phải
+      - sai rồi
+      - chưa đúng
+      - em muốn sửa lại
+      - hủy thao tác
 
   - intent: greet
     examples: |
@@ -112,127 +286,3 @@ nlu:
       - okie bye
       - cảm ơn trợ lý
       - xin cảm ơn
-
-  - intent: xin_nghi_hoc
-    examples: |
-      - em muốn xin nghỉ học
-      - hôm nay em xin phép vắng mặt được không
-      - thầy ơi cho em xin nghỉ buổi hôm nay với
-      - làm sao để làm đơn xin nghỉ học vậy ạ
-      - em bị bệnh nên muốn xin vắng học
-      - em có việc bận gia đình nên xin phép nghỉ buổi học
-      - quy trình xin nghỉ học như thế nào
-      - em muốn nộp đơn xin nghỉ học
-      - nghỉ học thì phải báo ai ạ
-      - em xin vắng môn [Lập trình Python](ma_mon_hoc) hôm nay
-      - em xin phép nghỉ học môn [Cơ sở dữ liệu](ma_mon_hoc)
-      - em bị sốt nên muốn xin nghỉ buổi học hôm nay
-      - MSSV của em là [2151050001](mssv) em xin phép nghỉ học
-      - em học lớp [DH21IT01](ma_lop) xin nghỉ học hôm nay
-      - em muốn nộp minh chứng xin vắng buổi học
-      - hôm nay em đi khám bệnh nên xin vắng mặt
-      - xin phép cô cho em nghỉ môn [Mạng máy tính](ma_mon_hoc)
-      - làm đơn xin vắng học ở đâu vậy bot
-      - em bị tai nạn nhẹ xin nghỉ học tuần này
-      - nhà em có việc đột xuất cho em xin nghỉ học
-      - nghỉ học môn [Kiểm thử phần mềm](ma_mon_hoc) cần giấy tờ gì
-      - em mang mã sinh viên [2021601234](mssv) xin phép nghỉ
-      - thầy ơi em xin nghỉ học lớp [IT001-M12](ma_lop)
-      - em bị ốm không đi học được xin phép vắng
-      - làm sao để xin vắng học có lý do
-      - em xin phép vắng học ngày hôm nay
-      - cô ơi em xin nghỉ buổi học chiều nay
-      - mã môn [INT1339](ma_mon) em muốn xin nghỉ
-      - em xin nghỉ môn [Trí tuệ nhân tạo](ma_mon_hoc) hôm nay
-      - em xin nghỉ học môn [CSDL102](ma_mon)
-      - em bận đi công tác gia đình xin vắng học
-      - hướng dẫn em xin phép nghỉ học
-      - em xin vắng mặt lớp [DH22SE02](ma_lop)
-      - xin vắng học trực tuyến có được không
-      - em nghỉ học vì lý do sức khỏe
-      - gửi đơn xin nghỉ cho ai vậy ạ
-      - em bị cách ly y tế xin nghỉ học
-      - MSSV [191200123](mssv) xin nghỉ vắng hôm nay
-      - xin nghỉ học môn [Software Testing](ma_mon_hoc)
-      - em muốn xin vắng tiết 1 2 hôm nay
-      - cho em xin nghỉ học 1 buổi
-      - xin nghỉ học 2 ngày thì làm thủ tục gì
-      - em bị hỏng xe không đến lớp được xin vắng
-      - em xin nghỉ học buổi sáng nay
-      - em muốn nghỉ học có phép
-
-  - intent: cung_cap_thong_tin
-    examples: |
-      - mssv của em là [2151012345](mssv)
-      - mã số sinh viên [20110099](mssv)
-      - mã lớp [DH21CN01](ma_lop)
-      - em học lớp [IT002-K15](ma_lop)
-      - mã môn là [CSDL201](ma_mon)
-      - môn học [Cấu trúc dữ liệu và giải thuật](ma_mon_hoc)
-      - mssv [19110012](mssv) lớp [DH20CS01](ma_lop)
-      - [2151050999](mssv)
-      - [DH22SE01](ma_lop)
-      - [INT2204](ma_mon)
-      - môn [Lập trình Python](ma_mon_hoc)
-      - mã môn học [NET101](ma_mon)
-      - mã sinh viên [SV2021001](mssv)
-      - em mã số [2151050123](mssv)
-      - lớp của em là [DH21T02](ma_lop)
-      - môn [Hệ quản trị CSDL](ma_mon_hoc)
-      - mã môn [AI301](ma_mon)
-      - em ở lớp [SE101-N01](ma_lop)
-      - MSSV: [20120345](mssv)
-      - Mã môn: [PRJ101](ma_mon)
-      - Lớp: [DH23IT03](ma_lop)
-      - mssv là [2251010001](mssv)
-      - môn [Trí tuệ nhân tạo](ma_mon_hoc)
-      - mã lớp em [CL01-DH21](ma_lop)
-      - [SV2022099](mssv)
-      - mã sinh viên của em [2151058888](mssv)
-      - [SE102-M01](ma_lop)
-      - môn học [Kiểm thử phần mềm](ma_mon_hoc)
-      - mã môn [SWE302](ma_mon)
-      - mssv em [2051010022](mssv)
-
-  - intent: quy_dinh_nghi_hoc
-    examples: |
-      - nghỉ bao nhiêu buổi thì bị cấm thi
-      - quy định vắng học như thế nào ạ
-      - nghỉ học có bị trừ điểm rèn luyện không
-      - nghỉ có lý do có bị tính là vắng không
-      - nghỉ quá 20% số tiết thì sao
-      - vắng bao nhiêu tiết thì bị hủy học phần
-      - quy chế nghỉ học của trường như thế nào
-      - xin nghỉ có phép có được tính chuyên cần không
-      - bị ốm nghỉ học có được tính là hợp lệ không
-      - vắng học không phép phạt thế nào
-      - nghỉ bao nhiêu % thì bị rớt môn
-      - có minh chứng bác sĩ thì có bị trừ điểm không
-      - quy định về việc nộp đơn xin nghỉ học
-      - thời hạn nộp đơn xin vắng học là bao lâu
-      - nghỉ thi giữa kỳ thì làm sao
-      - vắng 3 buổi có bị cấm thi không
-      - vắng học bao nhiêu tiết thì cấm thi môn [Lập trình Python](ma_mon_hoc)
-      - quy định điểm chuyên cần khi vắng học
-      - nghỉ học có minh chứng có được đi học bù không
-      - quy định nghỉ học tạm thời
-      - vắng 20% số tiết là mấy buổi
-      - bị cấm thi do vắng học thì xử lý ra sao
-      - xin nghỉ học muộn có được chấp nhận không
-      - nộp giấy khám bệnh sau buổi học có được chấp nhận không
-      - nghỉ học có lý do chính đáng được vắng tối đa bao nhiêu tiết
-      - vắng thực hành có được bù không
-      - quy định nghỉ vắng đối với môn [Cơ sở dữ liệu](ma_mon_hoc)
-      - vắng bao nhiêu buổi thì điểm chuyên cần bằng 0
-      - điều kiện để xin nghỉ học có phép
-      - nghỉ học nhiều có bị cảnh báo học tập không
-      - quy định vắng mặt trong buổi kiểm tra
-      - vắng mặt không lý do bị phạt gì
-      - nghỉ học do tai nạn xử lý thế nào
-      - nghỉ có phép có bị hạ xếp loại rèn luyện không
-      - quy định nghỉ học áp dụng cho lớp [DH21IT01](ma_lop)
-      - được vắng tối đa bao nhiêu buổi
-      - nghỉ 1 buổi có bị ảnh hưởng gì không
-      - vắng thi có được thi lại không
-      - làm sao biết mình đã vắng bao nhiêu tiết
-      - quy định điểm danh của trường

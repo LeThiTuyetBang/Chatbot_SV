@@ -1,10 +1,13 @@
 version: "3.1"
 
 intents:
-  - time
   - greet
   - goodbye
-  - xin_nghi_hoc
+  - affirm
+  - deny
+  - inform_absence
+  - check_absence_status
+  - cancel_absence
   - cung_cap_thong_tin
   - quy_dinh_nghi_hoc
 
@@ -15,37 +18,76 @@ entities:
   - ma_mon_hoc
   - time
 
+actions:
+  - action_submit_absence_request
+
 slots:
   time:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: time
   mssv:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: mssv
   ma_lop:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: ma_lop
   ma_mon:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: ma_mon
   ma_mon_hoc:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: ma_mon_hoc
+
+  start_date:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: start_date
+
+  end_date:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: end_date
+
+  reason:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: reason
+
+forms:
+  absence_form:
+    required_slots:
+      - ma_mon_hoc
+      - ma_lop
+      - start_date
+      - end_date
+      - reason
 
 responses:
   utter_greet:
