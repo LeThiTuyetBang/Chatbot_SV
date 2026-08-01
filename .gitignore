@@ -4,3 +4,13 @@ models/
 *.tar.gz
 *.pyc
 __pycache__/
+# SQLite Database
+db/*.db
+*.db
+# Security & Secrets
+credentials.yml
+.env
+
+# IDE & OS Files
+.vscode/
+.DS_Store
