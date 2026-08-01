@@ -11,17 +11,16 @@ rules:
       - intent: goodbye
       - action: utter_goodbye
 
-  - rule: Hướng dẫn xin nghỉ học
-    steps:
-      - intent: xin_nghi_hoc
-      - action: utter_huong_dan_xin_nghi
-
-  - rule: Phản hồi quy định
+  - rule: Hỏi quy định nghỉ học
     steps:
       - intent: quy_dinh_nghi_hoc
       - action: utter_quy_dinh_nghi_hoc
 
-  - rule: Tiếp nhận thông tin từ sinh viên
+  - rule: Hướng dẫn xin nghỉ học (Tạm thời cho Tuần 2)
+    steps:
+      - intent: inform_absence
+      - action: utter_huong_dan_xin_nghi
+  - rule: Phản hồi khi sinh viên cung cấp thông tin
     steps:
       - intent: cung_cap_thong_tin
       - action: utter_xac_nhan_thong_tin
