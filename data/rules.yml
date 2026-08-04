@@ -23,7 +23,37 @@ rules:
       - action: absence_form
       - active_loop: absence_form
 
+  - rule: Submit form xin nghỉ học
+    condition:
+      - active_loop: absence_form
+    steps:
+      - action: absence_form
+      - active_loop: null
+      - action: action_preview_absence_request
+
+  - rule: Xác nhận lưu đơn xin nghỉ
+    condition:
+      - slot_was_set:
+          - awaiting_request_confirmation: true
+    steps:
+      - intent: affirm
+      - action: action_submit_absence_request
+
+  - rule: Hủy lưu đơn xin nghỉ
+    condition:
+      - slot_was_set:
+          - awaiting_request_confirmation: true
+    steps:
+      - intent: deny
+      - action: action_reset_absence_form
+      - action: utter_huong_dan_xin_nghi
+
   - rule: Phản hồi khi sinh viên cung cấp thông tin
     steps:
       - intent: cung_cap_thong_tin
       - action: utter_xac_nhan_thong_tin
+
+  - rule: Fallback khi bot không hiểu
+    steps:
+      - intent: nlu_fallback
+      - action: utter_ask_rephrase

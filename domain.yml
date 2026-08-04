@@ -5,6 +5,7 @@ intents:
   - goodbye
   - affirm
   - deny
+  - nlu_fallback
   - inform_absence
   - check_absence_status
   - cancel_absence
@@ -19,7 +20,9 @@ entities:
   - time
 
 actions:
+  - action_preview_absence_request
   - action_submit_absence_request
+  - action_reset_absence_form
 
 slots:
   time:
@@ -57,6 +60,11 @@ slots:
     type: text
     influence_conversation: true
     mappings:
+      - type: from_entity
+        entity: time
+        conditions:
+          - active_loop: absence_form
+            requested_slot: start_date
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -66,10 +74,33 @@ slots:
     type: text
     influence_conversation: true
     mappings:
+      - type: from_entity
+        entity: time
+        conditions:
+          - active_loop: absence_form
+            requested_slot: end_date
       - type: from_text
         conditions:
           - active_loop: absence_form
             requested_slot: end_date
+
+  normalized_start_date:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  normalized_end_date:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  awaiting_request_confirmation:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: custom
 
   reason:
     type: text
@@ -114,11 +145,17 @@ responses:
   utter_ask_reason:
     - text: "Bạn cho mình lý do nghỉ học nhé."
 
+  utter_confirm_absence_request:
+    - text: "Mình đã hiểu đơn của bạn như sau: môn {ma_mon_hoc}, lớp {ma_lop}, từ {normalized_start_date} đến {normalized_end_date}, lý do: {reason}. Bạn xác nhận để mình lưu đơn nhé?"
+
   utter_quy_dinh_nghi_hoc:
     - text: "Theo quy định: Sinh viên không được vắng quá 20% tổng số tiết của môn học. Nếu vắng quá 20% (dù có phép hay không phép), bạn sẽ bị cấm thi kết thúc học phần và phải học lại môn đó."
 
   utter_xac_nhan_thong_tin:
     - text: "Hệ thống đã nhận thông tin của bạn. Vui lòng đảm bảo bạn đã gửi minh chứng đầy đủ cho giảng viên bộ môn!"
+
+  utter_ask_rephrase:
+    - text: "Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?"
 
 session_config:
   session_expiration_time: 60

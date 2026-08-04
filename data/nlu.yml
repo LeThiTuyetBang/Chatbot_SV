@@ -17,6 +17,13 @@ nlu:
       - \b[A-Z]{2,4}[0-9]{3,5}\b
       - ^[A-Z]{2,4}\d{3,4}$
 
+  - regex: time
+    examples: |
+      - \b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b
+      - \b\d{1,2}-\d{1,2}(?:-\d{2,4})?\b
+      - \b(hôm nay|hôm qua|ngày mai|mai|ngày kia)\b
+      - \b(thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b
+
   # --- 2. LOOKUP TABLES ---
   - lookup: ma_mon_hoc
     examples: |
@@ -85,6 +92,12 @@ nlu:
       - em bị hỏng xe không đến lớp được xin vắng
       - em xin nghỉ học buổi sáng nay
       - em muốn nghỉ học có phép
+      - em xin nghỉ ngày mai
+      - em xin nghỉ hôm nay
+      - em xin nghỉ từ [3/4](time) đến [5/4](time)
+      - cho em nghỉ vào [thứ 2 tuần sau](time)
+      - em xin nghỉ buổi học [mai](time)
+      - em muốn nghỉ từ [10/4](time) đến [12/4](time)
 
   # Intent Xem trạng thái đơn
   - intent: check_absence_status

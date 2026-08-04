@@ -1,91 +1,62 @@
-#### This file contains tests to evaluate that your bot behaves as expected.
-#### If you want to learn more, please see the docs: https://rasa.com/docs/rasa/testing-your-assistant
+version: "3.1"
 
 stories:
-  - story: happy path 1
+  - story: greet and goodbye
     steps:
       - user: |
-          hello there!
+          xin chào
         intent: greet
       - action: utter_greet
       - user: |
-          amazing
-        intent: mood_great
-      - action: utter_happy
-
-  - story: happy path 2
-    steps:
-      - user: |
-          hello there!
-        intent: greet
-      - action: utter_greet
-      - user: |
-          amazing
-        intent: mood_great
-      - action: utter_happy
-      - user: |
-          bye-bye!
+          cảm ơn bạn
         intent: goodbye
       - action: utter_goodbye
 
-  - story: sad path 1
+  - story: ask absence regulation
     steps:
       - user: |
-          hello
-        intent: greet
-      - action: utter_greet
+          nghỉ bao nhiêu buổi thì bị cấm thi
+        intent: quy_dinh_nghi_hoc
+      - action: utter_quy_dinh_nghi_hoc
+
+  - story: e2e submit absence request week 3
+    steps:
       - user: |
-          not good
-        intent: mood_unhappy
-      - action: utter_cheer_up
-      - action: utter_did_that_help
+          em xin nghỉ học
+        intent: inform_absence
+      - action: utter_huong_dan_xin_nghi
+      - action: absence_form
+      - active_loop: absence_form
       - user: |
-          yes
+          Lập trình Python
+        intent: cung_cap_thong_tin
+      - action: absence_form
+      - user: |
+          DH21IT01
+        intent: cung_cap_thong_tin
+      - action: absence_form
+      - user: |
+          mai
+        intent: cung_cap_thong_tin
+      - action: absence_form
+      - user: |
+          ngày kia
+        intent: cung_cap_thong_tin
+      - action: absence_form
+      - user: |
+          em bị ốm
+        intent: cung_cap_thong_tin
+      - action: absence_form
+      - active_loop: null
+      - action: action_preview_absence_request
+      - user: |
+          đúng rồi
         intent: affirm
-      - action: utter_happy
+      - action: action_submit_absence_request
 
-  - story: sad path 2
+  - story: fallback on unclear input
     steps:
       - user: |
-          hello
-        intent: greet
-      - action: utter_greet
-      - user: |
-          not good
-        intent: mood_unhappy
-      - action: utter_cheer_up
-      - action: utter_did_that_help
-      - user: |
-          not really
-        intent: deny
-      - action: utter_goodbye
-
-  - story: sad path 3
-    steps:
-      - user: |
-          hi
-        intent: greet
-      - action: utter_greet
-      - user: |
-          very terrible
-        intent: mood_unhappy
-      - action: utter_cheer_up
-      - action: utter_did_that_help
-      - user: |
-          no
-        intent: deny
-      - action: utter_goodbye
-
-  - story: say goodbye
-    steps:
-      - user: |
-          bye-bye!
-        intent: goodbye
-      - action: utter_goodbye
-
-  - story: bot challenge
-    steps:
-      - user: |
-          are you a bot?
-        intent: bot_challenge
-      - action: utter_iamabot
+          abc xyz
+        intent: nlu_fallback
+      - action: utter_ask_rephrase

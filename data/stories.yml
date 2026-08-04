@@ -5,7 +5,17 @@ stories:
     steps:
       - intent: greet
       - action: utter_greet
-      - intent: inform_absence
-      - action: utter_huong_dan_xin_nghi
       - intent: goodbye
       - action: utter_goodbye
+
+  - story: Luồng nộp đơn xin nghỉ tuần 3
+    steps:
+      - intent: inform_absence
+      - action: utter_huong_dan_xin_nghi
+      - action: absence_form
+      - active_loop: absence_form
+      - action: absence_form
+      - active_loop: null
+      - action: action_preview_absence_request
+      - intent: affirm
+      - action: action_submit_absence_request
