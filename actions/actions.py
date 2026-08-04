@@ -26,11 +26,6 @@ class ActionSubmitAbsenceRequest(Action):
         # 2. Lấy định danh sinh viên (student_id) từ phiên đăng nhập (Metadata hoặc Session)
         # Theo đúng yêu cầu: MSSV lấy từ phiên đăng nhập, không thu qua hội thoại!
         metadata = tracker.latest_message.get('metadata', {})
-        student_id = metadata.get('student_id')
-
-        # Nếu test trực tiếp qua Rasa Shell (chưa truyền metadata từ UI), ta gán tạm ID = 1 (Lê Thị Tuyết Băng)
-        if not student_id:
-            student_id = 1 
 
         # Kiểm tra xem đã đủ thông tin cơ bản chưa
         if not course_code or not start_date or not reason:
@@ -42,6 +37,11 @@ class ActionSubmitAbsenceRequest(Action):
             conn = sqlite3.connect(DB_PATH)
             conn.execute("PRAGMA foreign_keys = ON;")
             cursor = conn.cursor()
+
+            # Nếu test trực tiếp qua Rasa Shell (chưa truyền metadata từ UI), ta gán tạm ID = 1 (Lê Thị Tuyết Băng)
+            student_id = metadata.get('student_id')
+            if not student_id:
+                student_id = 1 
 
             # 4. Thực hiện INSERT đơn xin nghỉ vào bảng AbsenceRequests với trạng thái mặc định 'PENDING'
             cursor.execute('''
@@ -61,10 +61,7 @@ class ActionSubmitAbsenceRequest(Action):
             conn.close()
 
             # 6. Phản hồi thành công về cho người dùng
-            dispatcher.utter_message(
-                text=f" Ghi nhận thành công đơn xin nghỉ môn **{course_code}** từ ngày **{start_date}** đến ngày **{end_date}**. "
-                     f"Trạng thái hiện tại: **Chờ duyệt (PENDING)**. Mã đơn của bạn là #{request_id}."
-            )
+            dispatcher.utter_message(text=response_text)
 
         except Exception as e:
             dispatcher.utter_message(text=f" Lỗi hệ thống khi lưu CSDL: {str(e)}")

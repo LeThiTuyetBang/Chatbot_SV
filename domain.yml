@@ -99,6 +99,21 @@ responses:
   utter_huong_dan_xin_nghi:
     - text: "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng (giấy khám bệnh, xác nhận của gia đình...). Bạn vui lòng cung cấp MSSV, Mã lớp và Môn học để hệ thống ghi nhận nhé."
 
+  utter_ask_ma_mon_hoc:
+    - text: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
+
+  utter_ask_ma_lop:
+    - text: "Bạn cho mình biết mã lớp của bạn nhé."
+
+  utter_ask_start_date:
+    - text: "Bạn cho mình ngày bắt đầu nghỉ nhé."
+
+  utter_ask_end_date:
+    - text: "Bạn cho mình ngày kết thúc nghỉ nhé."
+
+  utter_ask_reason:
+    - text: "Bạn cho mình lý do nghỉ học nhé."
+
   utter_quy_dinh_nghi_hoc:
     - text: "Theo quy định: Sinh viên không được vắng quá 20% tổng số tiết của môn học. Nếu vắng quá 20% (dù có phép hay không phép), bạn sẽ bị cấm thi kết thúc học phần và phải học lại môn đó."
 

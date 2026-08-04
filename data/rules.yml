@@ -16,10 +16,13 @@ rules:
       - intent: quy_dinh_nghi_hoc
       - action: utter_quy_dinh_nghi_hoc
 
-  - rule: Hướng dẫn xin nghỉ học (Tạm thời cho Tuần 2)
+  - rule: Khởi động form xin nghỉ học
     steps:
       - intent: inform_absence
       - action: utter_huong_dan_xin_nghi
+      - action: absence_form
+      - active_loop: absence_form
+
   - rule: Phản hồi khi sinh viên cung cấp thông tin
     steps:
       - intent: cung_cap_thong_tin
