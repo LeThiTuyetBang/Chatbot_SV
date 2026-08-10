@@ -1,5 +1,3 @@
-import sqlite3
-import os
 import re
 from datetime import date, timedelta
 from typing import Any, Text, Dict, List
@@ -7,8 +5,17 @@ from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 
-# Xác định đường dẫn tuyệt đối tới file chatbot.db trong thư mục db/
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'db', 'chatbot.db')
+from db.store import (
+    STATUS_APPROVED,
+    STATUS_CANCELLED,
+    STATUS_LABELS,
+    STATUS_PENDING,
+    STATUS_REJECTED,
+    cancel_latest_pending_request,
+    create_absence_request,
+    list_requests_by_student,
+    resolve_user_id_from_metadata,
+)
 
 
 def _parse_date_text(raw_value: Text) -> Text:
@@ -82,8 +89,6 @@ class ActionSubmitAbsenceRequest(Action):
         end_date = tracker.get_slot('normalized_end_date') or tracker.get_slot('end_date')
         reason = tracker.get_slot('reason')
 
-        # 2. Lấy định danh sinh viên (student_id) từ phiên đăng nhập (Metadata hoặc Session)
-        # Theo đúng yêu cầu: MSSV lấy từ phiên đăng nhập, không thu qua hội thoại!
         metadata = tracker.latest_message.get('metadata', {})
 
         # Kiểm tra xem đã đủ thông tin cơ bản chưa
@@ -92,42 +97,26 @@ class ActionSubmitAbsenceRequest(Action):
             return []
 
         try:
-            # 3. Kết nối CSDL SQLite
-            conn = sqlite3.connect(DB_PATH)
-            conn.execute("PRAGMA foreign_keys = ON;")
-            cursor = conn.cursor()
-
-            # Nếu test trực tiếp qua Rasa Shell (chưa truyền metadata từ UI), ta gán tạm ID = 1 (Lê Thị Tuyết Băng)
-            student_id = metadata.get('student_id')
-            if not student_id:
-                student_id = 1 
-
-            # 4. Thực hiện INSERT đơn xin nghỉ vào bảng AbsenceRequests với trạng thái mặc định 'PENDING'
-            cursor.execute('''
-                INSERT INTO AbsenceRequests (student_id, course_code, class_code, start_date, end_date, reason, status)
-                VALUES (?, ?, ?, ?, ?, ?, 'PENDING')
-            ''', (student_id, course_code, class_code, start_date, end_date, reason))
-            
-            request_id = cursor.lastrowid # Lấy ID của đơn vừa tạo
-
-            # 5. Ghi vết vào bảng RequestStatusHistory (Lịch sử trạng thái)
-            cursor.execute('''
-                INSERT INTO RequestStatusHistory (request_id, old_status, new_status, changed_by, note)
-                VALUES (?, NULL, 'PENDING', ?, 'Sinh viên nộp đơn xin nghỉ học qua chatbot')
-            ''', (request_id, student_id))
-
-            conn.commit()
-            conn.close()
-
-            # 6. Phản hồi thành công về cho người dùng
-            response_text = (
-                f" Ghi nhận thành công đơn xin nghỉ môn **{course_code}** từ ngày **{start_date}** đến ngày **{end_date}**. "
-                f"Trạng thái hiện tại: **Chờ duyệt (PENDING)**. Mã đơn của bạn là #{request_id}."
+            # Định danh mô phỏng: ưu tiên metadata, nếu không có thì lấy tài khoản mẫu đầu tiên.
+            student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+            request_id = create_absence_request(
+                student_id=student_id,
+                course_code=course_code,
+                class_code=class_code,
+                start_date=start_date,
+                end_date=end_date,
+                reason=reason,
+                created_by=student_id,
             )
-            dispatcher.utter_message(text=response_text)
 
+            dispatcher.utter_message(
+                text=(
+                    f"Ghi nhận thành công đơn xin nghỉ môn {course_code} từ ngày {start_date} đến ngày {end_date}. "
+                    f"Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #{request_id}."
+                )
+            )
         except Exception as e:
-            dispatcher.utter_message(text=f" Lỗi hệ thống khi lưu CSDL: {str(e)}")
+            dispatcher.utter_message(text=f"Lỗi hệ thống khi lưu CSDL: {str(e)}")
 
         return [SlotSet("awaiting_request_confirmation", False)]
 
@@ -184,3 +173,61 @@ class ActionResetAbsenceForm(Action):
             SlotSet("normalized_end_date", None),
             SlotSet("awaiting_request_confirmation", False),
         ]
+
+
+class ActionCheckAbsenceStatus(Action):
+    def name(self) -> Text:
+        return "action_check_absence_status"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        metadata = tracker.latest_message.get("metadata", {})
+        student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+
+        try:
+            requests = list_requests_by_student(student_id=student_id, limit=5)
+            if not requests:
+                dispatcher.utter_message(text="Bạn chưa có đơn xin nghỉ nào trong hệ thống.")
+                return []
+
+            lines = ["Danh sách các đơn nghỉ gần nhất của bạn:"]
+            for request in requests:
+                lines.append(
+                    f"- #{request['id']}: {request['course_code']} | lớp {request['class_code']} | "
+                    f"{request['start_date']} đến {request['end_date']} | {STATUS_LABELS.get(request['status'], request['status'])}"
+                )
+            dispatcher.utter_message(text="\n".join(lines))
+        except Exception as e:
+            dispatcher.utter_message(text=f"Không thể tra cứu trạng thái đơn: {str(e)}")
+
+        return []
+
+
+class ActionCancelAbsence(Action):
+    def name(self) -> Text:
+        return "action_cancel_absence"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        metadata = tracker.latest_message.get("metadata", {})
+        student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+
+        try:
+            request = cancel_latest_pending_request(
+                student_id=student_id,
+                changed_by=student_id,
+                note="Sinh viên yêu cầu hủy đơn qua chatbot",
+            )
+            if not request:
+                dispatcher.utter_message(text="Hiện không có đơn Chờ duyệt nào để hủy.")
+                return []
+
+            dispatcher.utter_message(
+                text=f"Đã hủy đơn #{request['id']} và cập nhật trạng thái thành {STATUS_LABELS[STATUS_CANCELLED]}."
+            )
+        except Exception as e:
+            dispatcher.utter_message(text=f"Không thể hủy đơn: {str(e)}")
+
+        return []
