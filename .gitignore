@@ -16,3 +16,5 @@ credentials.yml
 .DS_Store
 # Bỏ qua thư mục báo cáo kết quả test của Rasa
 results/
+story_graph.dot
+*.dot
