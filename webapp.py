@@ -172,21 +172,6 @@ def reject_request(request_id: int):
     return _json_response(data=updated, message="Đã từ chối đơn.")
 
 
-@app.post("/api/admin/requests/<int:request_id>/cancel")
-def cancel_request(request_id: int):
-    payload = request.get_json(force=True, silent=True) or {}
-    admin_id = payload.get("admin_id") or DEFAULT_ADMIN_ID
-    try:
-        updated = update_request_status(
-            request_id=request_id,
-            new_status=STATUS_CANCELLED,
-            changed_by=admin_id,
-            note=payload.get("note") or "Huỷ đơn qua giao diện quản lý",
-        )
-    except Exception as error:
-        return _json_response(message=str(error), ok=False, status_code=400)
-    return _json_response(data=updated, message="Đã huỷ đơn.")
-
 
 @app.post("/api/student/cancel-latest")
 def student_cancel_latest():

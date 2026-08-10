@@ -14,3 +14,5 @@ credentials.yml
 # IDE & OS Files
 .vscode/
 .DS_Store
+# Bỏ qua thư mục báo cáo kết quả test của Rasa
+results/

@@ -67,10 +67,11 @@ function renderStatusCounts(counts) {
 }
 
 function renderRequests(requests) {
-  els.requestTable.innerHTML = requests.map((request) => {
-    const status = request.status || "PENDING";
-    const statusLabel = statusLabels[status] || status;
-    return `
+  els.requestTable.innerHTML = requests
+    .map((request) => {
+      const status = request.status || "PENDING";
+      const statusLabel = statusLabels[status] || status;
+      return `
       <tr>
         <td>#${request.id}</td>
         <td>${escapeHtml(request.student_name || request.student_username || request.student_id || "-")}</td>
@@ -82,13 +83,13 @@ function renderRequests(requests) {
           <div class="action-group">
             <button class="small-btn approve" data-action="approve" data-id="${request.id}">Duyệt</button>
             <button class="small-btn reject" data-action="reject" data-id="${request.id}">Từ chối</button>
-            <button class="small-btn cancel" data-action="cancel" data-id="${request.id}">Huỷ</button>
             <button class="chip" data-action="detail" data-id="${request.id}">Chi tiết</button>
           </div>
         </td>
       </tr>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 async function fetchAdminData() {
@@ -98,13 +99,16 @@ async function fetchAdminData() {
   }
   const response = await fetch(url);
   const payload = await response.json();
-  if (!payload.ok) throw new Error(payload.message || "Không tải được dữ liệu quản lý.");
+  if (!payload.ok)
+    throw new Error(payload.message || "Không tải được dữ liệu quản lý.");
   renderStatusCounts(payload.data.status_counts || {});
   renderRequests(payload.data.requests || []);
 }
 
 async function refreshStudentRequests() {
-  const response = await fetch(`/api/student/requests?student_id=${state.studentId}`);
+  const response = await fetch(
+    `/api/student/requests?student_id=${state.studentId}`,
+  );
   const payload = await response.json();
   if (!payload.ok) return;
 }
@@ -127,7 +131,10 @@ async function sendChatMessage(message) {
       body: JSON.stringify({
         sender: state.student.username,
         message,
-        metadata: { student_id: state.student.id, username: state.student.username },
+        metadata: {
+          student_id: state.student.id,
+          username: state.student.username,
+        },
       }),
     });
     const payload = await response.json();
@@ -140,7 +147,9 @@ async function sendChatMessage(message) {
       appendSystemMessage("Bot chưa trả lời.");
       return;
     }
-    botMessages.forEach((item) => addChatBubble("bot", item.text || JSON.stringify(item)));
+    botMessages.forEach((item) =>
+      addChatBubble("bot", item.text || JSON.stringify(item)),
+    );
   } catch (error) {
     appendSystemMessage(error.message);
   }
@@ -188,7 +197,6 @@ async function updateRequest(requestId, action) {
   const endpointMap = {
     approve: `/api/admin/requests/${requestId}/approve`,
     reject: `/api/admin/requests/${requestId}/reject`,
-    cancel: `/api/admin/requests/${requestId}/cancel`,
   };
   const response = await fetch(endpointMap[action], {
     method: "POST",
@@ -196,7 +204,8 @@ async function updateRequest(requestId, action) {
     body: JSON.stringify({ admin_id: state.admin ? state.admin.id : 2 }),
   });
   const payload = await response.json();
-  if (!payload.ok) throw new Error(payload.message || "Không thể cập nhật trạng thái.");
+  if (!payload.ok)
+    throw new Error(payload.message || "Không thể cập nhật trạng thái.");
   await fetchAdminData();
   await refreshDetail(requestId);
 }
@@ -204,21 +213,30 @@ async function updateRequest(requestId, action) {
 async function refreshDetail(requestId) {
   const response = await fetch(`/api/admin/requests/${requestId}`);
   const payload = await response.json();
-  if (!payload.ok) throw new Error(payload.message || "Không tải được chi tiết.");
+  if (!payload.ok)
+    throw new Error(payload.message || "Không tải được chi tiết.");
   state.currentRequest = payload.data;
   const detail = payload.data;
   els.requestDetail.textContent = JSON.stringify(detail, null, 2);
-  els.requestHistory.textContent = JSON.stringify(detail.history || [], null, 2);
+  els.requestHistory.textContent = JSON.stringify(
+    detail.history || [],
+    null,
+    2,
+  );
 }
 
 function bindEvents() {
   document.querySelectorAll(".tab-btn").forEach((button) => {
-    button.addEventListener("click", () => setActivePanel(button.dataset.tabTarget));
+    button.addEventListener("click", () =>
+      setActivePanel(button.dataset.tabTarget),
+    );
   });
 
   document.querySelectorAll(".filter-btn").forEach((button) => {
     button.addEventListener("click", async () => {
-      document.querySelectorAll(".filter-btn").forEach((item) => item.classList.remove("is-active"));
+      document
+        .querySelectorAll(".filter-btn")
+        .forEach((item) => item.classList.remove("is-active"));
       button.classList.add("is-active");
       state.activeFilter = button.dataset.filter || "";
       await fetchAdminData();
@@ -261,7 +279,10 @@ function bindEvents() {
 }
 
 function seedSystemMessages() {
-  addChatBubble("system", "Chào mừng bạn đến với chatbot chuyên cần. Hãy đăng nhập mô phỏng rồi thử nhắn: em muốn xin nghỉ học.");
+  addChatBubble(
+    "system",
+    "Chào mừng bạn đến với chatbot chuyên cần. Hãy đăng nhập mô phỏng rồi thử nhắn: em muốn xin nghỉ học.",
+  );
   const counts = window.__STATUS_COUNTS__ || {};
   renderStatusCounts(counts);
 }

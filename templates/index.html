@@ -1,148 +1,181 @@
 <!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chatbot chuyên cần sinh viên</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-</head>
-<body data-active-view="{{ active_view }}">
-  <div class="bg-blobs blob-a"></div>
-  <div class="bg-blobs blob-b"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chatbot chuyên cần sinh viên</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body data-active-view="{{ active_view }}">
+    <div class="bg-blobs blob-a"></div>
+    <div class="bg-blobs blob-b"></div>
 
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Rasa + SQLite + Flask</p>
-      <h1>Chatbot hỗ trợ xử lý chuyên cần sinh viên</h1>
-      <p class="subtitle">Màn hình chat cho sinh viên và bảng duyệt đơn cho giáo vụ trong một giao diện pastel gọn, rõ.</p>
-    </div>
-    <div class="topbar-actions">
-      <button class="tab-btn is-active" data-tab-target="student-panel">Sinh viên</button>
-      <button class="tab-btn" data-tab-target="admin-panel">Giáo vụ</button>
-    </div>
-  </header>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Rasa + SQLite + Flask</p>
+        <h1>Chatbot hỗ trợ xử lý chuyên cần sinh viên</h1>
+        <p class="subtitle">
+          Màn hình chat cho sinh viên và bảng duyệt đơn cho giáo vụ trong một
+          giao diện pastel gọn, rõ.
+        </p>
+      </div>
+      <div class="topbar-actions">
+        <button class="tab-btn is-active" data-tab-target="student-panel">
+          Sinh viên
+        </button>
+        <button class="tab-btn" data-tab-target="admin-panel">Giáo vụ</button>
+      </div>
+    </header>
 
-  <main class="layout">
-    <section class="panel login-panel">
-      <div class="panel-head">
-        <h2>Đăng nhập mô phỏng</h2>
-        <span class="pill">Hash mật khẩu + role</span>
-      </div>
-      <div class="login-grid">
-        <label>
-          <span>Tài khoản sinh viên</span>
-          <input id="student-username" value="066305014844" />
-        </label>
-        <label>
-          <span>Mật khẩu</span>
-          <input id="student-password" type="password" value="123456" />
-        </label>
-        <button id="student-login" class="primary-btn">Đăng nhập sinh viên</button>
-      </div>
-      <div class="login-grid admin-login">
-        <label>
-          <span>Tài khoản giáo vụ</span>
-          <input id="admin-username" value="gv_tien" />
-        </label>
-        <label>
-          <span>Mật khẩu</span>
-          <input id="admin-password" type="password" value="123456" />
-        </label>
-        <button id="admin-login" class="secondary-btn">Đăng nhập giáo vụ</button>
-      </div>
-      <div class="status-row">
-        <div class="status-card">
-          <strong id="student-status">Sinh viên: chưa đăng nhập</strong>
-          <span id="student-meta">MSSV sẽ được dùng làm sender cho chatbot</span>
+    <main class="layout">
+      <section class="panel login-panel">
+        <div class="panel-head">
+          <h2>Đăng nhập mô phỏng</h2>
+          <span class="pill">Hash mật khẩu + role</span>
         </div>
-        <div class="status-card">
-          <strong id="admin-status">Giáo vụ: chưa đăng nhập</strong>
-          <span id="admin-meta">Dùng cho các thao tác duyệt / từ chối / huỷ</span>
+        <div class="login-grid">
+          <label>
+            <span>Tài khoản sinh viên</span>
+            <input id="student-username" value="066305014844" />
+          </label>
+          <label>
+            <span>Mật khẩu</span>
+            <input id="student-password" type="password" value="123456" />
+          </label>
+          <button id="student-login" class="primary-btn">
+            Đăng nhập sinh viên
+          </button>
         </div>
-      </div>
-    </section>
-
-    <section id="student-panel" class="panel view-panel is-active">
-      <div class="panel-head">
-        <div>
-          <h2>Màn hình chat sinh viên</h2>
-          <p>Gửi tin nhắn qua REST để điền form, xác nhận ngày và nộp đơn.</p>
+        <div class="login-grid admin-login">
+          <label>
+            <span>Tài khoản giáo vụ</span>
+            <input id="admin-username" value="gv_tien" />
+          </label>
+          <label>
+            <span>Mật khẩu</span>
+            <input id="admin-password" type="password" value="123456" />
+          </label>
+          <button id="admin-login" class="secondary-btn">
+            Đăng nhập giáo vụ
+          </button>
         </div>
-        <span class="pill">PENDING → APPROVED / REJECTED / CANCELLED</span>
-      </div>
-      <div id="chat-log" class="chat-log"></div>
-      <form id="chat-form" class="chat-form">
-        <input id="chat-input" placeholder="Nhập tin nhắn... ví dụ: em muốn xin nghỉ học" autocomplete="off" />
-        <button type="submit" class="primary-btn">Gửi</button>
-      </form>
-      <div class="quick-actions">
-        <button class="chip" data-msg="em muốn xin nghỉ học">Xin nghỉ học</button>
-        <button class="chip" data-msg="nghỉ bao nhiêu buổi thì bị cấm thi">Hỏi quy định</button>
-        <button class="chip" data-msg="kiểm tra trạng thái đơn xin nghỉ">Tra cứu đơn</button>
-        <button class="chip" data-msg="em muốn hủy đơn xin nghỉ">Hủy đơn</button>
-      </div>
-    </section>
-
-    <section id="admin-panel" class="panel view-panel">
-      <div class="panel-head">
-        <div>
-          <h2>Màn hình quản lý / duyệt đơn</h2>
-          <p>Danh sách đơn lấy từ SQLite và đổi trạng thái ngay trên giao diện.</p>
+        <div class="status-row">
+          <div class="status-card">
+            <strong id="student-status">Sinh viên: chưa đăng nhập</strong>
+            <span id="student-meta"
+              >MSSV sẽ được dùng làm sender cho chatbot</span
+            >
+          </div>
+          <div class="status-card">
+            <strong id="admin-status">Giáo vụ: chưa đăng nhập</strong>
+            <span id="admin-meta">Dùng cho các thao tác duyệt / từ chối</span>
+          </div>
         </div>
-        <div class="pill-group">
-          <span class="pill">Chờ duyệt: <b id="count-pending">0</b></span>
-          <span class="pill">Đã duyệt: <b id="count-approved">0</b></span>
-          <span class="pill">Từ chối: <b id="count-rejected">0</b></span>
-          <span class="pill">Đã Huỷ: <b id="count-cancelled">0</b></span>
+      </section>
+
+      <section id="student-panel" class="panel view-panel is-active">
+        <div class="panel-head">
+          <div>
+            <h2>Màn hình chat sinh viên</h2>
+            <p>Gửi tin nhắn qua REST để điền form, xác nhận ngày và nộp đơn.</p>
+          </div>
+          <span class="pill">PENDING → APPROVED / REJECTED / CANCELLED</span>
         </div>
-      </div>
-
-      <div class="filter-bar">
-        <button class="filter-btn is-active" data-filter="">Tất cả</button>
-        <button class="filter-btn" data-filter="PENDING">Chờ duyệt</button>
-        <button class="filter-btn" data-filter="APPROVED">Đã duyệt</button>
-        <button class="filter-btn" data-filter="REJECTED">Từ chối</button>
-        <button class="filter-btn" data-filter="CANCELLED">Đã Huỷ</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Mã đơn</th>
-              <th>Sinh viên</th>
-              <th>Môn</th>
-              <th>Lớp</th>
-              <th>Ngày nghỉ</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="request-table"></tbody>
-        </table>
-      </div>
-
-      <div class="detail-grid">
-        <div class="detail-card">
-          <h3>Chi tiết đơn</h3>
-          <pre id="request-detail">Chọn một đơn để xem lịch sử trạng thái.</pre>
+        <div id="chat-log" class="chat-log"></div>
+        <form id="chat-form" class="chat-form">
+          <input
+            id="chat-input"
+            placeholder="Nhập tin nhắn... ví dụ: em muốn xin nghỉ học"
+            autocomplete="off"
+          />
+          <button type="submit" class="primary-btn">Gửi</button>
+        </form>
+        <div class="quick-actions">
+          <button class="chip" data-msg="em muốn xin nghỉ học">
+            Xin nghỉ học
+          </button>
+          <button class="chip" data-msg="nghỉ bao nhiêu buổi thì bị cấm thi">
+            Hỏi quy định
+          </button>
+          <button class="chip" data-msg="kiểm tra trạng thái đơn xin nghỉ">
+            Tra cứu đơn
+          </button>
+          <button class="chip" data-msg="em muốn hủy đơn xin nghỉ">
+            Hủy đơn
+          </button>
         </div>
-        <div class="detail-card">
-          <h3>Lịch sử trạng thái</h3>
-          <pre id="request-history">--</pre>
-        </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <script>
-    window.__STATUS_LABELS__ = {{ status_labels | tojson }};
-    window.__STATUS_COUNTS__ = {{ status_counts | tojson }};
-    window.__ACTIVE_VIEW__ = {{ active_view | tojson }};
-  </script>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
+      <section id="admin-panel" class="panel view-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Màn hình quản lý / duyệt đơn</h2>
+            <p>
+              Danh sách đơn lấy từ SQLite và đổi trạng thái ngay trên giao diện.
+            </p>
+          </div>
+          <div class="pill-group">
+            <span class="pill">Chờ duyệt: <b id="count-pending">0</b></span>
+            <span class="pill">Đã duyệt: <b id="count-approved">0</b></span>
+            <span class="pill">Từ chối: <b id="count-rejected">0</b></span>
+            <span class="pill">Đã Huỷ: <b id="count-cancelled">0</b></span>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn is-active" data-filter="">Tất cả</button>
+          <button class="filter-btn" data-filter="PENDING">Chờ duyệt</button>
+          <button class="filter-btn" data-filter="APPROVED">Đã duyệt</button>
+          <button class="filter-btn" data-filter="REJECTED">Từ chối</button>
+          <button class="filter-btn" data-filter="CANCELLED">Đã Huỷ</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Sinh viên</th>
+                <th>Môn</th>
+                <th>Lớp</th>
+                <th>Ngày nghỉ</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="request-table"></tbody>
+          </table>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h3>Chi tiết đơn</h3>
+            <pre id="request-detail">
+Chọn một đơn để xem lịch sử trạng thái.</pre
+            >
+          </div>
+          <div class="detail-card">
+            <h3>Lịch sử trạng thái</h3>
+            <pre id="request-history">--</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      window.__STATUS_LABELS__ = {{ status_labels | tojson }};
+      window.__STATUS_COUNTS__ = {{ status_counts | tojson }};
+      window.__ACTIVE_VIEW__ = {{ active_view | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
 </html>
