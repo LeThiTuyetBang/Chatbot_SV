@@ -23,6 +23,8 @@ actions:
   - action_preview_absence_request
   - action_submit_absence_request
   - action_reset_absence_form
+  - action_check_absence_status
+  - action_cancel_absence
 
 slots:
   time:

@@ -57,3 +57,13 @@ rules:
     steps:
       - intent: nlu_fallback
       - action: utter_ask_rephrase
+
+  - rule: Tra cứu trạng thái đơn xin nghỉ
+    steps:
+      - intent: check_absence_status
+      - action: action_check_absence_status
+
+  - rule: Hủy đơn xin nghỉ
+    steps:
+      - intent: cancel_absence
+      - action: action_cancel_absence
