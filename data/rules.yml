@@ -49,6 +49,8 @@ rules:
       - action: utter_huong_dan_xin_nghi
 
   - rule: Phản hồi khi sinh viên cung cấp thông tin
+    condition:
+      - active_loop: null
     steps:
       - intent: cung_cap_thong_tin
       - action: utter_xac_nhan_thong_tin

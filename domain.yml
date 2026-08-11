@@ -130,7 +130,7 @@ responses:
     - text: "Tạm biệt bạn! Chúc bạn học tập tốt và giữ gìn sức khỏe nhé."
 
   utter_huong_dan_xin_nghi:
-    - text: "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng (giấy khám bệnh, xác nhận của gia đình...). Bạn vui lòng cung cấp MSSV, Mã lớp và Môn học để hệ thống ghi nhận nhé."
+    - text: "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng (giấy khám bệnh, xác nhận của gia đình...). Bạn vui lòng cung cấp Mã lớp và Môn học để hệ thống ghi nhận nhé."
 
   utter_ask_ma_mon_hoc:
     - text: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
