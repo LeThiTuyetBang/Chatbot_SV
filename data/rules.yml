@@ -19,7 +19,7 @@ rules:
   - rule: Khởi động form xin nghỉ học
     steps:
       - intent: inform_absence
-      - action: utter_huong_dan_xin_nghi
+      - action: action_start_absence_form
       - action: absence_form
       - active_loop: absence_form
 

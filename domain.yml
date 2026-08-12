@@ -25,6 +25,7 @@ actions:
   - action_reset_absence_form
   - action_check_absence_status
   - action_cancel_absence
+  - action_start_absence_form
 
 slots:
   time:
@@ -161,4 +162,4 @@ responses:
 
 session_config:
   session_expiration_time: 60
-  carry_over_slots_to_new_session: true
+  carry_over_slots_to_new_session: false
