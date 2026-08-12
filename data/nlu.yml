@@ -212,6 +212,29 @@ nlu:
       - chuẩn rồi ạ
       - đúng thế
       - okie
+      - có
+      - có ạ
+      - ok
+      - okay
+      - vâng
+      - vâng ạ
+      - đồng ý
+      - được
+      - được ạ
+      - đúng
+      - đúng ạ
+      - lưu đi
+      - lưu đơn đi
+      - xác nhận lưu
+      - xác nhận đi
+      - ok lưu
+      - đồng ý lưu
+      - yes
+      - y
+      - ừ
+      - ừm
+      - chuẩn
+      - chuẩn ạ
 
   - intent: deny
     examples: |
@@ -220,6 +243,19 @@ nlu:
       - chưa đúng
       - em muốn sửa lại
       - hủy thao tác
+      - không
+      - không ạ
+      - thôi
+      - thôi ạ
+      - hủy
+      - không lưu
+      - không xác nhận
+      - nhập lại
+      - sửa lại
+      - không đúng
+      - sai
+      - no
+      - huỷ
 
   - intent: greet
     examples: |
