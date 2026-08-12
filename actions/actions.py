@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
-from rasa_sdk.events import SlotSet
+from rasa_sdk.events import SlotSet, ActiveLoop 
 
 from db.store import (
     STATUS_APPROVED,
@@ -74,6 +74,37 @@ def _date_display(raw_value: Text, normalized_value: Text) -> Text:
         return f"{raw_value.strip()} -> {normalized_value}"
     return normalized_value or raw_value.strip()
 
+class ActionStartAbsenceForm(Action):
+    def name(self) -> Text:
+        return "action_start_absence_form"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        dispatcher.utter_message(
+            text=(
+                "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng "
+                "(giấy khám bệnh, xác nhận của gia đình...). "
+                "Bạn vui lòng cung cấp Mã lớp và Môn học để hệ thống ghi nhận nhé."
+            )
+        )
+        return [
+            SlotSet("ma_mon_hoc", None),
+            SlotSet("ma_mon", None),
+            SlotSet("ma_lop", None),
+            SlotSet("start_date", None),
+            SlotSet("end_date", None),
+            SlotSet("reason", None),
+            SlotSet("normalized_start_date", None),
+            SlotSet("normalized_end_date", None),
+            SlotSet("awaiting_request_confirmation", False),
+        ]
+
+
+
 class ActionSubmitAbsenceRequest(Action):
     def name(self) -> Text:
         return "action_submit_absence_request"
@@ -90,6 +121,11 @@ class ActionSubmitAbsenceRequest(Action):
         reason = tracker.get_slot('reason')
 
         metadata = tracker.latest_message.get('metadata', {})
+
+        # Chỉ cho phép lưu khi người dùng đã xác nhận preview
+        if not tracker.get_slot("awaiting_request_confirmation"):
+            dispatcher.utter_message(text="Chưa có đơn nào đang chờ xác nhận. Bạn hãy nộp đơn và xác nhận trước nhé.")
+            return []
 
         # Kiểm tra xem đã đủ thông tin cơ bản chưa
         if not course_code or not start_date or not reason:
@@ -118,39 +154,112 @@ class ActionSubmitAbsenceRequest(Action):
         except Exception as e:
             dispatcher.utter_message(text=f"Lỗi hệ thống khi lưu CSDL: {str(e)}")
 
-        return [SlotSet("awaiting_request_confirmation", False)]
+            return [
+                SlotSet("awaiting_request_confirmation", False),
+                SlotSet("ma_mon_hoc", None),
+                SlotSet("ma_lop", None),
+                SlotSet("start_date", None),
+                SlotSet("end_date", None),
+                SlotSet("reason", None),
+                SlotSet("normalized_start_date", None),
+                SlotSet("normalized_end_date", None),
+            ]
+
+
 
 
 class ActionPreviewAbsenceRequest(Action):
     def name(self) -> Text:
         return "action_preview_absence_request"
 
-    def run(self, dispatcher: CollectingDispatcher,
-            tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        start_date_raw = tracker.get_slot('start_date') or ""
-        end_date_raw = tracker.get_slot('end_date') or ""
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+        course_code = tracker.get_slot("ma_mon_hoc") or tracker.get_slot("ma_mon") or ""
+        class_code = tracker.get_slot("ma_lop") or ""
+        reason = tracker.get_slot("reason") or ""
+        start_date_raw = tracker.get_slot("start_date") or ""
+        end_date_raw = tracker.get_slot("end_date") or ""
 
-        normalized_start_date = _parse_date_text(start_date_raw)
-        normalized_end_date = _parse_date_text(end_date_raw)
+        normalized_start = _parse_date_text(start_date_raw)
+        normalized_end = _parse_date_text(end_date_raw)
 
-        if not normalized_start_date or not normalized_end_date:
-            dispatcher.utter_message(text="Mình chưa hiểu rõ ngày nghỉ. Bạn hãy nhập lại ngày theo dạng dd/mm/yyyy hoặc các cách như 'mai', 'ngày mai'.")
+        # --- Validation ---
+        if not course_code or not class_code or not reason:
+            dispatcher.utter_message(
+                text="Thiếu thông tin (môn học / lớp / lý do). Mình sẽ hỏi lại từ đầu nhé."
+            )
             return [
+                SlotSet("awaiting_request_confirmation", False),
+                SlotSet("normalized_start_date", None),
+                SlotSet("normalized_end_date", None),
+            ]
+
+        if not normalized_start or not normalized_end:
+            dispatcher.utter_message(
+                text=(
+                    "Mình chưa hiểu rõ ngày nghỉ. "
+                    "Bạn nhập lại theo dạng dd/mm/yyyy hoặc 'mai', 'ngày mai', 'thứ 2 tuần sau' nhé."
+                )
+            )
+            return [
+                SlotSet("start_date", None),
+                SlotSet("end_date", None),
                 SlotSet("normalized_start_date", None),
                 SlotSet("normalized_end_date", None),
                 SlotSet("awaiting_request_confirmation", False),
+                ActiveLoop("absence_form"),
             ]
 
-        preview_message = (
-            f"Mình đã hiểu: từ { _date_display(start_date_raw, normalized_start_date) } đến { _date_display(end_date_raw, normalized_end_date) }. "
-            f"Bạn xác nhận để mình lưu đơn nhé?"
+        # start <= end
+        try:
+            from datetime import date as date_cls
+            d1 = date_cls.fromisoformat(normalized_start)
+            d2 = date_cls.fromisoformat(normalized_end)
+            if d1 > d2:
+                dispatcher.utter_message(
+                    text="Ngày bắt đầu không được sau ngày kết thúc. Bạn nhập lại khoảng ngày nghỉ nhé."
+                )
+                return [
+                    SlotSet("start_date", None),
+                    SlotSet("end_date", None),
+                    SlotSet("normalized_start_date", None),
+                    SlotSet("normalized_end_date", None),
+                    SlotSet("awaiting_request_confirmation", False),
+                    ActiveLoop("absence_form"), 
+                ]
+        except ValueError:
+            dispatcher.utter_message(text="Định dạng ngày không hợp lệ. Bạn nhập lại nhé.")
+            return [
+                SlotSet("start_date", None),
+                SlotSet("end_date", None),
+                SlotSet("normalized_start_date", None),
+                SlotSet("normalized_end_date", None),
+                SlotSet("awaiting_request_confirmation", False),
+                ActiveLoop("absence_form"),
+            ]
+
+        # --- Preview đầy đủ ---
+        start_show = _date_display(start_date_raw, normalized_start)
+        end_show = _date_display(end_date_raw, normalized_end)
+
+        preview = (
+            f"Mình đã hiểu đơn của bạn như sau:\n"
+            f"- Môn: {course_code}\n"
+            f"- Lớp: {class_code}\n"
+            f"- Từ: {start_show}\n"
+            f"- Đến: {end_show}\n"
+            f"- Lý do: {reason}\n\n"
+            f"Bạn xác nhận để mình lưu đơn nhé? (có / không)"
         )
-        dispatcher.utter_message(text=preview_message)
+        dispatcher.utter_message(text=preview)
 
         return [
-            SlotSet("normalized_start_date", normalized_start_date),
-            SlotSet("normalized_end_date", normalized_end_date),
+            SlotSet("normalized_start_date", normalized_start),
+            SlotSet("normalized_end_date", normalized_end),
             SlotSet("awaiting_request_confirmation", True),
         ]
 
