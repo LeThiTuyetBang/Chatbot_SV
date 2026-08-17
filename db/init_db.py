@@ -93,7 +93,10 @@ def init_database():
 
     conn.commit()
     conn.close()
-    print("Đã khởi tạo thành công CSDL mới với 4 bảng chuẩn và phân quyền đầy đủ!")
+    try:
+        print("Đã khởi tạo thành công CSDL mới với 4 bảng chuẩn và phân quyền đầy đủ!")
+    except UnicodeEncodeError:
+        print("Da khoi tao thanh cong CSDL moi!")
 
 if __name__ == '__main__':
     init_database()
