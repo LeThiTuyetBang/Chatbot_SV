@@ -148,6 +148,33 @@ def create_absence_request(
         )
         return int(request_id)
 
+def add_evidence(request_id: int, file_name: str, file_url: str) -> int:
+    """Lưu link minh chứng cho đơn xin nghỉ."""
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO Evidences (request_id, file_name, file_url)
+            VALUES (?, ?, ?)
+            """,
+            (request_id, file_name, file_url),
+        )
+        return int(cursor.lastrowid)
+
+def get_evidences_by_request(request_id: int) -> List[Dict[str, Any]]:
+    """Lấy danh sách minh chứng của một đơn."""
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, request_id, file_name, file_url, uploaded_at
+            FROM Evidences
+            WHERE request_id = ?
+            ORDER BY uploaded_at ASC, id ASC
+            """,
+            (request_id,),
+        )
+        return [dict(row) for row in cursor.fetchall()]    
 
 def get_request_by_id(request_id: int) -> Optional[Dict[str, Any]]:
     with connect_db() as conn:

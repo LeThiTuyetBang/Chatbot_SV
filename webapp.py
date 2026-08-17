@@ -20,6 +20,7 @@ from db.store import (
     list_requests_by_student,
     resolve_user_id_from_metadata,
     update_request_status,
+    get_evidences_by_request,
 )
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -136,6 +137,7 @@ def request_detail(request_id: int):
     if not request_data:
         return _json_response(message="Không tìm thấy đơn.", ok=False, status_code=404)
     request_data["history"] = get_request_history(request_id)
+    request_data["evidences"] = get_evidences_by_request(request_id)
     request_data["status_label"] = STATUS_LABELS.get(request_data["status"], request_data["status"])
     return _json_response(data=request_data, message="Chi tiết đơn.")
 

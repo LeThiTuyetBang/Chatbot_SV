@@ -34,6 +34,16 @@ slots:
     mappings:
       - type: from_entity
         entity: time
+
+  evidence_url:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: evidence_url
+
   mssv:
     type: text
     influence_conversation: false
@@ -122,8 +132,12 @@ forms:
       - start_date
       - end_date
       - reason
+      - evidence_url
 
 responses:
+  utter_ask_evidence_url:
+    - text: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
+
   utter_greet:
     - text: "Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?"
 
