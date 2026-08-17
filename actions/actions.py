@@ -119,6 +119,7 @@ class ActionSubmitAbsenceRequest(Action):
         start_date = tracker.get_slot('normalized_start_date') or tracker.get_slot('start_date')
         end_date = tracker.get_slot('normalized_end_date') or tracker.get_slot('end_date')
         reason = tracker.get_slot('reason')
+        evidence_url = tracker.get_slot("evidence_url")
 
         metadata = tracker.latest_message.get('metadata', {})
 
@@ -138,31 +139,44 @@ class ActionSubmitAbsenceRequest(Action):
             request_id = create_absence_request(
                 student_id=student_id,
                 course_code=course_code,
-                class_code=class_code,
+                class_code=class_code or "",
                 start_date=start_date,
-                end_date=end_date,
+                end_date=end_date or start_date,
                 reason=reason,
                 created_by=student_id,
             )
-
+            # ========== 
+            if evidence_url and str(evidence_url).strip().lower() not in {"không", "khong", "no", ""}:
+                from db.store import add_evidence
+                add_evidence(
+                    request_id=request_id,
+                    file_name="minh_chung",
+                    file_url=str(evidence_url).strip(),
+                )
             dispatcher.utter_message(
                 text=(
-                    f"Ghi nhận thành công đơn xin nghỉ môn {course_code} từ ngày {start_date} đến ngày {end_date}. "
+                    f"Ghi nhận thành công đơn xin nghỉ môn {course_code} "
+                    f"từ ngày {start_date} đến ngày {end_date or start_date}. "
                     f"Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #{request_id}."
                 )
             )
-        except Exception as e:
-            dispatcher.utter_message(text=f"Lỗi hệ thống khi lưu CSDL: {str(e)}")
-
+            # Reset slot sau khi lưu thành công
             return [
                 SlotSet("awaiting_request_confirmation", False),
                 SlotSet("ma_mon_hoc", None),
+                SlotSet("ma_mon", None),
                 SlotSet("ma_lop", None),
                 SlotSet("start_date", None),
                 SlotSet("end_date", None),
                 SlotSet("reason", None),
                 SlotSet("normalized_start_date", None),
                 SlotSet("normalized_end_date", None),
+                SlotSet("evidence_url", None),
+            ]
+        except Exception as e:
+            dispatcher.utter_message(text=f"Lỗi hệ thống khi lưu CSDL: {str(e)}")
+            return [
+                SlotSet("awaiting_request_confirmation", False),
             ]
 
 
@@ -183,6 +197,7 @@ class ActionPreviewAbsenceRequest(Action):
         reason = tracker.get_slot("reason") or ""
         start_date_raw = tracker.get_slot("start_date") or ""
         end_date_raw = tracker.get_slot("end_date") or ""
+        evidence_url = tracker.get_slot("evidence_url") or ""
 
         normalized_start = _parse_date_text(start_date_raw)
         normalized_end = _parse_date_text(end_date_raw)
@@ -253,6 +268,7 @@ class ActionPreviewAbsenceRequest(Action):
             f"- Từ: {start_show}\n"
             f"- Đến: {end_show}\n"
             f"- Lý do: {reason}\n\n"
+            f"- Minh chứng: {evidence_url if evidence_url and evidence_url.strip().lower() not in {'không', 'khong', 'no', ''} else 'Không có'}\n\n"
             f"Bạn xác nhận để mình lưu đơn nhé? (có / không)"
         )
         dispatcher.utter_message(text=preview)
