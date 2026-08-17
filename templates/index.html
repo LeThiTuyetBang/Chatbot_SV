@@ -42,40 +42,46 @@
           <h2>Đăng nhập mô phỏng</h2>
           <span class="pill">Hash mật khẩu + role</span>
         </div>
-        <div class="login-grid">
-          <label>
-            <span>Tài khoản sinh viên</span>
-            <input id="student-username" value="066305014844" />
-          </label>
-          <label>
-            <span>Mật khẩu</span>
-            <input id="student-password" type="password" value="123456" />
-          </label>
-          <button id="student-login" class="primary-btn">
-            Đăng nhập sinh viên
-          </button>
-        </div>
-        <div class="login-grid admin-login">
-          <label>
-            <span>Tài khoản giáo vụ</span>
-            <input id="admin-username" value="gv_tien" />
-          </label>
-          <label>
-            <span>Mật khẩu</span>
-            <input id="admin-password" type="password" value="123456" />
-          </label>
-          <button id="admin-login" class="secondary-btn">
-            Đăng nhập giáo vụ
-          </button>
-        </div>
-        <div class="status-row">
-          <div class="status-card">
+
+        <!-- Form sinh viên -->
+        <div id="login-student" class="login-block">
+          <div class="login-grid">
+            <label>
+              <span>Tài khoản sinh viên</span>
+              <input id="student-username" value="066305014844" />
+            </label>
+            <label>
+              <span>Mật khẩu</span>
+              <input id="student-password" type="password" value="123456" />
+            </label>
+            <button id="student-login" class="primary-btn">
+              Đăng nhập sinh viên
+            </button>
+          </div>
+          <div class="status-card" style="margin-top: 12px">
             <strong id="student-status">Sinh viên: chưa đăng nhập</strong>
             <span id="student-meta"
               >MSSV sẽ được dùng làm sender cho chatbot</span
             >
           </div>
-          <div class="status-card">
+        </div>
+
+        <!-- Form giáo vụ -->
+        <div id="login-admin" class="login-block" hidden>
+          <div class="login-grid admin-login">
+            <label>
+              <span>Tài khoản giáo vụ</span>
+              <input id="admin-username" value="gv_tien" />
+            </label>
+            <label>
+              <span>Mật khẩu</span>
+              <input id="admin-password" type="password" value="123456" />
+            </label>
+            <button id="admin-login" class="secondary-btn">
+              Đăng nhập giáo vụ
+            </button>
+          </div>
+          <div class="status-card" style="margin-top: 12px">
             <strong id="admin-status">Giáo vụ: chưa đăng nhập</strong>
             <span id="admin-meta">Dùng cho các thao tác duyệt / từ chối</span>
           </div>
@@ -163,9 +169,18 @@
 Chọn một đơn để xem lịch sử trạng thái.</pre
             >
           </div>
+
           <div class="detail-card">
             <h3>Lịch sử trạng thái</h3>
             <pre id="request-history">--</pre>
+          </div>
+
+          <!-- Thêm card minh chứng ở đây -->
+          <div class="detail-card">
+            <h3>Minh chứng</h3>
+            <div id="detail-evidences">
+              <p class="text-muted">Chưa có minh chứng</p>
+            </div>
           </div>
         </div>
       </section>

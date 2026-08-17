@@ -41,6 +41,18 @@ function setActivePanel(panelId) {
   document.querySelectorAll(".tab-btn").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.tabTarget === panelId);
   });
+
+  // Ẩn/hiện form đăng nhập theo tab
+  const loginStudent = document.getElementById("login-student");
+  const loginAdmin = document.getElementById("login-admin");
+
+  if (panelId === "student-panel") {
+    if (loginStudent) loginStudent.hidden = false;
+    if (loginAdmin) loginAdmin.hidden = true;
+  } else if (panelId === "admin-panel") {
+    if (loginStudent) loginStudent.hidden = true;
+    if (loginAdmin) loginAdmin.hidden = false;
+  }
 }
 
 function escapeHtml(text) {
@@ -223,8 +235,28 @@ async function refreshDetail(requestId) {
     null,
     2,
   );
+  const evidenceBox = document.getElementById("detail-evidences");
+  if (evidenceBox) {
+    const evidences = detail.evidences || [];
+    if (!evidences.length) {
+      evidenceBox.innerHTML = `<p class="text-muted">Chưa có minh chứng</p>`;
+    } else {
+      evidenceBox.innerHTML = evidences
+        .map(
+          (ev) => `
+          <div class="evidence-item" style="margin-bottom:8px;">
+            <a href="${ev.file_url}" target="_blank" rel="noopener noreferrer">
+              📎 ${ev.file_name || "Minh chứng"} – Xem link
+            </a>
+            <small class="text-muted" style="display:block;">
+              ${ev.uploaded_at || ""}
+            </small>
+          </div>`,
+        )
+        .join("");
+    }
+  }
 }
-
 function bindEvents() {
   document.querySelectorAll(".tab-btn").forEach((button) => {
     button.addEventListener("click", () =>
