@@ -74,6 +74,16 @@ def _date_display(raw_value: Text, normalized_value: Text) -> Text:
         return f"{raw_value.strip()} -> {normalized_value}"
     return normalized_value or raw_value.strip()
 
+
+def _get_student_id(tracker: Tracker) -> int:
+    metadata = tracker.latest_message.get("metadata") or {}
+    student_id = resolve_user_id_from_metadata(metadata) if metadata else None
+    if not student_id or student_id == 1:
+        sender_id = tracker.sender_id
+        if sender_id:
+            student_id = resolve_user_id_from_metadata({"username": sender_id})
+    return student_id or 1
+
 class ActionStartAbsenceForm(Action):
     def name(self) -> Text:
         return "action_start_absence_form"
@@ -134,8 +144,7 @@ class ActionSubmitAbsenceRequest(Action):
             return []
 
         try:
-            # Định danh mô phỏng: ưu tiên metadata, nếu không có thì lấy tài khoản mẫu đầu tiên.
-            student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+            student_id = _get_student_id(tracker)
             request_id = create_absence_request(
                 student_id=student_id,
                 course_code=course_code,
@@ -236,7 +245,7 @@ class ActionPreviewAbsenceRequest(Action):
             d2 = date_cls.fromisoformat(normalized_end)
             if d1 > d2:
                 dispatcher.utter_message(
-                    text="Ngày bắt đầu không được sau ngày kết thúc. Bạn nhập lại khoảng ngày nghỉ nhé."
+                    text="Ngày kết thúc không được trước ngày bắt đầu."
                 )
                 return [
                     SlotSet("start_date", None),
@@ -307,11 +316,10 @@ class ActionCheckAbsenceStatus(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        metadata = tracker.latest_message.get("metadata", {})
-        student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+        student_id = _get_student_id(tracker)
 
         try:
-            requests = list_requests_by_student(student_id=student_id, limit=5)
+            requests = list_requests_by_student(student_id=student_id, limit=10)
             if not requests:
                 dispatcher.utter_message(text="Bạn chưa có đơn xin nghỉ nào trong hệ thống.")
                 return []
@@ -336,8 +344,7 @@ class ActionCancelAbsence(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        metadata = tracker.latest_message.get("metadata", {})
-        student_id = resolve_user_id_from_metadata(metadata) if metadata else 1
+        student_id = _get_student_id(tracker)
 
         try:
             request = cancel_latest_pending_request(
