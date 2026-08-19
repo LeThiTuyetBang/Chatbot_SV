@@ -118,6 +118,38 @@ const els = {
   cancelEditBtn: document.getElementById("cancel-edit-btn"),
 };
 
+// =====================================================
+// Hàm chuyển tab dành cho Sinh viên
+// =====================================================
+function switchStudentTab(tab) {
+  const btnSubChat = document.getElementById("btn-sub-chat");
+  const btnSubMyRequests = document.getElementById("btn-sub-my-requests");
+  const btnSubForm = document.getElementById("btn-sub-form");
+
+  const chatView = document.getElementById("student-chat-view");
+  const requestsView = document.getElementById("student-my-requests-view");
+  const formView = document.getElementById("student-form-view");
+
+  // Reset tất cả
+  if (btnSubChat) btnSubChat.classList.remove("is-active");
+  if (btnSubMyRequests) btnSubMyRequests.classList.remove("is-active");
+  if (btnSubForm) btnSubForm.classList.remove("is-active");
+
+  if (chatView) chatView.style.display = "none";
+  if (requestsView) requestsView.style.display = "none";
+  if (formView) formView.style.display = "none";
+
+  if (tab === "chat") {
+    if (btnSubChat) btnSubChat.classList.add("is-active");
+    if (chatView) chatView.style.display = "block";
+  } else if (tab === "requests") {
+    if (btnSubMyRequests) btnSubMyRequests.classList.add("is-active");
+    if (requestsView) requestsView.style.display = "block";
+  } else if (tab === "form") {
+    if (btnSubForm) btnSubForm.classList.add("is-active");
+    if (formView) formView.style.display = "block";
+  }
+}
 // Utilities
 function escapeHtml(text) {
   return String(text || "")
@@ -167,7 +199,8 @@ function validateFormDates() {
     if (dStart > dEnd) {
       // Hiển thị lỗi ngay lập tức
       els.dateErrorMsg.style.display = "block";
-      els.dateErrorMsg.textContent = "⚠️ Ngày kết thúc không được trước ngày bắt đầu.";
+      els.dateErrorMsg.textContent =
+        "⚠️ Ngày kết thúc không được trước ngày bắt đầu.";
       els.formEndDate.classList.add("has-error");
       els.formSubmitBtn.disabled = true;
       els.formSubmitBtn.classList.add("disabled");
@@ -212,6 +245,10 @@ function renderUnauthenticatedUI() {
 
   // Hiển thị Form Đăng Nhập
   els.loginPanel.style.display = "block";
+  // Xóa chat log khi đăng xuất / chưa đăng nhập
+  if (els.chatLog) {
+    els.chatLog.innerHTML = "";
+  }
   document.getElementById("app-subtitle").textContent =
     "Bắt buộc đăng nhập để xem thông tin và sử dụng các chức năng hệ thống.";
 
@@ -234,7 +271,8 @@ function renderAuthenticatedUI() {
   els.userBadge.style.display = "flex";
   els.userAvatarIcon.textContent = user.role === "STUDENT" ? "🎓" : "👨‍🏫";
   els.userDisplayName.textContent = `${user.full_name} (${user.username})`;
-  els.userDisplayRole.textContent = user.role === "STUDENT" ? "Sinh viên" : "Giáo vụ";
+  els.userDisplayRole.textContent =
+    user.role === "STUDENT" ? "Sinh viên" : "Giáo vụ";
 
   document.getElementById("app-subtitle").textContent =
     user.role === "STUDENT"
@@ -246,12 +284,23 @@ function renderAuthenticatedUI() {
     els.topbarActions.style.display = "none";
     els.studentPanel.style.display = "block";
     els.adminPanel.style.display = "none";
-
+    // Reset Rasa khi load lại trang
+    fetch("/api/chat/restart", { method: "POST" }).catch(() => {});
     // Tự điền mặc định lớp của sinh viên nếu có
     if (user.class_code && !els.formClassCode.value) {
       els.formClassCode.value = user.class_code;
     }
     fetchStudentRequests();
+    // Xóa sạch chat cũ mỗi lần đăng nhập / load lại
+    if (els.chatLog) {
+      els.chatLog.innerHTML = "";
+      addChatBubble(
+        "system",
+        "Xin chào! Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?",
+      );
+    }
+    // Mặc định mở tab Chatbot
+    switchStudentTab("chat");
   } else if (user.role === "STAFF") {
     els.topbarActions.style.display = "none";
     els.studentPanel.style.display = "none";
@@ -278,8 +327,25 @@ async function handleLogin(username, password) {
 
     state.currentUser = payload.data;
     showToast(`Đăng nhập thành công!`, "success");
+
+    // Xóa sạch chat log trước khi hiện giao diện mới
+    if (els.chatLog) {
+      els.chatLog.innerHTML = "";
+      addChatBubble(
+        "system",
+        "Xin chào! Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?",
+      );
+    }
+    // Reset hội thoại Rasa
+    try {
+      await fetch("/api/chat/restart", { method: "POST" });
+    } catch (e) {
+      console.warn("Không reset được chatbot:", e);
+    }
+
     renderAuthenticatedUI();
   } catch (err) {
+    console.error("Login error:", err);
     showToast("Lỗi kết nối máy chủ", "error");
   }
 }
@@ -308,7 +374,10 @@ function initRealtimeSSE() {
       const data = JSON.parse(e.data || "{}");
       if (state.currentUser?.role === "STAFF") fetchAdminData();
       if (state.currentUser?.role === "STUDENT") fetchStudentRequests();
-      if (state.currentRequestId && data.request_id === state.currentRequestId) {
+      if (
+        state.currentRequestId &&
+        data.request_id === state.currentRequestId
+      ) {
         refreshDetailModal(state.currentRequestId);
       }
     });
@@ -357,7 +426,10 @@ async function handleCreateRequestSubmit(e) {
     });
     const payload = await res.json();
     if (!payload.ok) {
-      showToast(payload.message || "Gửi đơn thất bại. Vui lòng thử lại.", "error");
+      showToast(
+        payload.message || "Gửi đơn thất bại. Vui lòng thử lại.",
+        "error",
+      );
       return;
     }
 
@@ -439,7 +511,9 @@ async function handleCancelStudentRequest(requestId) {
   if (!confirm(`Bạn có chắc chắn muốn huỷ đơn #${requestId} không?`)) return;
 
   try {
-    const res = await fetch(`/api/student/requests/${requestId}/cancel`, { method: "POST" });
+    const res = await fetch(`/api/student/requests/${requestId}/cancel`, {
+      method: "POST",
+    });
     const payload = await res.json();
     if (!payload.ok) {
       showToast(payload.message || "Không thể huỷ đơn.", "error");
@@ -493,7 +567,8 @@ function renderAdminTable(requests) {
     .map((r) => {
       const status = r.status || "PENDING";
       const statusLabel = statusLabels[status] || status;
-      const studentName = r.student_name || r.student_username || `SV #${r.student_id}`;
+      const studentName =
+        r.student_name || r.student_username || `SV #${r.student_id}`;
 
       let actionButtons = "";
       if (status === "PENDING") {
@@ -503,10 +578,17 @@ function renderAdminTable(requests) {
           <button class="small-btn detail" onclick="openDetailModal(${r.id})">Chi tiết</button>
         `;
       } else if (status === "APPROVED" || status === "REJECTED") {
+        // Kiểm tra ngày nghỉ đã quá hạn chưa
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // chỉ so sánh ngày, bỏ giờ
+
+        const endDate = r.end_date ? new Date(r.end_date) : null;
+        const isExpired = endDate && endDate < today;
+
         actionButtons = `
-          <button class="small-btn detail" onclick="openDetailModal(${r.id})">Chi tiết</button>
-          <button class="small-btn edit" onclick="openEditModal(${r.id})">Chỉnh sửa</button>
-        `;
+    <button class="small-btn detail" onclick="openDetailModal(${r.id})">Chi tiết</button>
+    ${!isExpired ? `<button class="small-btn edit" onclick="openEditModal(${r.id})">Chỉnh sửa</button>` : ""}
+  `;
       } else {
         actionButtons = `
           <button class="small-btn detail" onclick="openDetailModal(${r.id})">Chi tiết</button>
@@ -544,7 +626,10 @@ async function handleApproveRequest(requestId, btnEl) {
 
     if (!payload.ok) {
       if (res.status === 409) {
-        showToast(payload.message || "Đơn này đã được xử lý trước đó.", "warning");
+        showToast(
+          payload.message || "Đơn này đã được xử lý trước đó.",
+          "warning",
+        );
       } else {
         showToast(payload.message || "Duyệt thất bại.", "error");
       }
@@ -588,7 +673,10 @@ async function handleConfirmReject() {
 
     if (!payload.ok) {
       if (res.status === 409) {
-        showToast(payload.message || "Đơn này đã được xử lý trước đó.", "warning");
+        showToast(
+          payload.message || "Đơn này đã được xử lý trước đó.",
+          "warning",
+        );
       } else {
         showToast(payload.message || "Từ chối đơn thất bại.", "error");
       }
@@ -619,13 +707,15 @@ async function openEditModal(requestId) {
     }
 
     const req = payload.data;
-    const studentName = req.student_name || req.student_username || `SV #${req.student_id}`;
+    const studentName =
+      req.student_name || req.student_username || `SV #${req.student_id}`;
 
     els.editSummaryStudent.innerHTML = `<b>Sinh viên:</b> ${escapeHtml(studentName)} (${req.student_username || req.student_id})`;
     els.editSummaryCourse.innerHTML = `<b>Môn học / Lớp:</b> ${escapeHtml(req.course_code)} - ${escapeHtml(req.class_code)}`;
     els.editSummaryDates.innerHTML = `<b>Thời gian nghỉ:</b> ${formatDateDisplay(req.start_date)} đến ${formatDateDisplay(req.end_date)}`;
 
-    els.editTargetStatus.value = req.status === "APPROVED" ? "REJECTED" : "APPROVED";
+    els.editTargetStatus.value =
+      req.status === "APPROVED" ? "REJECTED" : "APPROVED";
     els.editNoteInput.value = "";
 
     els.editModal.style.display = "flex";
@@ -657,7 +747,10 @@ async function handleConfirmEdit() {
       return;
     }
 
-    showToast(payload.message || "Đã điều chỉnh trạng thái đơn thành công.", "success");
+    showToast(
+      payload.message || "Đã điều chỉnh trạng thái đơn thành công.",
+      "success",
+    );
     els.editModal.style.display = "none";
     fetchAdminData();
   } catch (err) {
@@ -691,21 +784,25 @@ async function refreshDetailModal(requestId) {
     els.detailStatusBanner.className = `status-banner banner-${status.toLowerCase()}`;
     if (status === "PENDING") {
       els.detailStatusText.textContent = "Trạng thái: Chờ duyệt";
-      els.detailResultDesc.textContent = "⏳ Đơn xin nghỉ học của bạn đang chờ giáo vụ xem xét và phê duyệt.";
+      els.detailResultDesc.textContent =
+        "⏳ Đơn xin nghỉ học của bạn đang chờ giáo vụ xem xét và phê duyệt.";
     } else if (status === "APPROVED") {
       els.detailStatusText.textContent = "Trạng thái: Đã duyệt";
-      els.detailResultDesc.textContent = "✅ Đơn xin nghỉ của bạn đã được giáo vụ duyệt.";
+      els.detailResultDesc.textContent =
+        "✅ Đơn xin nghỉ của bạn đã được giáo vụ duyệt.";
     } else if (status === "REJECTED") {
       els.detailStatusText.textContent = "Trạng thái: Từ chối";
       const rejectNote = req.last_note ? ` Lý do: ${req.last_note}` : "";
       els.detailResultDesc.textContent = `❌ Đơn của bạn đã bị từ chối.${rejectNote}`;
     } else if (status === "CANCELLED") {
       els.detailStatusText.textContent = "Trạng thái: Đã huỷ";
-      els.detailResultDesc.textContent = "⚪ Đơn xin nghỉ học này đã được sinh viên huỷ.";
+      els.detailResultDesc.textContent =
+        "⚪ Đơn xin nghỉ học này đã được sinh viên huỷ.";
     }
 
     // Fill info grid
-    els.detailStudentName.textContent = req.student_name || req.student_username || `SV #${req.student_id}`;
+    els.detailStudentName.textContent =
+      req.student_name || req.student_username || `SV #${req.student_id}`;
     els.detailStudentMeta.textContent = `MSSV: ${req.student_username || req.student_id} | Lớp: ${req.class_code}`;
     els.detailCourse.textContent = req.course_code;
     els.detailDates.textContent = `${formatDateDisplay(req.start_date)} đến ${formatDateDisplay(req.end_date)}`;
@@ -729,7 +826,7 @@ async function refreshDetailModal(requestId) {
             <b>${escapeHtml(ev.file_name || "Xem file minh chứng")}</b>
           </a> (${ev.uploaded_at || ""})
         </div>
-      `
+      `,
         )
         .join("");
     } else {
@@ -741,8 +838,11 @@ async function refreshDetailModal(requestId) {
     if (history.length > 0) {
       els.detailHistoryTimeline.innerHTML = history
         .map((h) => {
-          const person = h.changer_name || h.changer_username || `ID #${h.changed_by}`;
-          const noteText = h.note || `Chuyển trạng thái sang ${statusLabels[h.new_status] || h.new_status}`;
+          const person =
+            h.changer_name || h.changer_username || `ID #${h.changed_by}`;
+          const noteText =
+            h.note ||
+            `Chuyển trạng thái sang ${statusLabels[h.new_status] || h.new_status}`;
           return `
           <div class="timeline-item">
             <div class="timeline-time">${h.changed_at || ""}</div>
@@ -784,7 +884,9 @@ async function sendChatMessage(message) {
       addChatBubble("bot", "Bot chưa phản hồi.");
       return;
     }
-    botMessages.forEach((msg) => addChatBubble("bot", msg.text || JSON.stringify(msg)));
+    botMessages.forEach((msg) =>
+      addChatBubble("bot", msg.text || JSON.stringify(msg)),
+    );
   } catch (err) {
     addChatBubble("system", "Lỗi kết nối chatbot.");
   }
@@ -793,7 +895,8 @@ async function sendChatMessage(message) {
 function addChatBubble(role, content) {
   const bubble = document.createElement("div");
   bubble.className = `chat-bubble ${role}`;
-  const senderLabel = role === "user" ? "Sinh viên" : role === "bot" ? "Bot Trợ Lý" : "Hệ thống";
+  const senderLabel =
+    role === "user" ? "Sinh viên" : role === "bot" ? "Bot Trợ Lý" : "Hệ thống";
   bubble.innerHTML = `<div class="chat-meta">${senderLabel}</div>${escapeHtml(content).replace(/\n/g, "<br>")}`;
   els.chatLog.appendChild(bubble);
   els.chatLog.scrollTop = els.chatLog.scrollHeight;
@@ -803,30 +906,60 @@ function addChatBubble(role, content) {
 // Global Event Listeners & Binding
 // ----------------------------------------------------
 function bindEvents() {
-  // Role switcher on Login panel
-  els.btnSelectStudent.addEventListener("click", () => {
-    els.btnSelectStudent.classList.add("is-active");
-    els.btnSelectStaff.classList.remove("is-active");
-    els.loginStudentBlock.style.display = "block";
-    els.loginStaffBlock.style.display = "none";
+  // Sub-tabs in Student View
+  els.btnSubChat.addEventListener("click", () => {
+    switchStudentTab("chat");
+  });
+  els.btnSubMyRequests.addEventListener("click", () => {
+    switchStudentTab("requests");
   });
 
-  els.btnSelectStaff.addEventListener("click", () => {
-    els.btnSelectStaff.classList.add("is-active");
-    els.btnSelectStudent.classList.remove("is-active");
-    els.loginStudentBlock.style.display = "none";
-    els.loginStaffBlock.style.display = "block";
-  });
+  // Thêm nút form mới
+  const btnSubForm = document.getElementById("btn-sub-form");
+  if (btnSubForm) {
+    btnSubForm.addEventListener("click", () => {
+      switchStudentTab("form");
+    });
+  }
+
+  function switchStudentTab(tab) {
+    // Reset tất cả
+    els.btnSubChat.classList.remove("is-active");
+    els.btnSubMyRequests.classList.remove("is-active");
+    if (btnSubForm) btnSubForm.classList.remove("is-active");
+
+    els.studentChatView.style.display = "none";
+    els.studentMyRequestsView.style.display = "none";
+    const formView = document.getElementById("student-form-view");
+    if (formView) formView.style.display = "none";
+
+    if (tab === "chat") {
+      els.btnSubChat.classList.add("is-active");
+      els.studentChatView.style.display = "block";
+    } else if (tab === "requests") {
+      els.btnSubMyRequests.classList.add("is-active");
+      els.studentMyRequestsView.style.display = "block";
+    } else if (tab === "form") {
+      if (btnSubForm) btnSubForm.classList.add("is-active");
+      if (formView) formView.style.display = "block";
+    }
+  }
 
   // Login Form Handlers
   els.studentLoginForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    handleLogin(els.studentUsernameInput.value.trim(), els.studentPasswordInput.value);
+    handleLogin(
+      els.studentUsernameInput.value.trim(),
+      els.studentPasswordInput.value,
+    );
   });
 
   els.staffLoginForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    handleLogin(els.adminUsernameInput.value.trim(), els.adminPasswordInput.value);
+    handleLogin(
+      els.adminUsernameInput.value.trim(),
+      els.adminPasswordInput.value,
+    );
   });
 
   els.logoutBtn.addEventListener("click", handleLogout);
@@ -873,7 +1006,9 @@ function bindEvents() {
   // Admin Filter Tabs
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("is-active"));
+      document
+        .querySelectorAll(".filter-btn")
+        .forEach((b) => b.classList.remove("is-active"));
       btn.classList.add("is-active");
       state.activeFilter = btn.dataset.filter || "";
       fetchAdminData();
@@ -881,25 +1016,46 @@ function bindEvents() {
   });
 
   // Modal Closers
-  els.closeDetailModalBtn.addEventListener("click", () => (els.detailModal.style.display = "none"));
-  els.btnCloseDetailModal.addEventListener("click", () => (els.detailModal.style.display = "none"));
+  els.closeDetailModalBtn.addEventListener(
+    "click",
+    () => (els.detailModal.style.display = "none"),
+  );
+  els.btnCloseDetailModal.addEventListener(
+    "click",
+    () => (els.detailModal.style.display = "none"),
+  );
 
-  els.closeRejectModalBtn.addEventListener("click", () => (els.rejectModal.style.display = "none"));
-  els.cancelRejectBtn.addEventListener("click", () => (els.rejectModal.style.display = "none"));
+  els.closeRejectModalBtn.addEventListener(
+    "click",
+    () => (els.rejectModal.style.display = "none"),
+  );
+  els.cancelRejectBtn.addEventListener(
+    "click",
+    () => (els.rejectModal.style.display = "none"),
+  );
   els.confirmRejectBtn.addEventListener("click", handleConfirmReject);
 
-  els.closeEditModalBtn.addEventListener("click", () => (els.editModal.style.display = "none"));
-  els.cancelEditBtn.addEventListener("click", () => (els.editModal.style.display = "none"));
+  els.closeEditModalBtn.addEventListener(
+    "click",
+    () => (els.editModal.style.display = "none"),
+  );
+  els.cancelEditBtn.addEventListener(
+    "click",
+    () => (els.editModal.style.display = "none"),
+  );
   els.confirmEditBtn.addEventListener("click", handleConfirmEdit);
 }
 
-// App Initialization
 function boot() {
   bindEvents();
-  addChatBubble("system", "Chào mừng bạn! Vui lòng đăng nhập để tạo hoặc xem đơn xin nghỉ.");
+
+  // Xóa chat log ngay khi load trang
+  if (els.chatLog) {
+    els.chatLog.innerHTML = "";
+  }
+
   checkAuthSession();
 }
-
 // Global scope exports for onclick inline handlers
 window.openDetailModal = openDetailModal;
 window.handleCancelStudentRequest = handleCancelStudentRequest;
