@@ -437,7 +437,21 @@ def chat():
         return _json_response(message=str(error), ok=False, status_code=502)
 
     return _json_response(data=responses, message="Đã gửi đến chatbot.")
-
+@app.post("/api/chat/restart")
+@login_required
+def restart_chat():
+    """Reset toàn bộ hội thoại Rasa của user hiện tại"""
+    sender = session.get("username", "student")
+    try:
+        # Gửi lệnh /restart đến Rasa
+        _rasa_send_message(sender, "/restart", {
+            "student_id": session.get("user_id"),
+            "username": session.get("username"),
+            "class_code": session.get("class_code"),
+        })
+        return _json_response(message="Đã reset hội thoại chatbot.")
+    except Exception as e:
+        return _json_response(message=f"Không thể reset chatbot: {str(e)}", ok=False, status_code=500)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
