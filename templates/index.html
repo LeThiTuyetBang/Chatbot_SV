@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Chatbot chuyên cần sinh viên</title>
+    <title>Hệ Thống Quản Lý Đơn Xin Nghỉ Học</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,172 +19,379 @@
     <div class="bg-blobs blob-a"></div>
     <div class="bg-blobs blob-b"></div>
 
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <header class="topbar">
       <div>
-        <p class="eyebrow">Rasa + SQLite + Flask</p>
-        <h1>Chatbot hỗ trợ xử lý chuyên cần sinh viên</h1>
-        <p class="subtitle">
-          Màn hình chat cho sinh viên và bảng duyệt đơn cho giáo vụ trong một
-          giao diện pastel gọn, rõ.
+        <p class="eyebrow">HỆ THỐNG ĐƠN XIN NGHĨ HỌC</p>
+        <h1 id="app-title">Quản Lý Đơn Xin Nghỉ Học & Chuyên Cần</h1>
+        <p class="subtitle" id="app-subtitle">
+          Vui lòng đăng nhập để sử dụng các chức năng theo phân quyền sinh viên hoặc giáo vụ.
         </p>
       </div>
-      <div class="topbar-actions">
-        <button class="tab-btn is-active" data-tab-target="student-panel">
-          Sinh viên
-        </button>
-        <button class="tab-btn" data-tab-target="admin-panel">Giáo vụ</button>
+
+      <div class="topbar-right">
+        <!-- Panel switcher when logged in -->
+        <div id="topbar-actions" class="topbar-actions" style="display: none">
+          <button class="tab-btn is-active" id="tab-btn-student" data-tab-target="student-panel">
+            Màn hình Sinh viên
+          </button>
+          <button class="tab-btn" id="tab-btn-admin" data-tab-target="admin-panel">
+            Màn hình Giáo vụ
+          </button>
+        </div>
+
+        <!-- User profile header badge -->
+        <div id="user-badge" class="user-badge" style="display: none">
+          <span class="user-avatar" id="user-avatar-icon">👤</span>
+          <div class="user-info">
+            <strong id="user-display-name">--</strong>
+            <span id="user-display-role" class="role-chip">--</span>
+          </div>
+          <button id="logout-btn" class="logout-btn" title="Đăng xuất">Đăng xuất</button>
+        </div>
       </div>
     </header>
 
     <main class="layout">
-      <section class="panel login-panel">
+      <!-- PANEL 1: LOGIN PANEL (Chỉ hiển thị khi chưa đăng nhập) -->
+      <section id="login-panel" class="panel login-panel">
         <div class="panel-head">
-          <h2>Đăng nhập mô phỏng</h2>
-          <span class="pill">Hash mật khẩu + role</span>
-        </div>
-
-        <!-- Form sinh viên -->
-        <div id="login-student" class="login-block">
-          <div class="login-grid">
-            <label>
-              <span>Tài khoản sinh viên</span>
-              <input id="student-username" value="066305014844" />
-            </label>
-            <label>
-              <span>Mật khẩu</span>
-              <input id="student-password" type="password" value="123456" />
-            </label>
-            <button id="student-login" class="primary-btn">
-              Đăng nhập sinh viên
-            </button>
+          <div>
+            <h2>Đăng Nhập Hệ Thống</h2>
+            <p>Vui lòng chọn vai trò và nhập tài khoản để tiếp tục</p>
           </div>
-          <div class="status-card" style="margin-top: 12px">
-            <strong id="student-status">Sinh viên: chưa đăng nhập</strong>
-            <span id="student-meta"
-              >MSSV sẽ được dùng làm sender cho chatbot</span
-            >
+          <div class="role-selector">
+            <button id="btn-select-student" class="role-tab is-active">Sinh viên</button>
+            <button id="btn-select-staff" class="role-tab">Giáo vụ</button>
           </div>
         </div>
 
-        <!-- Form giáo vụ -->
-        <div id="login-admin" class="login-block" hidden>
-          <div class="login-grid admin-login">
-            <label>
-              <span>Tài khoản giáo vụ</span>
-              <input id="admin-username" value="gv_tien" />
-            </label>
-            <label>
-              <span>Mật khẩu</span>
-              <input id="admin-password" type="password" value="123456" />
-            </label>
-            <button id="admin-login" class="secondary-btn">
-              Đăng nhập giáo vụ
-            </button>
+        <!-- Form Đăng nhập Sinh viên -->
+        <div id="login-student-block" class="login-block">
+          <form id="student-login-form" onsubmit="return false;">
+            <div class="login-grid">
+              <label>
+                <span>Tài khoản Sinh viên (MSSV)</span>
+                <input id="student-username" placeholder="Nhập MSSV (VD: 066305014844)" value="066305014844" required />
+              </label>
+              <label>
+                <span>Mật khẩu</span>
+                <input id="student-password" type="password" value="123456" required />
+              </label>
+              <div class="login-btn-wrap">
+                <button id="student-login-btn" type="submit" class="primary-btn full-w">
+                  Đăng Nhập Sinh Viên
+                </button>
+              </div>
+            </div>
+          </form>
+          <div class="login-hint-box">
+            📌 Tài khoản mẫu Sinh viên: <b>066305014844</b> | Mật khẩu: <b>123456</b> (Lê Thị Tuyết Băng - Lớp DTH2151)
           </div>
-          <div class="status-card" style="margin-top: 12px">
-            <strong id="admin-status">Giáo vụ: chưa đăng nhập</strong>
-            <span id="admin-meta">Dùng cho các thao tác duyệt / từ chối</span>
+        </div>
+
+        <!-- Form Đăng nhập Giáo vụ -->
+        <div id="login-staff-block" class="login-block" style="display: none">
+          <form id="staff-login-form" onsubmit="return false;">
+            <div class="login-grid admin-login">
+              <label>
+                <span>Tài khoản Giáo vụ</span>
+                <input id="admin-username" placeholder="Nhập tên đăng nhập (VD: gv_tien)" value="gv_tien" required />
+              </label>
+              <label>
+                <span>Mật khẩu</span>
+                <input id="admin-password" type="password" value="123456" required />
+              </label>
+              <div class="login-btn-wrap">
+                <button id="admin-login-btn" type="submit" class="secondary-btn full-w">
+                  Đăng Nhập Giáo Vụ
+                </button>
+              </div>
+            </div>
+          </form>
+          <div class="login-hint-box">
+            📌 Tài khoản mẫu Giáo vụ: <b>gv_tien</b> | Mật khẩu: <b>123456</b> (ThS. Nguyễn Thanh Tiên)
           </div>
         </div>
       </section>
 
-      <section id="student-panel" class="panel view-panel is-active">
-        <div class="panel-head">
-          <div>
-            <h2>Màn hình chat sinh viên</h2>
-            <p>Gửi tin nhắn qua REST để điền form, xác nhận ngày và nộp đơn.</p>
+      <!-- PANEL 2: STUDENT PANEL (Chỉ hiển thị khi đã đăng nhập vai trò Sinh viên) -->
+      <section id="student-panel" class="panel view-panel" style="display: none">
+        <div class="student-grid">
+          <!-- Cột bên trái: Form tạo đơn xin nghỉ -->
+          <div class="card-box create-form-card">
+            <div class="card-head">
+              <h3>Tạo Đơn Xin Nghỉ Học</h3>
+              <span class="pill-sm">Điền đầy đủ thông tin bên dưới</span>
+            </div>
+
+            <form id="create-request-form" onsubmit="return false;">
+              <div class="form-group">
+                <label>Môn học <span class="req">*</span></label>
+                <input id="form-course-code" placeholder="Ví dụ: Lập trình Python, CSDL..." required />
+              </div>
+
+              <div class="form-group">
+                <label>Mã Lớp <span class="req">*</span></label>
+                <input id="form-class-code" placeholder="Ví dụ: DTH2151..." required />
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Ngày bắt đầu <span class="req">*</span></label>
+                  <input id="form-start-date" type="date" required />
+                </div>
+                <div class="form-group">
+                  <label>Ngày kết thúc <span class="req">*</span></label>
+                  <input id="form-end-date" type="date" required />
+                  <!-- Hiển thị lỗi tức thì khi ngày kết thúc < ngày bắt đầu -->
+                  <div id="date-error-msg" class="date-error-text" style="display: none">
+                    ⚠️ Ngày kết thúc không được trước ngày bắt đầu.
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Lý do xin nghỉ <span class="req">*</span></label>
+                <textarea id="form-reason" rows="3" placeholder="Nhập lý do chi tiết (Ví dụ: Bị sốt cao đi khám bệnh...)" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Đường dẫn minh chứng (nếu có)</label>
+                <input id="form-evidence-url" placeholder="https://drive.google.com/... hoặc link ảnh" />
+              </div>
+
+              <div class="form-actions-row">
+                <button id="form-submit-btn" type="submit" class="primary-btn">
+                  Gửi Đơn Xin Nghỉ
+                </button>
+                <button id="form-cancel-btn" type="button" class="btn-secondary-outline">
+                  Huỷ Viết Đơn
+                </button>
+              </div>
+            </form>
           </div>
-          <span class="pill">PENDING → APPROVED / REJECTED / CANCELLED</span>
-        </div>
-        <div id="chat-log" class="chat-log"></div>
-        <form id="chat-form" class="chat-form">
-          <input
-            id="chat-input"
-            placeholder="Nhập tin nhắn... ví dụ: em muốn xin nghỉ học"
-            autocomplete="off"
-          />
-          <button type="submit" class="primary-btn">Gửi</button>
-        </form>
-        <div class="quick-actions">
-          <button class="chip" data-msg="em muốn xin nghỉ học">
-            Xin nghỉ học
-          </button>
-          <button class="chip" data-msg="nghỉ bao nhiêu buổi thì bị cấm thi">
-            Hỏi quy định
-          </button>
-          <button class="chip" data-msg="kiểm tra trạng thái đơn xin nghỉ">
-            Tra cứu đơn
-          </button>
-          <button class="chip" data-msg="em muốn hủy đơn xin nghỉ">
-            Hủy đơn
-          </button>
+
+          <!-- Cột bên phải: Danh sách đơn của tôi & Chatbot hỗ trợ -->
+          <div class="right-student-col">
+            <!-- Sub-tab chuyển đổi giữa Danh sách đơn & Chatbot -->
+            <div class="sub-tab-bar">
+              <button id="btn-sub-my-requests" class="sub-tab-btn is-active">Danh Sách Đơn Của Tôi</button>
+              <button id="btn-sub-chat" class="sub-tab-btn">Chatbot Trợ Lý</button>
+            </div>
+
+            <!-- View 1: Danh sách đơn của tôi -->
+            <div id="student-my-requests-view" class="sub-view-block">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Mã đơn</th>
+                      <th>Môn học</th>
+                      <th>Lớp</th>
+                      <th>Thời gian nghỉ</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-request-table">
+                    <tr><td colspan="6" class="text-center text-muted">Đang tải danh sách đơn...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- View 2: Khung Chatbot -->
+            <div id="student-chat-view" class="sub-view-block" style="display: none">
+              <div id="chat-log" class="chat-log"></div>
+              <form id="chat-form" class="chat-form" onsubmit="return false;">
+                <input
+                  id="chat-input"
+                  placeholder="Nhập tin nhắn... ví dụ: em muốn xin nghỉ học"
+                  autocomplete="off"
+                />
+                <button type="submit" class="primary-btn">Gửi</button>
+              </form>
+              <div class="quick-actions">
+                <button class="chip" data-msg="em muốn xin nghỉ học">Xin nghỉ học</button>
+                <button class="chip" data-msg="nghỉ bao nhiêu buổi thì bị cấm thi">Hỏi quy định</button>
+                <button class="chip" data-msg="kiểm tra trạng thái đơn xin nghỉ">Tra cứu đơn</button>
+                <button class="chip" data-msg="em muốn hủy đơn xin nghỉ">Hủy đơn gần nhất</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="admin-panel" class="panel view-panel">
+      <!-- PANEL 3: ADMIN PANEL (Chỉ hiển thị khi đã đăng nhập vai trò Giáo vụ) -->
+      <section id="admin-panel" class="panel view-panel" style="display: none">
         <div class="panel-head">
           <div>
-            <h2>Màn hình quản lý / duyệt đơn</h2>
-            <p>
-              Danh sách đơn lấy từ SQLite và đổi trạng thái ngay trên giao diện.
-            </p>
-          </div>
-          <div class="pill-group">
-            <span class="pill">Chờ duyệt: <b id="count-pending">0</b></span>
-            <span class="pill">Đã duyệt: <b id="count-approved">0</b></span>
-            <span class="pill">Từ chối: <b id="count-rejected">0</b></span>
-            <span class="pill">Đã Huỷ: <b id="count-cancelled">0</b></span>
+            <h2>Quản Lý & Duyệt Đơn Xin Nghỉ Học</h2>
+            <p>Danh sách đơn xin nghỉ học của toàn bộ sinh viên</p>
           </div>
         </div>
 
+        <!-- Bộ lọc 5 Tab & Đếm số lượng -->
         <div class="filter-bar">
-          <button class="filter-btn is-active" data-filter="">Tất cả</button>
-          <button class="filter-btn" data-filter="PENDING">Chờ duyệt</button>
-          <button class="filter-btn" data-filter="APPROVED">Đã duyệt</button>
-          <button class="filter-btn" data-filter="REJECTED">Từ chối</button>
-          <button class="filter-btn" data-filter="CANCELLED">Đã Huỷ</button>
+          <button class="filter-btn is-active" data-filter="">
+            Tất cả (<b id="count-all">0</b>)
+          </button>
+          <button class="filter-btn filter-pending" data-filter="PENDING">
+            Chờ duyệt (<b id="count-pending">0</b>)
+          </button>
+          <button class="filter-btn filter-approved" data-filter="APPROVED">
+            Đã duyệt (<b id="count-approved">0</b>)
+          </button>
+          <button class="filter-btn filter-rejected" data-filter="REJECTED">
+            Từ chối (<b id="count-rejected">0</b>)
+          </button>
+          <button class="filter-btn filter-cancelled" data-filter="CANCELLED">
+            Đã Huỷ (<b id="count-cancelled">0</b>)
+          </button>
         </div>
 
+        <!-- Bảng danh sách đơn Giáo vụ -->
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Mã đơn</th>
                 <th>Sinh viên</th>
-                <th>Môn</th>
+                <th>Môn học</th>
                 <th>Lớp</th>
                 <th>Ngày nghỉ</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
-            <tbody id="request-table"></tbody>
+            <tbody id="request-table">
+              <tr><td colspan="7" class="text-center text-muted">Đang tải danh sách đơn...</td></tr>
+            </tbody>
           </table>
-        </div>
-
-        <div class="detail-grid">
-          <div class="detail-card">
-            <h3>Chi tiết đơn</h3>
-            <pre id="request-detail">
-Chọn một đơn để xem lịch sử trạng thái.</pre
-            >
-          </div>
-
-          <div class="detail-card">
-            <h3>Lịch sử trạng thái</h3>
-            <pre id="request-history">--</pre>
-          </div>
-
-          <!-- Thêm card minh chứng ở đây -->
-          <div class="detail-card">
-            <h3>Minh chứng</h3>
-            <div id="detail-evidences">
-              <p class="text-muted">Chưa có minh chứng</p>
-            </div>
-          </div>
         </div>
       </section>
     </main>
+
+    <!-- MODAL 1: CHI TIẾT ĐƠN (Giao diện Kết quả dễ hiểu) -->
+    <div id="detail-modal" class="modal-overlay" style="display: none">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modal-detail-title">Chi Tiết Đơn Xin Nghỉ Học #--</h3>
+          <button id="close-detail-modal-btn" class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Thẻ Banner kết quả đơn -->
+          <div id="detail-status-banner" class="status-banner banner-pending">
+            <div id="detail-status-text" class="banner-title">Trạng thái: Chờ duyệt</div>
+            <div id="detail-result-desc" class="banner-desc">Đơn xin nghỉ học đang chờ giáo vụ xem xét.</div>
+          </div>
+
+          <!-- Thông tin tổng quan đơn -->
+          <div class="detail-info-grid">
+            <div class="info-item">
+              <span class="info-label">Sinh viên nộp đơn:</span>
+              <strong id="detail-student-name">--</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">MSSV / Lớp:</span>
+              <strong id="detail-student-meta">--</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Môn học xin nghỉ:</span>
+              <strong id="detail-course">--</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Thời gian xin nghỉ:</span>
+              <strong id="detail-dates">--</strong>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">Lý do xin nghỉ:</span>
+              <div id="detail-reason" class="info-box-text">--</div>
+            </div>
+            <div id="detail-handler-wrap" class="info-item full-width" style="display: none">
+              <span class="info-label">Người xử lý & Thời gian:</span>
+              <div id="detail-handler-info" class="info-box-text highlight">--</div>
+            </div>
+          </div>
+
+          <!-- Phần Minh chứng -->
+          <div class="modal-section">
+            <h4>📎 Minh Chứng Đính Kèm</h4>
+            <div id="detail-evidences-list" class="evidence-box">
+              <p class="text-muted">Không có minh chứng đính kèm</p>
+            </div>
+          </div>
+
+          <!-- Phần Lịch sử trạng thái (Timeline) -->
+          <div class="modal-section">
+            <h4>📜 Lịch Sử Trạng Thái Đơn</h4>
+            <div id="detail-history-timeline" class="timeline-list">
+              <p class="text-muted">Đang tải lịch sử...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-close-detail-modal" class="btn-secondary">Đóng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: TỪ CHỐI ĐƠN (Dành cho Giáo vụ nhập lý do) -->
+    <div id="reject-modal" class="modal-overlay" style="display: none">
+      <div class="modal-card modal-sm">
+        <div class="modal-header">
+          <h3>Từ Chối Đơn Xin Nghỉ</h3>
+          <button id="close-reject-modal-btn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Vui lòng nhập lý do từ chối đơn xin nghỉ học này:</p>
+          <textarea id="reject-reason-input" rows="3" placeholder="Ví dụ: Không đủ bằng chứng/minh chứng hợp lệ..." required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-reject-btn" class="btn-danger">Xác Nhận Từ Chối</button>
+          <button id="cancel-reject-btn" class="btn-secondary">Huỷ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: CHỈNH SỬA KẾT QUẢ DUYỆT (Dành cho Giáo vụ) -->
+    <div id="edit-modal" class="modal-overlay" style="display: none">
+      <div class="modal-card modal-sm">
+        <div class="modal-header">
+          <h3>Đổi Trạng Thái / Duyệt - Từ Chối Lại</h3>
+          <button id="close-edit-modal-btn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="info-box-text" style="margin-bottom: 12px; background: #f1f5f9;">
+            <div id="edit-summary-student"><b>Sinh viên:</b> --</div>
+            <div id="edit-summary-course"><b>Môn học:</b> --</div>
+            <div id="edit-summary-dates"><b>Ngày nghỉ:</b> --</div>
+          </div>
+
+          <div class="form-group">
+            <label>Chọn trạng thái mới <span class="req">*</span></label>
+            <select id="edit-target-status" class="form-control" style="width:100%; padding:10px; border-radius:12px; font-weight:700;">
+              <option value="APPROVED">Đã duyệt (APPROVED)</option>
+              <option value="REJECTED">Từ chối (REJECTED)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Lý do / Ghi chú điều chỉnh (nếu có)</label>
+            <textarea id="edit-note-input" rows="3" placeholder="Nhập lý do đổi trạng thái đơn..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-edit-btn" class="primary-btn">Lưu Trạng Thái Mới</button>
+          <button id="cancel-edit-btn" class="btn-secondary">Huỷ</button>
+        </div>
+      </div>
+    </div>
 
     <script>
       window.__STATUS_LABELS__ = {{ status_labels | tojson }};
