@@ -245,6 +245,7 @@ def student_create_request():
             end_date=end_date,
             reason=reason,
             created_by=student_id,
+            source="form", 
         )
         if evidence_url:
             add_evidence(request_id=req_id, file_name="minh_chung", file_url=evidence_url)

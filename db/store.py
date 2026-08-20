@@ -162,6 +162,7 @@ def create_absence_request(
     end_date: str,
     reason: str,
     created_by: Optional[int] = None,
+    source: str = "form",  # "form" | "chatbot"
 ) -> int:
     validate_date_range(start_date, end_date)
     actor_id = created_by or student_id
@@ -179,12 +180,19 @@ def create_absence_request(
             (student_id, course_code, class_code, start_date, end_date, reason, STATUS_PENDING),
         )
         request_id = cursor.lastrowid
+
+        # Ghi chú lịch sử rõ nguồn tạo đơn
+        if source == "chatbot":
+            history_note = f"{actor_name} đã tạo đơn xin nghỉ học qua Chatbot"
+        else:
+            history_note = f"{actor_name} đã tạo đơn xin nghỉ học qua Form web"
+
         cursor.execute(
             """
             INSERT INTO RequestStatusHistory (request_id, old_status, new_status, changed_by, note)
             VALUES (?, NULL, ?, ?, ?)
             """,
-            (request_id, STATUS_PENDING, actor_id, f"{actor_name} đã tạo đơn xin nghỉ học"),
+            (request_id, STATUS_PENDING, actor_id, history_note),
         )
         return int(request_id)
 

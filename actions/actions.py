@@ -4,6 +4,8 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, ActiveLoop 
+from rasa_sdk.forms import FormValidationAction
+from rasa_sdk.types import DomainDict
 
 from db.store import (
     STATUS_APPROVED,
@@ -84,6 +86,73 @@ def _get_student_id(tracker: Tracker) -> int:
             student_id = resolve_user_id_from_metadata({"username": sender_id})
     return student_id or 1
 
+class ValidateAbsenceForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_absence_form"
+
+    def validate_end_date(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        start_raw = tracker.get_slot("start_date") or ""
+        end_raw = slot_value or ""
+
+        normalized_start = _parse_date_text(start_raw)
+        normalized_end = _parse_date_text(end_raw)
+
+        # Không parse được ngày kết thúc
+        if not normalized_end:
+            dispatcher.utter_message(
+                text="Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
+            )
+            return {"end_date": None, "normalized_end_date": None}
+
+        # Có cả 2 ngày → kiểm tra thứ tự
+        if normalized_start:
+            try:
+                d1 = date.fromisoformat(normalized_start)
+                d2 = date.fromisoformat(normalized_end)
+                if d1 > d2:
+                    dispatcher.utter_message(
+                        text=(
+                            f"Ngày kết thúc ({end_raw}) không được trước ngày bắt đầu ({start_raw}). "
+                            "Bạn nhập lại ngày kết thúc nhé."
+                        )
+                    )
+                    return {"end_date": None, "normalized_end_date": None}
+            except ValueError:
+                dispatcher.utter_message(text="Định dạng ngày không hợp lệ. Bạn nhập lại nhé.")
+                return {"end_date": None, "normalized_end_date": None}
+
+        return {
+            "end_date": end_raw,
+            "normalized_end_date": normalized_end,
+        }
+
+    def validate_start_date(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        start_raw = slot_value or ""
+        normalized_start = _parse_date_text(start_raw)
+
+        if not normalized_start:
+            dispatcher.utter_message(
+                text="Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
+            )
+            return {"start_date": None, "normalized_start_date": None}
+
+        return {
+            "start_date": start_raw,
+            "normalized_start_date": normalized_start,
+        }
+    
 class ActionStartAbsenceForm(Action):
     def name(self) -> Text:
         return "action_start_absence_form"
@@ -153,6 +222,7 @@ class ActionSubmitAbsenceRequest(Action):
                 end_date=end_date or start_date,
                 reason=reason,
                 created_by=student_id,
+                source="chatbot",
             )
             # ========== 
             if evidence_url and str(evidence_url).strip().lower() not in {"không", "khong", "no", ""}:
