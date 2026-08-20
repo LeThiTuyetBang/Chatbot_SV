@@ -906,13 +906,25 @@ function addChatBubble(role, content) {
 // Global Event Listeners & Binding
 // ----------------------------------------------------
 function bindEvents() {
-  // Sub-tabs in Student View
-  els.btnSubChat.addEventListener("click", () => {
-    switchStudentTab("chat");
-  });
-  els.btnSubMyRequests.addEventListener("click", () => {
-    switchStudentTab("requests");
-  });
+  // ===== Role switcher trên màn hình Đăng nhập =====
+  if (els.btnSelectStudent) {
+    els.btnSelectStudent.addEventListener("click", () => {
+      els.btnSelectStudent.classList.add("is-active");
+      if (els.btnSelectStaff) els.btnSelectStaff.classList.remove("is-active");
+      if (els.loginStudentBlock) els.loginStudentBlock.style.display = "block";
+      if (els.loginStaffBlock) els.loginStaffBlock.style.display = "none";
+    });
+  }
+
+  if (els.btnSelectStaff) {
+    els.btnSelectStaff.addEventListener("click", () => {
+      els.btnSelectStaff.classList.add("is-active");
+      if (els.btnSelectStudent)
+        els.btnSelectStudent.classList.remove("is-active");
+      if (els.loginStudentBlock) els.loginStudentBlock.style.display = "none";
+      if (els.loginStaffBlock) els.loginStaffBlock.style.display = "block";
+    });
+  }
 
   // Thêm nút form mới
   const btnSubForm = document.getElementById("btn-sub-form");
