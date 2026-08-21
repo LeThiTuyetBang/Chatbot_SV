@@ -26,6 +26,7 @@ actions:
   - action_check_absence_status
   - action_cancel_absence
   - action_start_absence_form
+  - validate_absence_form
 
 slots:
   time:
