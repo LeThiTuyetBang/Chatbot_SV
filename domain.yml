@@ -18,6 +18,10 @@ entities:
   - ma_mon
   - ma_mon_hoc
   - time
+  - start_date
+  - end_date
+  - reason
+  - evidence_url
 
 actions:
   - action_preview_absence_request
@@ -40,6 +44,8 @@ slots:
     type: text
     influence_conversation: true
     mappings:
+      - type: from_entity
+        entity: evidence_url
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -69,16 +75,17 @@ slots:
     mappings:
       - type: from_entity
         entity: ma_mon_hoc
+      - type: from_entity
+        entity: ma_mon
 
   start_date:
     type: text
     influence_conversation: true
     mappings:
       - type: from_entity
+        entity: start_date
+      - type: from_entity
         entity: time
-        conditions:
-          - active_loop: absence_form
-            requested_slot: start_date
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -89,10 +96,9 @@ slots:
     influence_conversation: true
     mappings:
       - type: from_entity
+        entity: end_date
+      - type: from_entity
         entity: time
-        conditions:
-          - active_loop: absence_form
-            requested_slot: end_date
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -120,6 +126,8 @@ slots:
     type: text
     influence_conversation: true
     mappings:
+      - type: from_entity
+        entity: reason
       - type: from_text
         conditions:
           - active_loop: absence_form
