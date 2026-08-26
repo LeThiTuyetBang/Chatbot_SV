@@ -90,61 +90,103 @@ class ValidateAbsenceForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_absence_form"
 
-def validate_end_date(
-    self,
-    slot_value: Any,
-    dispatcher: CollectingDispatcher,
-    tracker: Tracker,
-    domain: DomainDict,
-) -> Dict[Text, Any]:
-    start_raw = tracker.get_slot("start_date") or ""
-    end_raw = (slot_value or "").strip()
+    def extract_ma_mon_hoc(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current = tracker.get_slot("ma_mon_hoc")
+        if current:
+            return {"ma_mon_hoc": current}
+        entities = tracker.latest_message.get("entities", [])
+        for e in entities:
+            if e.get("entity") in ["ma_mon_hoc", "ma_mon"]:
+                return {"ma_mon_hoc": e.get("value")}
+        return {}
 
-    normalized_start = _parse_date_text(start_raw)
-    normalized_end = _parse_date_text(end_raw)
+    def extract_ma_lop(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current = tracker.get_slot("ma_lop")
+        if current:
+            return {"ma_lop": current}
+        entities = tracker.latest_message.get("entities", [])
+        for e in entities:
+            if e.get("entity") == "ma_lop":
+                return {"ma_lop": e.get("value")}
+        return {}
 
-    # 1. Không parse được ngày kết thúc
-    if not normalized_end or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_end):
-        dispatcher.utter_message(
-            text="Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
-        )
-        return {"end_date": None, "normalized_end_date": None}
+    def extract_start_date(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current_start = tracker.get_slot("start_date")
+        entities = tracker.latest_message.get("entities", [])
+        start_entities = [e for e in entities if e.get("entity") == "start_date"]
+        time_entities = [e for e in entities if e.get("entity") == "time"]
 
-    # 2. Đã có ngày bắt đầu → bắt buộc kiểm tra thứ tự
-    if start_raw:
-        if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_start):
-            dispatcher.utter_message(
-                text="Ngày bắt đầu chưa hợp lệ. Mình sẽ hỏi lại từ đầu nhé."
-            )
-            return {
-                "start_date": None,
-                "normalized_start_date": None,
-                "end_date": None,
-                "normalized_end_date": None,
-            }
+        if start_entities:
+            return {"start_date": start_entities[0].get("value")}
+        if not current_start and time_entities:
+            return {"start_date": time_entities[0].get("value")}
+        if current_start:
+            return {"start_date": current_start}
+        return {}
 
-        try:
-            d1 = date.fromisoformat(normalized_start)
-            d2 = date.fromisoformat(normalized_end)
-            if d1 > d2:
-                dispatcher.utter_message(
-                    text=(
-                        f"Ngày kết thúc ({end_raw}) không được trước ngày bắt đầu ({start_raw}). "
-                        "Bạn nhập lại ngày kết thúc nhé."
-                    )
-                )
-                return {"end_date": None, "normalized_end_date": None}
-        except ValueError:
-            dispatcher.utter_message(text="Định dạng ngày không hợp lệ. Bạn nhập lại nhé.")
-            return {"end_date": None, "normalized_end_date": None}
+    def extract_end_date(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current_end = tracker.get_slot("end_date")
+        entities = tracker.latest_message.get("entities", [])
+        end_entities = [e for e in entities if e.get("entity") == "end_date"]
+        time_entities = [e for e in entities if e.get("entity") == "time"]
 
-    return {
-        "end_date": end_raw,
-        "normalized_end_date": normalized_end,
-    }
+        if end_entities:
+            return {"end_date": end_entities[0].get("value")}
+        if len(time_entities) >= 2:
+            return {"end_date": time_entities[1].get("value")}
+        requested_slot = tracker.get_slot("requested_slot")
+        if requested_slot == "end_date" and time_entities:
+            return {"end_date": time_entities[0].get("value")}
+        if current_end:
+            return {"end_date": current_end}
+        return {}
 
+    def extract_reason(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current_reason = tracker.get_slot("reason")
+        if current_reason:
+            return {"reason": current_reason}
+        entities = tracker.latest_message.get("entities", [])
+        reason_entities = [e for e in entities if e.get("entity") == "reason"]
+        if reason_entities:
+            return {"reason": reason_entities[0].get("value")}
+        requested_slot = tracker.get_slot("requested_slot")
+        if requested_slot == "reason":
+            text = tracker.latest_message.get("text", "")
+            if text and tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
+                return {"reason": text}
+        return {}
 
-def validate_start_date(
+    def extract_evidence_url(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict
+    ) -> Dict[Text, Any]:
+        current_url = tracker.get_slot("evidence_url")
+        if current_url:
+            return {"evidence_url": current_url}
+        entities = tracker.latest_message.get("entities", [])
+        evidence_entities = [e for e in entities if e.get("entity") == "evidence_url"]
+        if evidence_entities:
+            return {"evidence_url": evidence_entities[0].get("value")}
+        text = tracker.latest_message.get("text", "")
+        url_match = re.search(r"https?://[^\s]+|drive\.google\.com[^\s]+|imgur\.com[^\s]+", text)
+        if url_match:
+            return {"evidence_url": url_match.group(0)}
+        requested_slot = tracker.get_slot("requested_slot")
+        if requested_slot == "evidence_url":
+            if text:
+                return {"evidence_url": text}
+        return {}
+
+    def validate_start_date(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
@@ -153,18 +195,66 @@ def validate_start_date(
     ) -> Dict[Text, Any]:
         start_raw = slot_value or ""
         normalized_start = _parse_date_text(start_raw)
-
         if not normalized_start:
             dispatcher.utter_message(
                 text="Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
             )
             return {"start_date": None, "normalized_start_date": None}
-
         return {
             "start_date": start_raw,
             "normalized_start_date": normalized_start,
         }
-    
+
+    def validate_end_date(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        start_raw = tracker.get_slot("start_date") or ""
+        end_raw = (slot_value or "").strip()
+        normalized_start = _parse_date_text(start_raw)
+        normalized_end = _parse_date_text(end_raw)
+
+        if not normalized_end or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_end):
+            dispatcher.utter_message(
+                text="Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
+            )
+            return {"end_date": None, "normalized_end_date": None}
+
+        if start_raw:
+            if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_start):
+                dispatcher.utter_message(
+                    text="Ngày bắt đầu chưa hợp lệ. Bạn nhập lại ngày bắt đầu nhé."
+                )
+                return {
+                    "start_date": None,
+                    "normalized_start_date": None,
+                    "end_date": None,
+                    "normalized_end_date": None,
+                }
+            try:
+                d1 = date.fromisoformat(normalized_start)
+                d2 = date.fromisoformat(normalized_end)
+                if d1 > d2:
+                    dispatcher.utter_message(
+                        text=(
+                            f"Ngày kết thúc ({end_raw}) không được trước ngày bắt đầu ({start_raw}). "
+                            "Bạn nhập lại ngày kết thúc nhé."
+                        )
+                    )
+                    return {"end_date": None, "normalized_end_date": None}
+            except ValueError:
+                dispatcher.utter_message(text="Định dạng ngày không hợp lệ. Bạn nhập lại nhé.")
+                return {"end_date": None, "normalized_end_date": None}
+
+        return {
+            "end_date": end_raw,
+            "normalized_end_date": normalized_end,
+        }
+
+
 class ActionStartAbsenceForm(Action):
     def name(self) -> Text:
         return "action_start_absence_form"
@@ -175,22 +265,8 @@ class ActionStartAbsenceForm(Action):
         tracker: Tracker,
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
-        dispatcher.utter_message(
-            text=(
-                "Để xin nghỉ học hợp lệ, bạn cần gửi đơn xin phép cho giảng viên kèm minh chứng "
-                "(giấy khám bệnh, xác nhận của gia đình...). "
-                "Bạn vui lòng cung cấp Mã lớp và Môn học để hệ thống ghi nhận nhé."
-            )
-        )
+        # Không reset slot đã được trích xuất từ câu lệnh ban đầu
         return [
-            SlotSet("ma_mon_hoc", None),
-            SlotSet("ma_mon", None),
-            SlotSet("ma_lop", None),
-            SlotSet("start_date", None),
-            SlotSet("end_date", None),
-            SlotSet("reason", None),
-            SlotSet("normalized_start_date", None),
-            SlotSet("normalized_end_date", None),
             SlotSet("awaiting_request_confirmation", False),
         ]
 
