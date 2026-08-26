@@ -25,6 +25,13 @@ nlu:
       - \b(hôm nay|hôm qua|ngày mai|mai|ngày kia)\b
       - \b(thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b
 
+  - regex: evidence_url
+    examples: |
+      - https?://[^\s]+
+      - www\.[^\s]+
+      - drive\.google\.com[^\s]+
+      - imgur\.com[^\s]+
+
   # --- 2. LOOKUP TABLES ---
   - lookup: ma_mon_hoc
     examples: |
@@ -105,6 +112,12 @@ nlu:
       - mã lớp là [010112610016](ma_lop)
       - [CN2302C](ma_lop)
       - [DL75GK](ma_lop)
+      - em xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DH21IT01](ma_lop) từ [10/04/2026](start_date) đến [12/04/2026](end_date) vì [bị sốt cao](reason) minh chứng [https://drive.google.com/file/123](evidence_url)
+      - cho em xin nghỉ môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [IT002](ma_lop) từ ngày [hôm nay](start_date) đến [ngày mai](end_date) lý do [bận việc gia đình](reason)
+      - em xin phép vắng môn [Kiểm thử phần mềm](ma_mon_hoc) từ [thứ 2 tuần sau](start_date) đến [thứ 4 tuần sau](end_date) vì [bị tai nạn giao thông](reason) có minh chứng [https://imgur.com/abc](evidence_url)
+      - xin nghỉ học môn [INT2204](ma_mon) lớp [DH22SE01](ma_lop) nghỉ từ [15/05/2026](start_date) đến [17/05/2026](end_date) lý do [nhiễm covid](reason)
+      - em xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21CN01](ma_lop) ngày [20/04/2026](start_date) đến [22/04/2026](end_date) vì [bị ốm nặng](reason) link [https://drive.google.com/doc](evidence_url)
+      - xin vắng học môn [Trí tuệ nhân tạo](ma_mon_hoc) lớp [SE101](ma_lop) từ [hôm nay](start_date) do [hỏng xe trên đường](reason)
 
   # Intent Xem trạng thái đơn
   - intent: check_absence_status
@@ -158,6 +171,14 @@ nlu:
       - môn học [Kiểm thử phần mềm](ma_mon_hoc)
       - mã môn [SWE302](ma_mon)
       - mssv em [2051010022](mssv)
+      - từ [10/05/2026](start_date) đến [12/05/2026](end_date)
+      - em bị [bệnh sốt siêu vi](reason)
+      - lý do là [đi khám bệnh tại bệnh viện](reason)
+      - link minh chứng là [https://drive.google.com/file/456](evidence_url)
+      - môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [DH21IT02](ma_lop)
+      - từ [ngày mai](start_date) đến [thứ 6 tuần sau](end_date) vì [ốm](reason)
+      - lớp [IT003](ma_lop) môn [Mạng máy tính](ma_mon_hoc) từ [01/06/2026](start_date) đến [03/06/2026](end_date)
+      - lý do [bị ngộ độc thực phẩm](reason) minh chứng [https://imgur.com/xyz123](evidence_url)
 
   # Intent Hỏi quy định nghỉ học
   - intent: quy_dinh_nghi_hoc
