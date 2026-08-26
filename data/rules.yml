@@ -16,10 +16,15 @@ rules:
       - intent: quy_dinh_nghi_hoc
       - action: utter_quy_dinh_nghi_hoc
 
-  - rule: Khởi động form xin nghỉ học
+  - rule: Khởi động form xin nghỉ học (inform_absence)
     steps:
       - intent: inform_absence
-      - action: action_start_absence_form
+      - action: absence_form
+      - active_loop: absence_form
+
+  - rule: Khởi động form xin nghỉ học (cung_cap_thong_tin)
+    steps:
+      - intent: cung_cap_thong_tin
       - action: absence_form
       - active_loop: absence_form
 
@@ -29,6 +34,8 @@ rules:
     steps:
       - action: absence_form
       - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
       - action: action_preview_absence_request
 
   - rule: Xác nhận lưu đơn xin nghỉ
@@ -47,13 +54,6 @@ rules:
       - intent: deny
       - action: action_reset_absence_form
       - action: utter_huong_dan_xin_nghi
-
-  - rule: Phản hồi khi sinh viên cung cấp thông tin
-    condition:
-      - active_loop: null
-    steps:
-      - intent: cung_cap_thong_tin
-      - action: utter_xac_nhan_thong_tin
 
   - rule: Fallback khi bot không hiểu
     steps:

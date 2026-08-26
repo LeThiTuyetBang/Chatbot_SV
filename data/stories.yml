@@ -8,14 +8,51 @@ stories:
       - intent: goodbye
       - action: utter_goodbye
 
-  - story: Luồng nộp đơn xin nghỉ
+  - story: Luồng nộp đơn xin nghỉ từng bước
     steps:
       - intent: inform_absence
-      - action: action_start_absence_form
       - action: absence_form
       - active_loop: absence_form
       - action: absence_form
       - active_loop: null
+      - action: action_preview_absence_request
+      - intent: affirm
+      - action: action_submit_absence_request
+
+  - story: Nộp đơn xin nghỉ đủ thông tin 1 câu (inform_absence)
+    steps:
+      - intent: inform_absence
+      - action: absence_form
+      - active_loop: absence_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_preview_absence_request
+      - intent: affirm
+      - action: action_submit_absence_request
+
+  - story: Nộp đơn xin nghỉ đủ thông tin 1 câu (cung_cap_thong_tin)
+    steps:
+      - intent: cung_cap_thong_tin
+      - action: absence_form
+      - active_loop: absence_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_preview_absence_request
+      - intent: affirm
+      - action: action_submit_absence_request
+
+  - story: Nộp đơn xin nghỉ điền bổ sung bằng cung_cap_thong_tin
+    steps:
+      - intent: inform_absence
+      - action: absence_form
+      - active_loop: absence_form
+      - intent: cung_cap_thong_tin
+      - action: absence_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
       - action: action_preview_absence_request
       - intent: affirm
       - action: action_submit_absence_request
