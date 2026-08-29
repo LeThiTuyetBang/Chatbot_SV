@@ -16,19 +16,27 @@ rules:
       - intent: quy_dinh_nghi_hoc
       - action: utter_quy_dinh_nghi_hoc
 
+  # 1. Kích hoạt form xin nghỉ học
   - rule: Khởi động form xin nghỉ học (inform_absence)
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
     steps:
       - intent: inform_absence
       - action: absence_form
-      - active_loop: absence_form
 
   - rule: Khởi động form xin nghỉ học (cung_cap_thong_tin)
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
     steps:
       - intent: cung_cap_thong_tin
       - action: absence_form
-      - active_loop: absence_form
 
-  - rule: Submit form xin nghỉ học
+  # 2. Xử lý khi Form hoàn thành -> BẮT BUỘC gọi action_preview_absence_request
+  - rule: Preview sau khi form hoàn thành (Form đang active)
     condition:
       - active_loop: absence_form
     steps:
@@ -38,7 +46,18 @@ rules:
           - requested_slot: null
       - action: action_preview_absence_request
 
-  - rule: Xác nhận lưu đơn xin nghỉ
+  - rule: Preview sau khi form hoàn thành (Form 0-turn)
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
+          - requested_slot: null
+    steps:
+      - action: absence_form
+      - action: action_preview_absence_request
+
+  # 3. Bước xác nhận: User đồng ý (affirm) -> Lưu đơn
+  - rule: Xác nhận lưu đơn xin nghỉ (affirm)
     condition:
       - slot_was_set:
           - awaiting_request_confirmation: true
@@ -46,14 +65,40 @@ rules:
       - intent: affirm
       - action: action_submit_absence_request
 
-  - rule: Hủy lưu đơn xin nghỉ
+  # 4. Bước xác nhận: User nói "không" / từ chối (deny) -> Hủy không lưu
+  - rule: Từ chối lưu đơn khi chờ xác nhận (deny)
     condition:
       - slot_was_set:
           - awaiting_request_confirmation: true
     steps:
       - intent: deny
-      - action: action_reset_absence_form
-      - action: utter_huong_dan_xin_nghi
+      - action: action_handle_absence_correction
+
+  # 5. Bước xác nhận: User yêu cầu sửa thông tin (sua_thong_tin / cung_cap_thong_tin)
+  - rule: Chỉnh sửa thông tin đơn khi chờ xác nhận (sua_thong_tin)
+    condition:
+      - slot_was_set:
+          - awaiting_request_confirmation: true
+    steps:
+      - intent: sua_thong_tin
+      - action: action_handle_absence_correction
+
+  - rule: Chỉnh sửa thông tin đơn khi chờ xác nhận (cung_cap_thong_tin)
+    condition:
+      - slot_was_set:
+          - awaiting_request_confirmation: true
+    steps:
+      - intent: cung_cap_thong_tin
+      - action: action_handle_absence_correction
+
+  # 6. Bước xác nhận: User nói "hủy" / "làm lại từ đầu" (cancel_absence)
+  - rule: Hủy đơn khi đang chờ xác nhận (cancel_absence)
+    condition:
+      - slot_was_set:
+          - awaiting_request_confirmation: true
+    steps:
+      - intent: cancel_absence
+      - action: action_handle_absence_correction
 
   - rule: Fallback khi bot không hiểu
     steps:
@@ -65,7 +110,11 @@ rules:
       - intent: check_absence_status
       - action: action_check_absence_status
 
-  - rule: Hủy đơn xin nghỉ
+  - rule: Hủy đơn xin nghỉ khi không ở trạng thái xác nhận
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
     steps:
       - intent: cancel_absence
       - action: action_cancel_absence
