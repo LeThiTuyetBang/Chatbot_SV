@@ -180,6 +180,27 @@ nlu:
       - lớp [IT003](ma_lop) môn [Mạng máy tính](ma_mon_hoc) từ [01/06/2026](start_date) đến [03/06/2026](end_date)
       - lý do [bị ngộ độc thực phẩm](reason) minh chứng [https://imgur.com/xyz123](evidence_url)
 
+  # Intent Sửa thông tin đơn
+  - intent: sua_thong_tin
+    examples: |
+      - sửa ngày bắt đầu thành [15/04/2026](start_date)
+      - sửa ngày từ [10/04/2026](start_date) đến [12/04/2026](end_date)
+      - đổi ngày từ [ngày mai](start_date) đến [ngày kia](end_date)
+      - đổi ngày kết thúc thành [18/04/2026](end_date)
+      - sửa lý do thành [bị sốt siêu vi](reason)
+      - đổi lý do [đi khám bệnh](reason)
+      - sửa lớp [DH21IT02](ma_lop)
+      - sửa môn [Cơ sở dữ liệu](ma_mon_hoc)
+      - sửa lại thông tin
+      - đổi ngày nghỉ
+      - sửa ngày
+      - sửa lý do
+      - sửa lại môn học
+      - đổi lại lớp
+      - em muốn sửa lại thông tin đơn
+      - đổi ngày từ [hôm nay](start_date) đến [ngày mai](end_date)
+      - sửa ngày nghỉ từ [01/05/2026](start_date) đến [05/05/2026](end_date)
+
   # Intent Hỏi quy định nghỉ học
   - intent: quy_dinh_nghi_hoc
     examples: |
@@ -363,3 +384,25 @@ nlu:
       - okie bye
       - cảm ơn trợ lý
       - xin cảm ơn
+
+  # Intent Fallback cho câu không liên quan
+  - intent: nlu_fallback
+    examples: |
+      - thời tiết hôm nay thế nào
+      - dự báo thời tiết ngày mai
+      - bạn tên là gì vậy
+      - hôm nay ăn gì đây
+      - chơi game với mình không
+      - abc xyz
+      - 123 456
+      - kết quả bóng đá đêm qua
+      - giá vàng hôm nay bao nhiêu
+      - tin tức thời sự mới nhất
+      - mua máy tính ở đâu tốt
+      - bài hát này tên là gì
+      - địa chỉ quán ăn ngon
+      - ai là tổng thống mỹ
+      - làm sao để học giỏi toán
+      - xem phim chiếu rạp
+      - cho mình hỏi về du lịch
+      - dịch giúp mình câu này
