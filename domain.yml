@@ -11,6 +11,7 @@ intents:
   - cancel_absence
   - cung_cap_thong_tin
   - quy_dinh_nghi_hoc
+  - sua_thong_tin
 
 entities:
   - mssv
@@ -30,6 +31,7 @@ actions:
   - action_check_absence_status
   - action_cancel_absence
   - action_start_absence_form
+  - action_handle_absence_correction
   - validate_absence_form
 
 slots:
@@ -86,6 +88,9 @@ slots:
         entity: start_date
       - type: from_entity
         entity: time
+        conditions:
+          - active_loop: absence_form
+            requested_slot: start_date
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -99,6 +104,9 @@ slots:
         entity: end_date
       - type: from_entity
         entity: time
+        conditions:
+          - active_loop: absence_form
+            requested_slot: end_date
       - type: from_text
         conditions:
           - active_loop: absence_form
@@ -118,7 +126,7 @@ slots:
 
   awaiting_request_confirmation:
     type: bool
-    influence_conversation: false
+    influence_conversation: true
     mappings:
       - type: custom
 
