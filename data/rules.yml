@@ -20,20 +20,18 @@ rules:
   - rule: Khởi động form xin nghỉ học (inform_absence)
     condition:
       - active_loop: null
-      - slot_was_set:
-          - awaiting_request_confirmation: false
     steps:
       - intent: inform_absence
       - action: absence_form
+      - active_loop: absence_form
 
   - rule: Khởi động form xin nghỉ học (cung_cap_thong_tin)
     condition:
       - active_loop: null
-      - slot_was_set:
-          - awaiting_request_confirmation: false
     steps:
       - intent: cung_cap_thong_tin
       - action: absence_form
+      - active_loop: absence_form
 
   # 2. Xử lý khi Form hoàn thành -> BẮT BUỘC gọi action_preview_absence_request
   - rule: Preview sau khi form hoàn thành (Form đang active)
@@ -46,14 +44,26 @@ rules:
           - requested_slot: null
       - action: action_preview_absence_request
 
-  - rule: Preview sau khi form hoàn thành (Form 0-turn)
+  - rule: Preview sau khi form hoàn thành (Form 0-turn / 1 câu đủ thông tin - inform_absence)
     condition:
       - active_loop: null
-      - slot_was_set:
-          - awaiting_request_confirmation: false
-          - requested_slot: null
     steps:
+      - intent: inform_absence
       - action: absence_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: action_preview_absence_request
+
+  - rule: Preview sau khi form hoàn thành (Form 0-turn / 1 câu đủ thông tin - cung_cap_thong_tin)
+    condition:
+      - active_loop: null
+    steps:
+      - intent: cung_cap_thong_tin
+      - action: absence_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
       - action: action_preview_absence_request
 
   # 3. Bước xác nhận: User đồng ý (affirm) -> Lưu đơn

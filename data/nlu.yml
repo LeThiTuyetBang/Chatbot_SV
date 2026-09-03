@@ -9,8 +9,8 @@ nlu:
 
   - regex: ma_lop
     examples: |
-      - \b[A-Z]{2}\d{2,4}[A-Z0-9]{0,2}\b
-      - \b[A-Z]{2}\d{2}[A-Z]{2}\b
+      - \b[A-Z]{2,4}\d{2,4}[A-Z0-9]{0,2}\b
+      - \b[A-Z]{2,4}\d{2}[A-Z]{2}\b
       - \b\d{10,12}\b
 
   - regex: ma_mon
@@ -118,6 +118,11 @@ nlu:
       - xin nghỉ học môn [INT2204](ma_mon) lớp [DH22SE01](ma_lop) nghỉ từ [15/05/2026](start_date) đến [17/05/2026](end_date) lý do [nhiễm covid](reason)
       - em xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21CN01](ma_lop) ngày [20/04/2026](start_date) đến [22/04/2026](end_date) vì [bị ốm nặng](reason) link [https://drive.google.com/doc](evidence_url)
       - xin vắng học môn [Trí tuệ nhân tạo](ma_mon_hoc) lớp [SE101](ma_lop) từ [hôm nay](start_date) do [hỏng xe trên đường](reason)
+      - em xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](time) đến [ngày kia](time) vì [bị ốm](reason), không có minh chứng
+      - xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](time) đến [ngày kia](time) vì [bị ốm](reason)
+      - em xin nghỉ môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [CN2302C](ma_lop) từ [hôm nay](time) đến [ngày mai](time) vì [bị sốt](reason) không có minh chứng
+      - em muốn xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21IT01](ma_lop) từ [thứ 2 tuần sau](time) đến [thứ 4 tuần sau](time) do [bận việc gia đình](reason) không có minh chứng
+      - thầy ơi cho em xin nghỉ môn [Kiểm thử phần mềm](ma_mon_hoc) lớp [DTH2151](ma_lop) ngày [mai](time) vì [đi khám bệnh](reason) không có giấy
 
   # Intent Xem trạng thái đơn
   - intent: check_absence_status

@@ -44,7 +44,7 @@ slots:
 
   evidence_url:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: evidence_url
@@ -82,7 +82,7 @@ slots:
 
   start_date:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: start_date
@@ -98,7 +98,7 @@ slots:
 
   end_date:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: end_date
@@ -126,13 +126,14 @@ slots:
 
   awaiting_request_confirmation:
     type: bool
+    initial_value: false
     influence_conversation: true
     mappings:
       - type: custom
 
   reason:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
         entity: reason
