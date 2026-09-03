@@ -87,6 +87,14 @@ def _get_student_id(tracker: Tracker) -> int:
     return student_id or 1
 
 
+KNOWN_SUBJECTS = [
+    "Lập trình Python", "Cơ sở dữ liệu", "CSDL", "Mạng máy tính",
+    "Cấu trúc dữ liệu và giải thuật", "CTDL", "Software Testing",
+    "Kiểm thử phần mềm", "Trí tuệ nhân tạo", "AI", "Hệ quản trị CSDL",
+    "Thực tập tốt nghiệp", "An toàn thông tin", "Phát triển ứng dụng web"
+]
+
+
 def _extract_date_range_from_text(text: str, entities: List[Dict[Text, Any]]) -> Tuple[Optional[Text], Optional[Text]]:
     text_lower = (text or "").strip().lower()
 
@@ -116,7 +124,11 @@ def _extract_date_range_from_text(text: str, entities: List[Dict[Text, Any]]) ->
         date_val = found_dates[0]
         if any(kw in text_lower for kw in ["kết thúc", "ket thuc", "đến", "den"]):
             return None, date_val
-        return date_val, None
+        # Nếu câu nói 'từ <ngày>' thì chỉ có start_date
+        if re.search(r"(?:từ|tu)\s+" + re.escape(date_val), text_lower):
+            return date_val, None
+        # Mặc định câu xin nghỉ 1 ngày cụ thể (VD: xin nghỉ ngày mai) -> cả start và end đều là ngày đó
+        return date_val, date_val
 
     if start_e:
         return start_e[0], None
@@ -137,10 +149,46 @@ class ValidateAbsenceForm(FormValidationAction):
         current = tracker.get_slot("ma_mon_hoc")
         if current and requested_slot != "ma_mon_hoc":
             return {"ma_mon_hoc": current}
+
+        text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
+
+        # 1. Entity ma_mon_hoc trực tiếp từ NLU
         for e in entities:
-            if e.get("entity") in ["ma_mon_hoc", "ma_mon"]:
-                return {"ma_mon_hoc": e.get("value")}
+            if e.get("entity") == "ma_mon_hoc" and e.get("value"):
+                return {"ma_mon_hoc": e.get("value").strip()}
+
+        # 2. Tìm tên môn trong danh sách các môn phổ biến
+        text_lower = text.lower()
+        for sub in KNOWN_SUBJECTS:
+            if sub.lower() in text_lower:
+                return {"ma_mon_hoc": sub}
+
+        # 3. Regex bắt mẫu "môn <Tên môn / Mã môn>"
+        subject_match = re.search(
+            r"(?:môn|mon)\s+([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)",
+            text,
+            re.IGNORECASE
+        )
+        if subject_match:
+            candidate = subject_match.group(1).strip()
+            if candidate and len(candidate) >= 2:
+                return {"ma_mon_hoc": candidate}
+
+        # 4. Entity ma_mon (loại trừ trường hợp ma_mon bị nhận nhầm từ mã lớp)
+        for e in entities:
+            if e.get("entity") == "ma_mon" and e.get("value"):
+                val = e.get("value").strip()
+                if not re.search(r"(?:lớp|lop)\s+" + re.escape(val), text, re.IGNORECASE):
+                    return {"ma_mon_hoc": val}
+
+        # 5. Nếu đang trong form hỏi riêng slot ma_mon_hoc và user nhập câu trả lời
+        if requested_slot == "ma_mon_hoc" and text:
+            if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
+                clean = re.sub(r"^(?:môn|mon|học phần)\s*", "", text.strip(), flags=re.IGNORECASE).strip()
+                if clean:
+                    return {"ma_mon_hoc": clean}
+
         return {}
 
     def extract_ma_lop(
@@ -150,10 +198,38 @@ class ValidateAbsenceForm(FormValidationAction):
         current = tracker.get_slot("ma_lop")
         if current and requested_slot != "ma_lop":
             return {"ma_lop": current}
+
+        text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
+        metadata = tracker.latest_message.get("metadata") or {}
+
+        # 1. Bắt theo mẫu "lớp <mã lớp>"
+        class_match = re.search(r"(?:lớp|lop)\s+([A-Za-z0-9_-]+)", text, re.IGNORECASE)
+        if class_match:
+            return {"ma_lop": class_match.group(1).strip().upper()}
+
+        # 2. Entity ma_lop từ NLU
         for e in entities:
-            if e.get("entity") == "ma_lop":
-                return {"ma_lop": e.get("value")}
+            if e.get("entity") == "ma_lop" and e.get("value"):
+                return {"ma_lop": e.get("value").strip().upper()}
+
+        # 3. Regex mã lớp dạng chữ-số (VD: DTH2151, CN2302C, IT001, DH21IT01)
+        potential_codes = re.findall(r"\b[A-Za-z]{2,5}\d{2,6}[A-Za-z0-9_-]*\b", text)
+        for code in potential_codes:
+            if not re.search(r"(?:môn|mon)\s+" + re.escape(code), text, re.IGNORECASE):
+                return {"ma_lop": code.upper()}
+
+        # 4. Fallback từ session metadata (nếu sinh viên đã đăng nhập và có mã lớp sẵn)
+        if metadata.get("class_code"):
+            return {"ma_lop": str(metadata.get("class_code")).strip().upper()}
+
+        # 5. Nếu đang trong form hỏi riêng slot ma_lop
+        if requested_slot == "ma_lop" and text:
+            if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
+                clean = re.sub(r"^(?:lớp|lop)\s*", "", text.strip(), flags=re.IGNORECASE).strip().upper()
+                if clean:
+                    return {"ma_lop": clean}
+
         return {}
 
     def extract_start_date(
@@ -207,26 +283,52 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         requested_slot = tracker.get_slot("requested_slot")
         current_reason = tracker.get_slot("reason")
-
         if current_reason and requested_slot != "reason":
             return {"reason": current_reason}
 
-        entities = tracker.latest_message.get("entities", [])
-        reason_entities = [e for e in entities if e.get("entity") == "reason"]
-        if reason_entities:
-            return {"reason": reason_entities[0].get("value")}
-
         text = tracker.latest_message.get("text", "")
+        entities = tracker.latest_message.get("entities", [])
+        text_clean = text.strip()
+
+        # 1. Bắt theo mẫu "vì / do / lý do là / lý do: ..." kết hợp loại bỏ minh chứng/link ở đuôi
+        reason_match = re.search(
+            r"(?:vì|vi|do|lý do là|lý do:|ly do la|ly do)\s+(.+?)(?=(?:,\s*|\s+)(?:không|khong|chưa|chua|ko)?\s*(?:có|co)?\s*(?:minh chứng|minh chung|giấy|giay|hồ sơ|ho so)|minh chứng|minh chung|link|url|https?://|$|\.)",
+            text_clean,
+            re.IGNORECASE
+        )
+        if reason_match:
+            val = reason_match.group(1).strip()
+            val = re.sub(r"^(?:là|la|:\s*)\s*", "", val).strip()
+            val = re.sub(r"[,\.]+$", "", val).strip()
+            if val and len(val) >= 2 and val.lower() not in ["không", "khong", "ko"]:
+                return {"reason": val}
+
+        # 2. Bắt mẫu "em bị <bệnh> nên xin nghỉ..."
+        illness_match = re.search(
+            r"(?:em\s+)?(?:bị|bi)\s+([A-Za-z0-9_\sÀ-ỹ]+?)(?=\s+(?:nên|nen|xin|muốn|muon|để|de|không đi|khong di)|$)",
+            text_clean,
+            re.IGNORECASE
+        )
+        if illness_match:
+            val = "bị " + illness_match.group(1).strip()
+            val = re.sub(r"[,\.]+$", "", val).strip()
+            if len(val) >= 4:
+                return {"reason": val}
+
+        # 3. Entity reason từ NLU (bỏ qua giá trị 'không', 'ko' do NLU gắn nhầm)
+        for e in entities:
+            if e.get("entity") == "reason":
+                val = str(e.get("value") or "").strip()
+                if val.lower() not in ["không", "khong", "ko", "hủy", "huy"] and len(val) >= 2:
+                    return {"reason": val}
+
+        # 4. Khi đang hỏi trực tiếp slot reason
         if requested_slot == "reason" and text:
             if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
-                return {"reason": text}
-
-        if "bị" in text.lower() or "do" in text.lower() or "vì" in text.lower() or "ốm" in text.lower() or "bệnh" in text.lower():
-            reason_match = re.search(r"(?:bị|do|vì|lý do|ly do)(?:\s+là|\s+là:|\s*:)?\s*(.+)", text, re.IGNORECASE)
-            if reason_match:
-                val = reason_match.group(1).strip()
-                if not re.search(r"\b\d{1,2}[/-]\d{1,2}\b", val):
-                    return {"reason": val}
+                clean_reason = text.strip()
+                clean_reason = re.sub(r"^(?:lý do|ly do|vì|vi|do)\s*(?:là|la|:\s*)?\s*", "", clean_reason, flags=re.IGNORECASE).strip()
+                if clean_reason:
+                    return {"reason": clean_reason}
 
         return {}
 
@@ -235,27 +337,36 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         requested_slot = tracker.get_slot("requested_slot")
         current_url = tracker.get_slot("evidence_url")
-
         if current_url and requested_slot != "evidence_url":
             return {"evidence_url": current_url}
 
-        entities = tracker.latest_message.get("entities", [])
-        evidence_entities = [e for e in entities if e.get("entity") == "evidence_url"]
-        if evidence_entities:
-            return {"evidence_url": evidence_entities[0].get("value")}
-
         text = tracker.latest_message.get("text", "")
         text_lower = text.lower().strip()
+        entities = tracker.latest_message.get("entities", [])
 
+        # 1. Trích xuất đường link
         url_match = re.search(r"https?://[^\s]+|drive\.google\.com[^\s]+|imgur\.com[^\s]+", text)
         if url_match:
-            return {"evidence_url": url_match.group(0)}
+            return {"evidence_url": url_match.group(0).strip()}
 
-        if any(kw in text_lower for kw in ["không có minh chứng", "khong co minh chung", "không minh chứng", "khong minh chung"]):
+        # 2. Bắt các từ khóa xác nhận không có minh chứng
+        neg_keywords = [
+            "không có minh chứng", "khong co minh chung", "không minh chứng", "khong minh chung",
+            "chưa có minh chứng", "chua co minh chung", "ko có minh chứng", "ko minh chung",
+            "không có giấy", "chưa có giấy", "ko có giấy", "không có", "khong co", "ko co",
+            "chưa có", "chua co", "không", "khong", "no"
+        ]
+        if any(kw in text_lower for kw in neg_keywords):
             return {"evidence_url": "không"}
 
+        # 3. Entity evidence_url từ NLU
+        for e in entities:
+            if e.get("entity") == "evidence_url" and e.get("value"):
+                return {"evidence_url": e.get("value").strip()}
+
+        # 4. Khi đang trong form hỏi riêng slot evidence_url
         if requested_slot == "evidence_url" and text:
-            return {"evidence_url": text}
+            return {"evidence_url": text.strip()}
 
         return {}
 
