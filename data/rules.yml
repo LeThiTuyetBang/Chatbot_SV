@@ -128,3 +128,21 @@ rules:
     steps:
       - intent: cancel_absence
       - action: action_cancel_absence
+
+  - rule: Phản hồi khi đồng ý (affirm) ngoài ngữ cảnh xác nhận
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
+    steps:
+      - intent: affirm
+      - action: utter_affirm_default
+
+  - rule: Phản hồi khi từ chối (deny) ngoài ngữ cảnh xác nhận
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - awaiting_request_confirmation: false
+    steps:
+      - intent: deny
+      - action: utter_deny_default
