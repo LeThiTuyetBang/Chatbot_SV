@@ -77,8 +77,6 @@ slots:
     mappings:
       - type: from_entity
         entity: ma_mon_hoc
-      - type: from_entity
-        entity: ma_mon
 
   start_date:
     type: text
@@ -191,6 +189,12 @@ responses:
 
   utter_ask_rephrase:
     - text: "Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?"
+
+  utter_affirm_default:
+    - text: "Dạ vâng! Bạn cần mình hỗ trợ xin nghỉ học hay tra cứu thông tin gì không?"
+
+  utter_deny_default:
+    - text: "Dạ được rồi. Nếu bạn cần hỗ trợ xin nghỉ học hoặc tra cứu quy định vắng, cứ nhắn cho mình nhé!"
 
 session_config:
   session_expiration_time: 60
