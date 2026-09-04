@@ -36,6 +36,9 @@ def _parse_date_text(raw_value: Text) -> Text:
         "mai": today + timedelta(days=1),
         "ngày kia": today + timedelta(days=2),
         "ngay kia": today + timedelta(days=2),
+        "ngày mốt": today + timedelta(days=2),   
+        "ngay mot": today + timedelta(days=2),  
+        "mốt": today + timedelta(days=2), 
     }
     if value in relative_dates:
         return relative_dates[value].isoformat()
@@ -95,10 +98,28 @@ KNOWN_SUBJECTS = [
 ]
 
 
-def _extract_date_range_from_text(text: str, entities: List[Dict[Text, Any]]) -> Tuple[Optional[Text], Optional[Text]]:
+def _is_class_code(val: str) -> bool:
+    """Kiểm tra một chuỗi có mang cấu trúc của mã lớp hay không (ví dụ: CN2302C, DTH2151, DH21IT01, 010112610016)."""
+    if not val:
+        return False
+    s = str(val).strip().upper()
+    if " " in s:
+        return False
+    if re.match(r"^[A-Z]{2,5}\d{2,6}[A-Z0-9_-]{0,4}$", s):
+        return True
+    if re.match(r"^\d{10,12}$", s):
+        return True
+    return False
+
+
+def _extract_date_range_from_text(
+    text: str,
+    entities: List[Dict[Text, Any]],
+    prefer_slot: Optional[str] = None   # "start_date" | "end_date" | None
+) -> Tuple[Optional[Text], Optional[Text]]:
     text_lower = (text or "").strip().lower()
 
-    # 1. Bắt mẫu "từ <ngày A> đến <ngày B>" hoặc "<ngày A> - <ngày B>"
+    # 1. Bắt mẫu "từ A đến B"
     range_match = re.search(
         r"(?:từ|tu)\s+([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|hôm nay|hôm qua|ngày mai|mai|ngày kia|thứ\s*[2-7]|chủ nhật)\s+(?:đến|den|-)\s+([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|hôm nay|hôm qua|ngày mai|mai|ngày kia|thứ\s*[2-7]|chủ nhật)",
         text_lower
@@ -106,14 +127,14 @@ def _extract_date_range_from_text(text: str, entities: List[Dict[Text, Any]]) ->
     if range_match:
         return range_match.group(1).strip(), range_match.group(2).strip()
 
-    # 2. Tìm tất cả các biểu thức ngày dạng dd/mm hoặc dd-mm
-    date_pattern = r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|\b(?:hôm nay|hôm qua|ngày mai|mai|ngày kia)\b|\b(?:thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b"
+    # 2. Tìm tất cả biểu thức ngày
+    date_pattern = r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|\b(?:hôm nay|hôm qua|ngày mai|mai|ngày kia|ngày mốt|mốt)\b|\b(?:thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b"
     found_dates = re.findall(date_pattern, text_lower)
 
     if len(found_dates) >= 2:
         return found_dates[0], found_dates[1]
 
-    # 3. Sử dụng entity start_date / end_date từ NLU nếu có và khác nhau
+    # 3. Entity start/end khác nhau
     start_e = [e.get("value") for e in entities if e.get("entity") == "start_date"]
     end_e = [e.get("value") for e in entities if e.get("entity") == "end_date"]
     if start_e and end_e and start_e[0] != end_e[0]:
@@ -122,13 +143,27 @@ def _extract_date_range_from_text(text: str, entities: List[Dict[Text, Any]]) ->
     # 4. Nếu chỉ tìm được 1 ngày trong câu
     if len(found_dates) == 1:
         date_val = found_dates[0]
-        if any(kw in text_lower for kw in ["kết thúc", "ket thuc", "đến", "den"]):
+
+        # Từ khóa rõ ràng về ngày kết thúc
+        if any(kw in text_lower for kw in ["kết thúc", "ket thuc", "ngày kết thúc", "đến ngày", "den ngay", "đến hết"]):
             return None, date_val
-        # Nếu câu nói 'từ <ngày>' thì chỉ có start_date
+        if re.search(r"(?:đến|den)\s+" + re.escape(date_val), text_lower):
+            return None, date_val
+
+        # Từ khóa rõ ràng về ngày bắt đầu
+        if any(kw in text_lower for kw in ["bắt đầu", "bat dau", "ngày bắt đầu", "từ ngày", "tu ngay"]):
+            return date_val, None
         if re.search(r"(?:từ|tu)\s+" + re.escape(date_val), text_lower):
             return date_val, None
-        # Mặc định câu xin nghỉ 1 ngày cụ thể (VD: xin nghỉ ngày mai) -> cả start và end đều là ngày đó
-        return date_val, date_val
+
+        # Ưu tiên theo prefer_slot (nếu có)
+        if prefer_slot == "end_date":
+            return None, date_val
+        if prefer_slot == "start_date":
+            return date_val, None
+
+        # === QUAN TRỌNG: Mặc định chỉ trả về ngày bắt đầu, KHÔNG tự set end = start ===
+        return date_val, None
 
     if start_e:
         return start_e[0], None
@@ -147,26 +182,18 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         requested_slot = tracker.get_slot("requested_slot")
         current = tracker.get_slot("ma_mon_hoc")
-        if current and requested_slot != "ma_mon_hoc":
-            return {"ma_mon_hoc": current}
+
+        # Nếu current bị gán nhầm giá trị của một mã lớp (VD: DTH2151, CN2302C) thì hủy bỏ
+        if current and _is_class_code(current) and not any(current.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
+            current = None
 
         text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
+        text_lower = text.lower().strip()
 
-        # 1. Entity ma_mon_hoc trực tiếp từ NLU
-        for e in entities:
-            if e.get("entity") == "ma_mon_hoc" and e.get("value"):
-                return {"ma_mon_hoc": e.get("value").strip()}
-
-        # 2. Tìm tên môn trong danh sách các môn phổ biến
-        text_lower = text.lower()
-        for sub in KNOWN_SUBJECTS:
-            if sub.lower() in text_lower:
-                return {"ma_mon_hoc": sub}
-
-        # 3. Regex bắt mẫu "môn <Tên môn / Mã môn>"
+        # 1. Bắt theo mẫu rõ ràng "môn <Tên môn / Mã môn>" hoặc "học phần <...>"
         subject_match = re.search(
-            r"(?:môn|mon)\s+([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)",
+            r"(?:môn|mon|học phần|hoc phan)\s+([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)",
             text,
             re.IGNORECASE
         )
@@ -175,19 +202,39 @@ class ValidateAbsenceForm(FormValidationAction):
             if candidate and len(candidate) >= 2:
                 return {"ma_mon_hoc": candidate}
 
-        # 4. Entity ma_mon (loại trừ trường hợp ma_mon bị nhận nhầm từ mã lớp)
+        # 2. Tìm tên môn trong danh sách các môn phổ biến (kể cả CSDL, CTDL, AI)
+        for sub in KNOWN_SUBJECTS:
+            if re.search(r"\b" + re.escape(sub.lower()) + r"\b", text_lower):
+                return {"ma_mon_hoc": sub}
+
+        # 3. Entity ma_mon_hoc trực tiếp từ NLU (loại trừ nếu entity đó thực chất là mã lớp)
+        for e in entities:
+            if e.get("entity") == "ma_mon_hoc" and e.get("value"):
+                val = e.get("value").strip()
+                if not _is_class_code(val) or any(val.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
+                    return {"ma_mon_hoc": val}
+
+        # 4. Entity ma_mon: CHỈ chấp nhận nếu có từ "môn" phía trước hoặc không phải định dạng mã lớp
         for e in entities:
             if e.get("entity") == "ma_mon" and e.get("value"):
                 val = e.get("value").strip()
-                if not re.search(r"(?:lớp|lop)\s+" + re.escape(val), text, re.IGNORECASE):
+                if re.search(r"(?:môn|mon)\s+" + re.escape(val), text, re.IGNORECASE):
+                    return {"ma_mon_hoc": val}
+                if not _is_class_code(val):
                     return {"ma_mon_hoc": val}
 
         # 5. Nếu đang trong form hỏi riêng slot ma_mon_hoc và user nhập câu trả lời
         if requested_slot == "ma_mon_hoc" and text:
             if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
                 clean = re.sub(r"^(?:môn|mon|học phần)\s*", "", text.strip(), flags=re.IGNORECASE).strip()
-                if clean:
+                # TUYỆT ĐỐI KHÔNG GÁN NẾU USER NHẬP VÀO MỘT MÃ LỚP!
+                if clean and not _is_class_code(clean):
                     return {"ma_mon_hoc": clean}
+                elif _is_class_code(clean):
+                    return {"ma_mon_hoc": None}
+
+        if current and requested_slot != "ma_mon_hoc":
+            return {"ma_mon_hoc": current}
 
         return {}
 
@@ -196,8 +243,6 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         requested_slot = tracker.get_slot("requested_slot")
         current = tracker.get_slot("ma_lop")
-        if current and requested_slot != "ma_lop":
-            return {"ma_lop": current}
 
         text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
@@ -213,15 +258,17 @@ class ValidateAbsenceForm(FormValidationAction):
             if e.get("entity") == "ma_lop" and e.get("value"):
                 return {"ma_lop": e.get("value").strip().upper()}
 
-        # 3. Regex mã lớp dạng chữ-số (VD: DTH2151, CN2302C, IT001, DH21IT01)
+        # 3. Nếu người dùng chỉ nhập một mã lớp (VD: "CN2302C", "DTH2151")
+        clean_text = text.strip()
+        if _is_class_code(clean_text) and not re.search(r"(?:môn|mon)\s+" + re.escape(clean_text), text, re.IGNORECASE):
+            return {"ma_lop": clean_text.upper()}
+
+        # 4. Regex mã lớp dạng chữ-số trong câu (loại trừ nếu đi ngay sau 'môn')
         potential_codes = re.findall(r"\b[A-Za-z]{2,5}\d{2,6}[A-Za-z0-9_-]*\b", text)
         for code in potential_codes:
             if not re.search(r"(?:môn|mon)\s+" + re.escape(code), text, re.IGNORECASE):
-                return {"ma_lop": code.upper()}
-
-        # 4. Fallback từ session metadata (nếu sinh viên đã đăng nhập và có mã lớp sẵn)
-        if metadata.get("class_code"):
-            return {"ma_lop": str(metadata.get("class_code")).strip().upper()}
+                if _is_class_code(code):
+                    return {"ma_lop": code.upper()}
 
         # 5. Nếu đang trong form hỏi riêng slot ma_lop
         if requested_slot == "ma_lop" and text:
@@ -229,6 +276,13 @@ class ValidateAbsenceForm(FormValidationAction):
                 clean = re.sub(r"^(?:lớp|lop)\s*", "", text.strip(), flags=re.IGNORECASE).strip().upper()
                 if clean:
                     return {"ma_lop": clean}
+
+        # 6. Fallback từ session metadata (nếu sinh viên đã đăng nhập và có mã lớp sẵn)
+        #if metadata.get("class_code") and not current:
+          #  return {"ma_lop": str(metadata.get("class_code")).strip().upper()}
+
+        if current and requested_slot != "ma_lop":
+            return {"ma_lop": current}
 
         return {}
 
@@ -240,7 +294,13 @@ class ValidateAbsenceForm(FormValidationAction):
         text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
 
-        new_start, _ = _extract_date_range_from_text(text, entities)
+        # Nếu đang hỏi ngày kết thúc thì KHÔNG được đụng đến start_date
+        if requested_slot == "end_date":
+            if current_start:
+                return {"start_date": current_start}
+            return {}
+
+        new_start, _ = _extract_date_range_from_text(text, entities, prefer_slot="start_date")
         if new_start:
             return {"start_date": new_start, "normalized_start_date": _parse_date_text(new_start)}
 
@@ -249,9 +309,11 @@ class ValidateAbsenceForm(FormValidationAction):
 
         if requested_slot == "start_date" and text:
             if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
-                date_val = _parse_date_text(text)
+                # Làm sạch text trước khi parse
+                clean_text = re.sub(r"^(?:ngày bắt đầu|ngay bat dau|từ|tu)\s*", "", text.strip(), flags=re.IGNORECASE).strip()
+                date_val = _parse_date_text(clean_text)
                 if date_val:
-                    return {"start_date": text, "normalized_start_date": date_val}
+                    return {"start_date": clean_text, "normalized_start_date": date_val}
 
         return {}
 
@@ -263,7 +325,13 @@ class ValidateAbsenceForm(FormValidationAction):
         text = tracker.latest_message.get("text", "")
         entities = tracker.latest_message.get("entities", [])
 
-        _, new_end = _extract_date_range_from_text(text, entities)
+        # Nếu đang hỏi ngày bắt đầu thì KHÔNG được đụng đến end_date
+        if requested_slot == "start_date":
+            if current_end:
+                return {"end_date": current_end}
+            return {}
+
+        _, new_end = _extract_date_range_from_text(text, entities, prefer_slot="end_date")
         if new_end:
             return {"end_date": new_end, "normalized_end_date": _parse_date_text(new_end)}
 
@@ -272,9 +340,16 @@ class ValidateAbsenceForm(FormValidationAction):
 
         if requested_slot == "end_date" and text:
             if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
-                date_val = _parse_date_text(text)
+                # Làm sạch text (bỏ "ngày kết thúc", "đến"...)
+                clean_text = re.sub(
+                    r"^(?:ngày kết thúc|ngay ket thuc|đến|den|kết thúc|ket thuc)\s*",
+                    "",
+                    text.strip(),
+                    flags=re.IGNORECASE
+                ).strip()
+                date_val = _parse_date_text(clean_text)
                 if date_val:
-                    return {"end_date": text, "normalized_end_date": date_val}
+                    return {"end_date": clean_text, "normalized_end_date": date_val}
 
         return {}
 
@@ -369,6 +444,19 @@ class ValidateAbsenceForm(FormValidationAction):
             return {"evidence_url": text.strip()}
 
         return {}
+
+    def validate_ma_mon_hoc(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        val = (slot_value or "").strip()
+        # Nếu slot_value bị gán nhầm là một mã lớp và không có trong danh sách môn
+        if _is_class_code(val) and not any(val.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
+            return {"ma_mon_hoc": None, "ma_lop": val.upper()}
+        return {"ma_mon_hoc": val}
 
     def validate_start_date(
         self,
@@ -680,20 +768,51 @@ class ActionHandleAbsenceCorrection(Action):
             slot_events = []
             updated_fields = []
 
-            mon_entities = [e for e in entities if e.get("entity") in ["ma_mon_hoc", "ma_mon"]]
-            if mon_entities:
-                val = mon_entities[0].get("value")
-                slot_events.append(SlotSet("ma_mon_hoc", val))
-                updated_fields.append(f"Môn học: {val}")
+            # 1. Cập nhật môn học
+            mon_updated = None
+            if any(kw in text for kw in ["môn", "mon", "học phần", "hoc phan"]):
+                m_mon = re.search(r"(?:môn|mon|học phần|hoc phan)\s*(?:là|la|thành|thanh|:)?\s*([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)", text, re.IGNORECASE)
+                if m_mon and m_mon.group(1).strip():
+                    mon_updated = m_mon.group(1).strip()
+            if not mon_updated:
+                for sub in KNOWN_SUBJECTS:
+                    if re.search(r"\b" + re.escape(sub.lower()) + r"\b", text):
+                        mon_updated = sub
+                        break
+            if not mon_updated:
+                for e in entities:
+                    if e.get("entity") == "ma_mon_hoc":
+                        mon_updated = e.get("value")
+                        break
+            if mon_updated and not (_is_class_code(mon_updated) and not any(mon_updated.lower() == s.lower() for s in KNOWN_SUBJECTS)):
+                slot_events.append(SlotSet("ma_mon_hoc", mon_updated))
+                updated_fields.append(f"Môn học: {mon_updated}")
 
-            lop_entities = [e for e in entities if e.get("entity") == "ma_lop"]
-            if lop_entities:
-                val = lop_entities[0].get("value")
-                slot_events.append(SlotSet("ma_lop", val))
-                updated_fields.append(f"Lớp: {val}")
+            # 2. Cập nhật lớp
+            lop_updated = None
+            if any(kw in text for kw in ["lớp", "lop"]):
+                m_lop = re.search(r"(?:lớp|lop)\s*(?:là|la|thành|thanh|:)?\s*([A-Za-z0-9_-]+)", text, re.IGNORECASE)
+                if m_lop:
+                    lop_updated = m_lop.group(1).strip().upper()
+            if not lop_updated:
+                for e in entities:
+                    if e.get("entity") == "ma_lop":
+                        lop_updated = e.get("value").strip().upper()
+                        break
+            if not lop_updated:
+                potential_codes = re.findall(r"\b[A-Za-z]{2,5}\d{2,6}[A-Za-z0-9_-]*\b", text)
+                for code in potential_codes:
+                    if not re.search(r"(?:môn|mon)\s+" + re.escape(code), text, re.IGNORECASE):
+                        if _is_class_code(code):
+                            lop_updated = code.upper()
+                            break
+            if lop_updated:
+                slot_events.append(SlotSet("ma_lop", lop_updated))
+                updated_fields.append(f"Lớp: {lop_updated}")
 
+            # 3. Cập nhật lý do
             reason_entities = [e for e in entities if e.get("entity") == "reason"]
-            if reason_entities:
+            if reason_entities and reason_entities[0].get("value", "").lower() not in ["không", "khong", "ko"]:
                 val = reason_entities[0].get("value")
                 slot_events.append(SlotSet("reason", val))
                 updated_fields.append(f"Lý do: {val}")
@@ -705,6 +824,7 @@ class ActionHandleAbsenceCorrection(Action):
                         slot_events.append(SlotSet("reason", val))
                         updated_fields.append(f"Lý do: {val}")
 
+            # 4. Cập nhật minh chứng
             evidence_entities = [e for e in entities if e.get("entity") == "evidence_url"]
             if evidence_entities:
                 val = evidence_entities[0].get("value")
@@ -717,26 +837,69 @@ class ActionHandleAbsenceCorrection(Action):
                     slot_events.append(SlotSet("evidence_url", val))
                     updated_fields.append(f"Minh chứng: {val}")
 
-            new_start, new_end = _extract_date_range_from_text(text, entities)
+            # 5. Cập nhật ngày tháng (phân biệt rõ sửa ngày bắt đầu vs ngày kết thúc vs cả hai)
+            is_start_only = any(kw in text for kw in ["bắt đầu", "bat dau", "start", "từ ngày", "tu ngay"]) and not any(kw in text for kw in ["kết thúc", "ket thuc", "đến ngày", "den ngay", "đến hết", "hết ngày"])
+            is_end_only = any(kw in text for kw in ["kết thúc", "ket thuc", "end", "đến ngày", "den ngay", "đến hết", "hết ngày"]) and not any(kw in text for kw in ["bắt đầu", "bat dau", "từ ngày", "tu ngay"])
 
-            if new_start:
-                norm_start = _parse_date_text(new_start)
-                slot_events.append(SlotSet("start_date", new_start))
-                slot_events.append(SlotSet("normalized_start_date", norm_start))
-                updated_fields.append(f"Ngày bắt đầu: {_date_display(new_start, norm_start)}")
+                        # ===== XỬ LÝ NGÀY - PHIÊN BẢN SỬA TRIỆT ĐỂ =====
+            prefer = None
+            text_lower = text.lower()
 
-            if new_end:
-                norm_end = _parse_date_text(new_end)
-                slot_events.append(SlotSet("end_date", new_end))
-                slot_events.append(SlotSet("normalized_end_date", norm_end))
-                updated_fields.append(f"Ngày kết thúc: {_date_display(new_end, norm_end)}")
+            if any(kw in text_lower for kw in ["bắt đầu", "bat dau", "ngày bắt đầu", "đổi ngày bắt đầu", "sửa ngày bắt đầu"]):
+                prefer = "start_date"
+            elif any(kw in text_lower for kw in ["kết thúc", "ket thuc", "ngày kết thúc", "đổi ngày kết thúc", "sửa ngày kết thúc"]):
+                prefer = "end_date"
 
+            new_start, new_end = _extract_date_range_from_text(text, entities, prefer_slot=prefer)
+
+            # Cập nhật slot theo prefer
+            if prefer == "start_date":
+                target = new_start or new_end
+                if target:
+                    norm = _parse_date_text(target)
+                    slot_events.append(SlotSet("start_date", target))
+                    slot_events.append(SlotSet("normalized_start_date", norm))
+                    updated_fields.append(f"Ngày bắt đầu: {_date_display(target, norm)}")
+                    new_start = target
+                    new_end = None
+
+            elif prefer == "end_date":
+                target = new_end or new_start
+                if target:
+                    norm = _parse_date_text(target)
+                    slot_events.append(SlotSet("end_date", target))
+                    slot_events.append(SlotSet("normalized_end_date", norm))
+                    updated_fields.append(f"Ngày kết thúc: {_date_display(target, norm)}")
+                    new_end = target
+                    new_start = None
+
+            else:
+                if new_start:
+                    norm_start = _parse_date_text(new_start)
+                    slot_events.append(SlotSet("start_date", new_start))
+                    slot_events.append(SlotSet("normalized_start_date", norm_start))
+                    updated_fields.append(f"Ngày bắt đầu: {_date_display(new_start, norm_start)}")
+                if new_end:
+                    norm_end = _parse_date_text(new_end)
+                    slot_events.append(SlotSet("end_date", new_end))
+                    slot_events.append(SlotSet("normalized_end_date", norm_end))
+                    updated_fields.append(f"Ngày kết thúc: {_date_display(new_end, norm_end)}")
+
+            # ===== Phần tạo preview + kiểm tra ngày hợp lệ =====
             if updated_fields:
-                curr_course = mon_entities[0].get("value") if mon_entities else (tracker.get_slot("ma_mon_hoc") or tracker.get_slot("ma_mon"))
-                curr_class = lop_entities[0].get("value") if lop_entities else tracker.get_slot("ma_lop")
-                curr_start = new_start if new_start else tracker.get_slot("start_date")
-                curr_end = new_end if new_end else tracker.get_slot("end_date")
-                
+                curr_course = mon_updated if mon_updated else (tracker.get_slot("ma_mon_hoc") or tracker.get_slot("ma_mon"))
+                curr_class = lop_updated if lop_updated else tracker.get_slot("ma_lop")
+
+                if prefer == "start_date":
+                    curr_start = new_start if new_start else tracker.get_slot("start_date")
+                    curr_end = tracker.get_slot("end_date")
+                elif prefer == "end_date":
+                    curr_start = tracker.get_slot("start_date")
+                    curr_end = new_end if new_end else tracker.get_slot("end_date")
+                else:
+                    curr_start = new_start if new_start else tracker.get_slot("start_date")
+                    curr_end = new_end if new_end else tracker.get_slot("end_date")
+
                 if reason_entities:
                     curr_reason = reason_entities[0].get("value")
                 elif "lý do" in text or "ly do" in text:
@@ -752,6 +915,19 @@ class ActionHandleAbsenceCorrection(Action):
 
                 start_show = _date_display(curr_start, norm_s)
                 end_show = _date_display(curr_end, norm_e)
+
+                # Kiểm tra ngày hợp lệ
+                try:
+                    from datetime import date as date_cls
+                    d1 = date_cls.fromisoformat(str(norm_s)) if norm_s else None
+                    d2 = date_cls.fromisoformat(str(norm_e)) if norm_e else None
+                    if d1 and d2 and d1 > d2:
+                        dispatcher.utter_message(
+                            text=f"Ngày kết thúc ({end_show}) không được trước ngày bắt đầu ({start_show}). Bạn vui lòng chọn lại ngày kết thúc nhé."
+                        )
+                        return [SlotSet("awaiting_request_confirmation", True)]
+                except Exception:
+                    pass
 
                 preview_msg = (
                     f"Đã cập nhật thông tin đơn của bạn:\n"
