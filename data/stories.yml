@@ -18,6 +18,8 @@ stories:
       - slot_was_set:
           - requested_slot: null
       - action: action_preview_absence_request
+      - slot_was_set:
+          - awaiting_request_confirmation: true
       - intent: affirm
       - action: action_submit_absence_request
 
@@ -30,6 +32,8 @@ stories:
       - slot_was_set:
           - requested_slot: null
       - action: action_preview_absence_request
+      - slot_was_set:
+          - awaiting_request_confirmation: true
       - intent: affirm
       - action: action_submit_absence_request
 
@@ -42,6 +46,8 @@ stories:
       - slot_was_set:
           - requested_slot: null
       - action: action_preview_absence_request
+      - slot_was_set:
+          - awaiting_request_confirmation: true
       - intent: affirm
       - action: action_submit_absence_request
 
@@ -56,6 +62,8 @@ stories:
       - slot_was_set:
           - requested_slot: null
       - action: action_preview_absence_request
+      - slot_was_set:
+          - awaiting_request_confirmation: true
       - intent: affirm
       - action: action_submit_absence_request
 
