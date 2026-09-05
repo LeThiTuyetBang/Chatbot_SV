@@ -437,6 +437,9 @@ def chat():
     except RuntimeError as error:
         return _json_response(message=str(error), ok=False, status_code=502)
 
+    if not responses:
+        responses = [{"text": "Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!"}]
+
     return _json_response(data=responses, message="Đã gửi đến chatbot.")
 @app.post("/api/chat/restart")
 @login_required
