@@ -330,6 +330,9 @@ class ValidateAbsenceForm(FormValidationAction):
             if current_end:
                 return {"end_date": current_end}
             return {}
+        
+    # Chỉ dùng prefer_slot="end_date" khi ĐANG HỎI end_date
+        prefer = "end_date" if requested_slot == "end_date" else None
 
         _, new_end = _extract_date_range_from_text(text, entities, prefer_slot="end_date")
         if new_end:
@@ -841,7 +844,8 @@ class ActionHandleAbsenceCorrection(Action):
             is_start_only = any(kw in text for kw in ["bắt đầu", "bat dau", "start", "từ ngày", "tu ngay"]) and not any(kw in text for kw in ["kết thúc", "ket thuc", "đến ngày", "den ngay", "đến hết", "hết ngày"])
             is_end_only = any(kw in text for kw in ["kết thúc", "ket thuc", "end", "đến ngày", "den ngay", "đến hết", "hết ngày"]) and not any(kw in text for kw in ["bắt đầu", "bat dau", "từ ngày", "tu ngay"])
 
-                        # ===== XỬ LÝ NGÀY - PHIÊN BẢN SỬA TRIỆT ĐỂ =====
+                      
+            # ===== XỬ LÝ NGÀY - PHIÊN BẢN SỬA LỖI =====
             prefer = None
             text_lower = text.lower()
 
@@ -852,38 +856,68 @@ class ActionHandleAbsenceCorrection(Action):
 
             new_start, new_end = _extract_date_range_from_text(text, entities, prefer_slot=prefer)
 
-            # Cập nhật slot theo prefer
+            # --- Helper: kiểm tra ngày parse được có hợp lệ (ISO format) hay không ---
+            def _is_valid_parsed_date(raw_val):
+                """Trả về normalized ISO string nếu hợp lệ, ngược lại trả về None."""
+                if not raw_val:
+                    return None
+                norm = _parse_date_text(raw_val)
+                if not norm:
+                    return None
+                # _parse_date_text trả về raw_value.strip() nếu không parse được
+                # → phải kiểm tra kết quả có đúng định dạng ISO (YYYY-MM-DD) không
+                try:
+                    from datetime import date as date_cls
+                    date_cls.fromisoformat(str(norm))
+                    return norm
+                except (ValueError, TypeError):
+                    return None
+
+            # Lấy giá trị cũ từ tracker để bảo vệ slot không bị sửa
+            old_start_date = tracker.get_slot("start_date")
+            old_end_date = tracker.get_slot("end_date")
+            old_norm_start = tracker.get_slot("normalized_start_date")
+            old_norm_end = tracker.get_slot("normalized_end_date")
+
+            # Chỉ cập nhật đúng slot người dùng muốn sửa, giữ nguyên slot còn lại
             if prefer == "start_date":
-                target = new_start or new_end
-                if target:
-                    norm = _parse_date_text(target)
-                    slot_events.append(SlotSet("start_date", target))
-                    slot_events.append(SlotSet("normalized_start_date", norm))
-                    updated_fields.append(f"Ngày bắt đầu: {_date_display(target, norm)}")
-                    new_start = target
-                    new_end = None
+                # Chỉ sửa start_date, TUYỆT ĐỐI giữ nguyên end_date cũ
+                if new_start:
+                    norm = _is_valid_parsed_date(new_start)
+                    if norm:
+                        slot_events.append(SlotSet("start_date", new_start))
+                        slot_events.append(SlotSet("normalized_start_date", norm))
+                        updated_fields.append(f"Ngày bắt đầu: {_date_display(new_start, norm)}")
+                # Luôn ghi đè lại end_date bằng giá trị cũ để chống Rasa auto-fill
+                slot_events.append(SlotSet("end_date", old_end_date))
+                slot_events.append(SlotSet("normalized_end_date", old_norm_end))
 
             elif prefer == "end_date":
-                target = new_end or new_start
-                if target:
-                    norm = _parse_date_text(target)
-                    slot_events.append(SlotSet("end_date", target))
-                    slot_events.append(SlotSet("normalized_end_date", norm))
-                    updated_fields.append(f"Ngày kết thúc: {_date_display(target, norm)}")
-                    new_end = target
-                    new_start = None
+                # Chỉ sửa end_date, TUYỆT ĐỐI giữ nguyên start_date cũ
+                if new_end:
+                    norm = _is_valid_parsed_date(new_end)
+                    if norm:
+                        slot_events.append(SlotSet("end_date", new_end))
+                        slot_events.append(SlotSet("normalized_end_date", norm))
+                        updated_fields.append(f"Ngày kết thúc: {_date_display(new_end, norm)}")
+                # Luôn ghi đè lại start_date bằng giá trị cũ để chống Rasa auto-fill
+                slot_events.append(SlotSet("start_date", old_start_date))
+                slot_events.append(SlotSet("normalized_start_date", old_norm_start))
 
             else:
+                # Trường hợp người dùng nói chung chung (không nói rõ bắt đầu hay kết thúc)
                 if new_start:
-                    norm_start = _parse_date_text(new_start)
-                    slot_events.append(SlotSet("start_date", new_start))
-                    slot_events.append(SlotSet("normalized_start_date", norm_start))
-                    updated_fields.append(f"Ngày bắt đầu: {_date_display(new_start, norm_start)}")
+                    norm = _is_valid_parsed_date(new_start)
+                    if norm:
+                        slot_events.append(SlotSet("start_date", new_start))
+                        slot_events.append(SlotSet("normalized_start_date", norm))
+                        updated_fields.append(f"Ngày bắt đầu: {_date_display(new_start, norm)}")
                 if new_end:
-                    norm_end = _parse_date_text(new_end)
-                    slot_events.append(SlotSet("end_date", new_end))
-                    slot_events.append(SlotSet("normalized_end_date", norm_end))
-                    updated_fields.append(f"Ngày kết thúc: {_date_display(new_end, norm_end)}")
+                    norm = _is_valid_parsed_date(new_end)
+                    if norm:
+                        slot_events.append(SlotSet("end_date", new_end))
+                        slot_events.append(SlotSet("normalized_end_date", norm))
+                        updated_fields.append(f"Ngày kết thúc: {_date_display(new_end, norm)}")
 
             # ===== Phần tạo preview + kiểm tra ngày hợp lệ =====
             if updated_fields:
@@ -891,11 +925,11 @@ class ActionHandleAbsenceCorrection(Action):
                 curr_class = lop_updated if lop_updated else tracker.get_slot("ma_lop")
 
                 if prefer == "start_date":
-                    curr_start = new_start if new_start else tracker.get_slot("start_date")
-                    curr_end = tracker.get_slot("end_date")
+                    curr_start = new_start if new_start else old_start_date
+                    curr_end = old_end_date
                 elif prefer == "end_date":
-                    curr_start = tracker.get_slot("start_date")
-                    curr_end = new_end if new_end else tracker.get_slot("end_date")
+                    curr_start = old_start_date
+                    curr_end = new_end if new_end else old_end_date
                 else:
                     curr_start = new_start if new_start else tracker.get_slot("start_date")
                     curr_end = new_end if new_end else tracker.get_slot("end_date")
