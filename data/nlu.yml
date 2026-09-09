@@ -22,7 +22,7 @@ nlu:
     examples: |
       - \b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b
       - \b\d{1,2}-\d{1,2}(?:-\d{2,4})?\b
-      - \b(hôm nay|hôm qua|ngày mai|mai|ngày kia)\b
+      - \b(hôm nay|hôm qua|ngày mai|mai|ngày kia|ngày mốt|mốt)\b
       - \b(thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b
 
   - regex: evidence_url
