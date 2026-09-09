@@ -65,6 +65,10 @@ slots:
     mappings:
       - type: from_entity
         entity: ma_lop
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: ma_lop
   ma_mon:
     type: text
     influence_conversation: false
@@ -77,6 +81,10 @@ slots:
     mappings:
       - type: from_entity
         entity: ma_mon_hoc
+      - type: from_text
+        conditions:
+          - active_loop: absence_form
+            requested_slot: ma_mon_hoc
 
   start_date:
     type: text

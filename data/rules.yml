@@ -32,7 +32,16 @@ rules:
       - intent: cung_cap_thong_tin
       - action: absence_form
       - active_loop: absence_form
-
+  # Tiếp tục form khi user đang trả lời slot (kể cả intent inform/cung_cap)
+  - rule: Tiếp tục form khi đang active và user cung cấp thông tin
+    condition:
+      - active_loop: absence_form
+    steps:
+      - or:
+          - intent: cung_cap_thong_tin
+          - intent: inform_absence
+          - intent: nlu_fallback
+      - action: absence_form
   # 2. Xử lý khi Form hoàn thành -> BẮT BUỘC gọi action_preview_absence_request
   - rule: Preview sau khi form hoàn thành (Form đang active)
     condition:
