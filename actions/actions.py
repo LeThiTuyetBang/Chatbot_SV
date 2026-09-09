@@ -1,4 +1,6 @@
 import re
+import logging
+logger = logging.getLogger(__name__)
 from datetime import date, timedelta
 from typing import Any, Text, Dict, List, Tuple, Optional
 from rasa_sdk import Action, Tracker
@@ -137,8 +139,9 @@ def _extract_date_range_from_text(
     # 3. Entity start/end khác nhau
     start_e = [e.get("value") for e in entities if e.get("entity") == "start_date"]
     end_e = [e.get("value") for e in entities if e.get("entity") == "end_date"]
-    if start_e and end_e and start_e[0] != end_e[0]:
-        return start_e[0], end_e[0]
+    if prefer_slot is None:
+        if start_e and end_e and start_e[0] != end_e[0]:
+            return start_e[0], end_e[0]
 
     # 4. Nếu chỉ tìm được 1 ngày trong câu
     if len(found_dates) == 1:
@@ -193,10 +196,9 @@ class ValidateAbsenceForm(FormValidationAction):
 
         # 1. Bắt theo mẫu rõ ràng "môn <Tên môn / Mã môn>" hoặc "học phần <...>"
         subject_match = re.search(
-            r"(?:môn|mon|học phần|hoc phan)\s+([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)",
-            text,
-            re.IGNORECASE
-        )
+    r"(?:môn|mon|học phần|hoc phan)\s+([A-Za-z0-9_\s\+À-ỹ]+?)(?=\s*[,\.]|\s+(?:lớp|lop|từ|tu|ngày|ngay|vì|vi|do|lý do|ly do|minh chứng|minh chung)|$)",
+    text, re.IGNORECASE
+)
         if subject_match:
             candidate = subject_match.group(1).strip()
             if candidate and len(candidate) >= 2:
@@ -248,6 +250,10 @@ class ValidateAbsenceForm(FormValidationAction):
         entities = tracker.latest_message.get("entities", [])
         metadata = tracker.latest_message.get("metadata") or {}
 
+        clean_text = text.strip()
+        if requested_slot == "ma_lop" and _is_class_code(clean_text):
+            return {"ma_lop": clean_text.upper()}
+
         # 1. Bắt theo mẫu "lớp <mã lớp>"
         class_match = re.search(r"(?:lớp|lop)\s+([A-Za-z0-9_-]+)", text, re.IGNORECASE)
         if class_match:
@@ -274,8 +280,9 @@ class ValidateAbsenceForm(FormValidationAction):
         if requested_slot == "ma_lop" and text:
             if tracker.latest_message.get("intent", {}).get("name") not in ["deny", "cancel_absence"]:
                 clean = re.sub(r"^(?:lớp|lop)\s*", "", text.strip(), flags=re.IGNORECASE).strip().upper()
-                if clean:
+                if clean and _is_class_code(clean):
                     return {"ma_lop": clean}
+                return {}   # để form hỏi lại thay vì gán bừa
 
         # 6. Fallback từ session metadata (nếu sinh viên đã đăng nhập và có mã lớp sẵn)
         #if metadata.get("class_code") and not current:
@@ -334,7 +341,7 @@ class ValidateAbsenceForm(FormValidationAction):
     # Chỉ dùng prefer_slot="end_date" khi ĐANG HỎI end_date
         prefer = "end_date" if requested_slot == "end_date" else None
 
-        _, new_end = _extract_date_range_from_text(text, entities, prefer_slot="end_date")
+        _, new_end = _extract_date_range_from_text(text, entities, prefer_slot=prefer)
         if new_end:
             return {"end_date": new_end, "normalized_end_date": _parse_date_text(new_end)}
 
@@ -742,6 +749,8 @@ class ActionHandleAbsenceCorrection(Action):
             text = tracker.latest_message.get("text", "").strip().lower()
             intent_name = tracker.latest_message.get("intent", {}).get("name")
             entities = tracker.latest_message.get("entities", [])
+            logger.warning(f"[DEBUG correction] text={text!r} entities={entities}")
+            logger.warning(f"[DEBUG correction] reason_slot_TRUOC={tracker.get_slot('reason')!r}")
 
             # Kiểm tra xem có entity hoặc từ khóa thông tin mới đi kèm không (môn, lớp, ngày, lý do, link)
             has_update_entity = any(
@@ -809,23 +818,26 @@ class ActionHandleAbsenceCorrection(Action):
                         if _is_class_code(code):
                             lop_updated = code.upper()
                             break
-            if lop_updated:
-                slot_events.append(SlotSet("ma_lop", lop_updated))
-                updated_fields.append(f"Lớp: {lop_updated}")
-
             # 3. Cập nhật lý do
+            # Chỉ cập nhật reason nếu câu KHÔNG phải đang sửa ngày
+            is_date_correction = any(kw in text for kw in [
+                "ngày", "ngay", "đổi ngày", "sửa ngày", "bắt đầu", "kết thúc",
+                "mai", "mốt", "hôm nay", "hôm qua", "thứ "
+            ])
+
             reason_entities = [e for e in entities if e.get("entity") == "reason"]
-            if reason_entities and reason_entities[0].get("value", "").lower() not in ["không", "khong", "ko"]:
-                val = reason_entities[0].get("value")
-                slot_events.append(SlotSet("reason", val))
-                updated_fields.append(f"Lý do: {val}")
-            elif "lý do" in text or "ly do" in text:
-                reason_match = re.search(r"(?:lý do|ly do)(?:\s+là|\s+là:|\s*:)?\s*(.+)", text, re.IGNORECASE)
-                if reason_match:
-                    val = reason_match.group(1).strip()
-                    if not re.search(r"\b\d{1,2}[/-]\d{1,2}\b", val):
-                        slot_events.append(SlotSet("reason", val))
-                        updated_fields.append(f"Lý do: {val}")
+            if not is_date_correction:
+                if reason_entities and reason_entities[0].get("value", "").lower() not in ["không", "khong", "ko", "mai", "mốt", "môt"]:
+                    val = reason_entities[0].get("value")
+                    slot_events.append(SlotSet("reason", val))
+                    updated_fields.append(f"Lý do: {val}")
+                elif "lý do" in text or "ly do" in text:
+                    reason_match = re.search(r"(?:lý do|ly do)(?:\s+là|\s+là:|\s*:)?\s*(.+)", text, re.IGNORECASE)
+                    if reason_match:
+                        val = reason_match.group(1).strip()
+                        if not re.search(r"\b\d{1,2}[/-]\d{1,2}\b", val):
+                            slot_events.append(SlotSet("reason", val))
+                            updated_fields.append(f"Lý do: {val}")
 
             # 4. Cập nhật minh chứng
             evidence_entities = [e for e in entities if e.get("entity") == "evidence_url"]
@@ -959,6 +971,7 @@ class ActionHandleAbsenceCorrection(Action):
                         dispatcher.utter_message(
                             text=f"Ngày kết thúc ({end_show}) không được trước ngày bắt đầu ({start_show}). Bạn vui lòng chọn lại ngày kết thúc nhé."
                         )
+                        logger.warning(f"[DEBUG correction] LOI NGAY - slot_events bi bo = {slot_events}")
                         return [SlotSet("awaiting_request_confirmation", True)]
                 except Exception:
                     pass
@@ -975,6 +988,7 @@ class ActionHandleAbsenceCorrection(Action):
                 )
                 dispatcher.utter_message(text=preview_msg)
                 slot_events.append(SlotSet("awaiting_request_confirmation", True))
+                logger.warning(f"[DEBUG correction] slot_events CUOI CUNG = {slot_events}")
                 return slot_events
 
             dispatcher.utter_message(
