@@ -32,6 +32,15 @@ rules:
       - intent: cung_cap_thong_tin
       - action: absence_form
       - active_loop: absence_form
+
+  - rule: Hủy đơn khi đang điền form giữa chừng
+    condition:
+      - active_loop: absence_form
+    steps:
+      - intent: cancel_absence
+      - action: action_reset_absence_form
+      - active_loop: null
+
   # Tiếp tục form khi user đang trả lời slot (kể cả intent inform/cung_cap)
   - rule: Tiếp tục form khi đang active và user cung cấp thông tin
     condition:

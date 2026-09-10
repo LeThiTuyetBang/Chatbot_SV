@@ -142,6 +142,13 @@ nlu:
       - hủy giúp em cái đơn nghỉ vừa nộp
       - em đi học lại được rồi nên muốn hủy đơn
       - làm sao để hủy đơn xin nghỉ học ạ
+      - hủy
+      - huỷ
+      - thôi
+      - thôi hủy
+      - hủy đi
+      - không làm nữa
+      - dừng lại
 
   # Intent Cung cấp thông tin bổ sung
   - intent: cung_cap_thong_tin
@@ -205,6 +212,10 @@ nlu:
       - em muốn sửa lại thông tin đơn
       - đổi ngày từ [hôm nay](start_date) đến [ngày mai](end_date)
       - sửa ngày nghỉ từ [01/05/2026](start_date) đến [05/05/2026](end_date)
+      - dổi lý do thành [bị cảm nặng](reason)
+      - dổi ngày bắt đầu thành [ngày mai](start_date)
+      - sủa lại lý do thành [đau bụng](reason)
+      - doi ly do thanh [bi cam](reason)
 
   # Intent Hỏi quy định nghỉ học
   - intent: quy_dinh_nghi_hoc
