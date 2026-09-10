@@ -92,6 +92,9 @@ slots:
     mappings:
       - type: from_entity
         entity: start_date
+        conditions:
+          - active_loop: absence_form
+            requested_slot: start_date
       - type: from_entity
         entity: time
         conditions:
@@ -108,6 +111,9 @@ slots:
     mappings:
       - type: from_entity
         entity: end_date
+        conditions:
+          - active_loop: absence_form
+            requested_slot: end_date
       - type: from_entity
         entity: time
         conditions:

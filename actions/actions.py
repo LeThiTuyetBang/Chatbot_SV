@@ -262,7 +262,9 @@ class ValidateAbsenceForm(FormValidationAction):
         # 2. Entity ma_lop từ NLU
         for e in entities:
             if e.get("entity") == "ma_lop" and e.get("value"):
-                return {"ma_lop": e.get("value").strip().upper()}
+                val = e.get("value").strip().upper()
+                if _is_class_code(val) and e.get("confidence_entity", 1.0) >= 0.7:
+                    return {"ma_lop": val}
 
         # 3. Nếu người dùng chỉ nhập một mã lớp (VD: "CN2302C", "DTH2151")
         clean_text = text.strip()
@@ -796,7 +798,8 @@ class ActionHandleAbsenceCorrection(Action):
                     if e.get("entity") == "ma_mon_hoc":
                         mon_updated = e.get("value")
                         break
-            if mon_updated and not (_is_class_code(mon_updated) and not any(mon_updated.lower() == s.lower() for s in KNOWN_SUBJECTS)):
+            mon_valid = mon_updated and not (_is_class_code(mon_updated) and not any(mon_updated.lower() == s.lower() for s in KNOWN_SUBJECTS))
+            if mon_valid:
                 slot_events.append(SlotSet("ma_mon_hoc", mon_updated))
                 updated_fields.append(f"Môn học: {mon_updated}")
 
@@ -818,6 +821,11 @@ class ActionHandleAbsenceCorrection(Action):
                         if _is_class_code(code):
                             lop_updated = code.upper()
                             break
+
+            if lop_updated:
+                slot_events.append(SlotSet("ma_lop", lop_updated))
+                updated_fields.append(f"Lớp: {lop_updated}")
+
             # 3. Cập nhật lý do
             # Chỉ cập nhật reason nếu câu KHÔNG phải đang sửa ngày
             is_date_correction = any(kw in text for kw in [
@@ -933,7 +941,7 @@ class ActionHandleAbsenceCorrection(Action):
 
             # ===== Phần tạo preview + kiểm tra ngày hợp lệ =====
             if updated_fields:
-                curr_course = mon_updated if mon_updated else (tracker.get_slot("ma_mon_hoc") or tracker.get_slot("ma_mon"))
+                curr_course = mon_updated if mon_valid else (tracker.get_slot("ma_mon_hoc") or tracker.get_slot("ma_mon"))
                 curr_class = lop_updated if lop_updated else tracker.get_slot("ma_lop")
 
                 if prefer == "start_date":
@@ -946,7 +954,7 @@ class ActionHandleAbsenceCorrection(Action):
                     curr_start = new_start if new_start else tracker.get_slot("start_date")
                     curr_end = new_end if new_end else tracker.get_slot("end_date")
 
-                if reason_entities:
+                if not is_date_correction and reason_entities:
                     curr_reason = reason_entities[0].get("value")
                 elif "lý do" in text or "ly do" in text:
                     reason_match = re.search(r"(?:lý do|ly do)(?:\s+là|\s+là:|\s*:)?\s*(.+)", text, re.IGNORECASE)
