@@ -64,9 +64,11 @@ const els = {
   // Student Views
   btnSubMyRequests: document.getElementById("btn-sub-my-requests"),
   btnSubChat: document.getElementById("btn-sub-chat"),
+  btnSubForm: document.getElementById("btn-sub-form"), // ← THÊM DÒNG NÀY
   studentMyRequestsView: document.getElementById("student-my-requests-view"),
   studentChatView: document.getElementById("student-chat-view"),
   studentRequestTable: document.getElementById("student-request-table"),
+  studentFormView: document.getElementById("student-form-view"), // ← nên thêm luôn
 
   // Chat
   chatLog: document.getElementById("chat-log"),
@@ -901,12 +903,26 @@ function addChatBubble(role, content) {
   els.chatLog.appendChild(bubble);
   els.chatLog.scrollTop = els.chatLog.scrollHeight;
 }
+// ----------------------------------------------------
+// Hàm đóng modal
+// ----------------------------------------------------
+function closeDetailModal() {
+  if (els.detailModal) els.detailModal.style.display = "none";
+}
+
+function closeRejectModal() {
+  if (els.rejectModal) els.rejectModal.style.display = "none";
+}
+
+function closeEditModal() {
+  if (els.editModal) els.editModal.style.display = "none";
+}
 
 // ----------------------------------------------------
 // Global Event Listeners & Binding
 // ----------------------------------------------------
 function bindEvents() {
-  // ===== Role switcher trên màn hình Đăng nhập =====
+  // Role switcher
   if (els.btnSelectStudent) {
     els.btnSelectStudent.addEventListener("click", () => {
       els.btnSelectStudent.classList.add("is-active");
@@ -926,38 +942,7 @@ function bindEvents() {
     });
   }
 
-  // Thêm nút form mới
-  const btnSubForm = document.getElementById("btn-sub-form");
-  if (btnSubForm) {
-    btnSubForm.addEventListener("click", () => {
-      switchStudentTab("form");
-    });
-  }
-
-  function switchStudentTab(tab) {
-    // Reset tất cả
-    els.btnSubChat.classList.remove("is-active");
-    els.btnSubMyRequests.classList.remove("is-active");
-    if (btnSubForm) btnSubForm.classList.remove("is-active");
-
-    els.studentChatView.style.display = "none";
-    els.studentMyRequestsView.style.display = "none";
-    const formView = document.getElementById("student-form-view");
-    if (formView) formView.style.display = "none";
-
-    if (tab === "chat") {
-      els.btnSubChat.classList.add("is-active");
-      els.studentChatView.style.display = "block";
-    } else if (tab === "requests") {
-      els.btnSubMyRequests.classList.add("is-active");
-      els.studentMyRequestsView.style.display = "block";
-    } else if (tab === "form") {
-      if (btnSubForm) btnSubForm.classList.add("is-active");
-      if (formView) formView.style.display = "block";
-    }
-  }
-
-  // Login Form Handlers
+  // Login
   els.studentLoginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     handleLogin(
@@ -976,31 +961,30 @@ function bindEvents() {
 
   els.logoutBtn.addEventListener("click", handleLogout);
 
-  // Requirement 1: Real-time Date Validation Listeners
+  // Date validation
   els.formStartDate.addEventListener("input", validateFormDates);
   els.formStartDate.addEventListener("change", validateFormDates);
   els.formEndDate.addEventListener("input", validateFormDates);
   els.formEndDate.addEventListener("change", validateFormDates);
 
-  // Form Submission & Cancel Draft
+  // Form submit & cancel
   els.createRequestForm.addEventListener("submit", handleCreateRequestSubmit);
   els.formCancelBtn.addEventListener("click", handleCancelDraft);
 
-  // Sub-tabs in Student View
-  els.btnSubMyRequests.addEventListener("click", () => {
-    els.btnSubMyRequests.classList.add("is-active");
-    els.btnSubChat.classList.remove("is-active");
-    els.studentMyRequestsView.style.display = "block";
-    els.studentChatView.style.display = "none";
-  });
-  els.btnSubChat.addEventListener("click", () => {
-    els.btnSubChat.classList.add("is-active");
-    els.btnSubMyRequests.classList.remove("is-active");
-    els.studentMyRequestsView.style.display = "none";
-    els.studentChatView.style.display = "block";
-  });
+  // Sub-tabs
+  if (els.btnSubChat) {
+    els.btnSubChat.addEventListener("click", () => switchStudentTab("chat"));
+  }
+  if (els.btnSubMyRequests) {
+    els.btnSubMyRequests.addEventListener("click", () =>
+      switchStudentTab("requests"),
+    );
+  }
+  if (els.btnSubForm) {
+    els.btnSubForm.addEventListener("click", () => switchStudentTab("form"));
+  }
 
-  // Chatbot Form
+  // Chat
   els.chatForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const msg = els.chatInput.value.trim();
@@ -1009,13 +993,13 @@ function bindEvents() {
 
   document.querySelectorAll(".chip[data-msg]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      els.btnSubChat.click();
+      switchStudentTab("chat");
       els.chatInput.value = btn.dataset.msg;
       els.chatInput.focus();
     });
   });
 
-  // Admin Filter Tabs
+  // Admin filters
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document
@@ -1028,51 +1012,53 @@ function bindEvents() {
   });
 
   // Modal Closers
-  els.closeDetailModalBtn.addEventListener(
-    "click",
-    () => (els.detailModal.style.display = "none"),
-  );
-  els.btnCloseDetailModal.addEventListener(
-    "click",
-    () => (els.detailModal.style.display = "none"),
-  );
-
-  els.closeRejectModalBtn.addEventListener(
-    "click",
-    () => (els.rejectModal.style.display = "none"),
-  );
-  els.cancelRejectBtn.addEventListener(
-    "click",
-    () => (els.rejectModal.style.display = "none"),
-  );
-  els.confirmRejectBtn.addEventListener("click", handleConfirmReject);
-
-  els.closeEditModalBtn.addEventListener(
-    "click",
-    () => (els.editModal.style.display = "none"),
-  );
-  els.cancelEditBtn.addEventListener(
-    "click",
-    () => (els.editModal.style.display = "none"),
-  );
-  els.confirmEditBtn.addEventListener("click", handleConfirmEdit);
-}
-
-function boot() {
-  bindEvents();
-
-  // Xóa chat log ngay khi load trang
-  if (els.chatLog) {
-    els.chatLog.innerHTML = "";
+  if (els.closeDetailModalBtn) {
+    els.closeDetailModalBtn.addEventListener("click", closeDetailModal);
+  }
+  if (els.btnCloseDetailModal) {
+    els.btnCloseDetailModal.addEventListener("click", closeDetailModal);
+  }
+  if (els.detailModal) {
+    els.detailModal.addEventListener("click", (e) => {
+      if (e.target === els.detailModal) closeDetailModal();
+    });
   }
 
-  checkAuthSession();
+  if (els.closeRejectModalBtn) {
+    els.closeRejectModalBtn.addEventListener("click", closeRejectModal);
+  }
+  if (els.cancelRejectBtn) {
+    els.cancelRejectBtn.addEventListener("click", closeRejectModal);
+  }
+  if (els.confirmRejectBtn) {
+    els.confirmRejectBtn.addEventListener("click", handleConfirmReject);
+  }
+
+  if (els.closeEditModalBtn) {
+    els.closeEditModalBtn.addEventListener("click", closeEditModal);
+  }
+  if (els.cancelEditBtn) {
+    els.cancelEditBtn.addEventListener("click", closeEditModal);
+  }
+  if (els.confirmEditBtn) {
+    els.confirmEditBtn.addEventListener("click", handleConfirmEdit);
+  }
 }
-// Global scope exports for onclick inline handlers
+
+// Global exports
 window.openDetailModal = openDetailModal;
 window.handleCancelStudentRequest = handleCancelStudentRequest;
 window.handleApproveRequest = handleApproveRequest;
 window.openRejectModal = openRejectModal;
 window.openEditModal = openEditModal;
+window.closeDetailModal = closeDetailModal;
+window.closeRejectModal = closeRejectModal;
+window.closeEditModal = closeEditModal;
+
+function boot() {
+  bindEvents();
+  if (els.chatLog) els.chatLog.innerHTML = "";
+  checkAuthSession();
+}
 
 boot();
