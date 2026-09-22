@@ -2,10 +2,8 @@
 
 Hệ thống chatbot hội thoại hướng tác vụ (Task-Oriented Dialogue System) hỗ trợ sinh viên nộp đơn xin nghỉ học, tra cứu trạng thái, hủy đơn và hỗ trợ giáo vụ duyệt/từ chối đơn.
 
-**Trường Đại học Giao thông Vận tải TP. Hồ Chí Minh**  
-**Viện Công nghệ Thông tin và Điện, Điện tử**  
+**Trường Đại học Giao thông Vận tải TP. Hồ Chí Minh**   
 **Sinh viên thực hiện:** Lê Thị Tuyết Băng – 066305014844  
-**Giảng viên hướng dẫn:** ThS. Nguyễn Thanh Tiến
 
 ---
 
@@ -249,7 +247,6 @@ rasa test
 ## 13. Tác giả
 
 - **Sinh viên:** Lê Thị Tuyết Băng – MSSV 066305014844
-- **Giảng viên hướng dẫn:** ThS. Nguyễn Thanh Tiến
 - **Đề tài:** Xây dựng chatbot hỗ trợ xử lý chuyên cần của sinh viên (vắng buổi học)
 
 ---
