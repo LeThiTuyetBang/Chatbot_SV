@@ -29,10 +29,13 @@ from db.store import (
     resolve_user_id_from_metadata,
     update_request_status,
     validate_date_range,
+    validate_evidence_url,
 )
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = os.environ.get("SECRET_KEY", "chatbot_sv_secure_key_2026_antigravity")
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    raise RuntimeError("Thiếu biến môi trường SECRET_KEY. Hãy đặt SECRET_KEY trước khi chạy.")
 
 RASA_REST_URL = os.environ.get("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook")
 
@@ -139,6 +142,7 @@ def admin_view():
 
 
 @app.get("/api/events")
+@login_required
 def sse_events():
     def stream():
         q = queue.Queue(maxsize=50)
@@ -232,7 +236,7 @@ def student_create_request():
         )
 
     try:
-        validate_date_range(start_date, end_date)
+        start_date, end_date = validate_date_range(start_date, end_date)
     except ValueError as ve:
         return _json_response(message=str(ve), ok=False, status_code=400)
 
@@ -245,17 +249,21 @@ def student_create_request():
             end_date=end_date,
             reason=reason,
             created_by=student_id,
-            source="form", 
+            source="form",
         )
+
         if evidence_url:
+            evidence_url = validate_evidence_url(evidence_url)
             add_evidence(request_id=req_id, file_name="minh_chung", file_url=evidence_url)
 
         request_data = get_request_by_id(req_id)
         broadcast_event("request_created", {"request_id": req_id, "student_id": student_id})
         return _json_response(data=request_data, message="Gửi đơn thành công.")
+
+    except ValueError as ve:
+        return _json_response(message=str(ve), ok=False, status_code=400)
     except Exception as e:
         return _json_response(message=f"Gửi đơn thất bại: {str(e)}", ok=False, status_code=400)
-
 
 @app.get("/api/student/requests")
 @role_required("STUDENT")
@@ -458,4 +466,4 @@ def restart_chat():
         return _json_response(message=f"Không thể reset chatbot: {str(e)}", ok=False, status_code=500)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True, use_reloader=False)
+    app.run(host="127.0.0.1", port=5000, debug=False)

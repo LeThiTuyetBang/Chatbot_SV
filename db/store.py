@@ -4,6 +4,7 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, date
 from typing import Any, Dict, Iterable, List, Optional
+from urllib.parse import urlparse
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatbot.db")
 
@@ -32,22 +33,66 @@ def parse_date_obj(date_str: str) -> Optional[date]:
     if not date_str:
         return None
     s = str(date_str).strip()
-    try:
-        return datetime.strptime(s, "%Y-%m-%d").date()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(s, "%d/%m/%Y").date()
-    except ValueError:
-        pass
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y", "%d-%m-%y"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
     return None
 
 
-def validate_date_range(start_date_str: str, end_date_str: str) -> None:
-    d_start = parse_date_obj(start_date_str)
-    d_end = parse_date_obj(end_date_str)
-    if d_start and d_end and d_start > d_end:
+def normalize_date(date_str: str) -> str:
+    """Chuẩn hóa về YYYY-MM-DD. Ném ValueError nếu không parse được."""
+    d = parse_date_obj(date_str)
+    if d is None:
+        raise ValueError(
+            f"Ngày không hợp lệ hoặc sai định dạng: '{date_str}'. "
+            "Ví dụ đúng: 2026-09-25 hoặc 25/09/2026"
+        )
+    return d.isoformat()
+
+
+def validate_evidence_url(url: str) -> str:
+    """
+    Chỉ chấp nhận http/https.
+    Ném ValueError nếu scheme khác hoặc URL quá dài / rỗng.
+    """
+    if not url or not url.strip():
+        return ""   # Cho phép để trống (không có minh chứng)
+
+    url = url.strip()
+    if len(url) > 500:
+        raise ValueError("Link minh chứng quá dài (tối đa 500 ký tự).")
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            "Link minh chứng chỉ được phép dùng http hoặc https. "
+            f"Scheme '{parsed.scheme or 'không có'}' không được chấp nhận."
+        )
+    if not parsed.netloc:
+        raise ValueError("Link minh chứng không hợp lệ.")
+
+    return url
+
+
+def validate_date_range(start_date_str: str, end_date_str: str) -> tuple[str, str]:
+    """
+    Validate + chuẩn hóa cả hai ngày.
+    - Ném ValueError nếu một trong hai ngày không parse được.
+    - Ném ValueError nếu start > end.
+    Trả về (normalized_start, normalized_end) dạng YYYY-MM-DD.
+    """
+    start_norm = normalize_date(start_date_str)
+    end_norm = normalize_date(end_date_str)
+
+    d_start = date.fromisoformat(start_norm)
+    d_end = date.fromisoformat(end_norm)
+
+    if d_start > d_end:
         raise ValueError("Ngày kết thúc không được trước ngày bắt đầu.")
+
+    return start_norm, end_norm
 
 
 @contextmanager
@@ -164,7 +209,7 @@ def create_absence_request(
     created_by: Optional[int] = None,
     source: str = "form",  # "form" | "chatbot"
 ) -> int:
-    validate_date_range(start_date, end_date)
+    start_date, end_date = validate_date_range(start_date, end_date)
     actor_id = created_by or student_id
     with connect_db() as conn:
         cursor = conn.cursor()
@@ -198,6 +243,7 @@ def create_absence_request(
 
 
 def add_evidence(request_id: int, file_name: str, file_url: str) -> int:
+    file_url = validate_evidence_url(file_url)   # ← thêm dòng này
     with connect_db() as conn:
         cursor = conn.cursor()
         cursor.execute(
