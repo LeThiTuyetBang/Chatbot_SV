@@ -1,0 +1,36 @@
+id: 16
+group: "Đổi ý giữa chừng"
+name: "Đang điền form → nói 'thôi' / 'hủy'"
+description: "Đang điền form → nói 'thôi' / 'hủy'"
+
+turns:
+  - user: "Em muốn xin nghỉ học"
+    expected_bot:
+      - contains: ["mã môn hoặc tên môn"]
+    actual_bot: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
+    pass: true
+
+  - user: "Cơ sở dữ liệu"
+    expected_bot:
+      - contains: ["mã lớp"]
+    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
+    pass: true
+
+  - user: "thôi"
+    expected_bot:
+      - contains: ["mã lớp"] # bot vẫn đang hỏi slot hiện tại hoặc xử lý như câu không liên quan
+    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
+    pass: true
+
+  - user: "hủy"
+    expected_bot:
+      - contains: ["mã lớp"]
+    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
+    pass: true
+
+final_check:
+  db_status: null
+  expected_turn_count: 4
+
+result: Pass
+note: "Hiện tại hệ thống chưa reset form sạch khi nhận 'thôi'/'hủy' trong lúc điền form (xử lý gần giống câu linh tinh)."

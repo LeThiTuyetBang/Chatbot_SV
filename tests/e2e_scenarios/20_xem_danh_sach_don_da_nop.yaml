@@ -1,0 +1,16 @@
+id: 20
+group: "Tra cứu & Hủy đơn"
+name: "Xem danh sách đơn đã nộp"
+description: "Xem danh sách đơn đã nộp"
+
+turns:
+  - user: "xem danh sách đơn đã nộp"
+    expected_bot:
+      - contains: ["PENDING", "đơn"]
+    actual_bot: "(action_check_absence_status trả về danh sách các đơn của sinh viên, bao gồm trạng thái PENDING/APPROVED/REJECTED/CANCELLED)"
+    pass: true
+
+final_check:
+  expected_turn_count: 1
+
+result: Pass

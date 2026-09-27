@@ -1,0 +1,32 @@
+id: 17
+group: "Đổi ý giữa chừng"
+name: "Sau khi xem preview → nói 'sai rồi' / 'không'"
+description: "Sau khi xem preview → nói 'sai rồi' / 'không'"
+
+turns:
+  - user: "Em xin nghỉ môn CTDL lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
+    actual_bot: |
+      Mình đã hiểu đơn của bạn như sau:
+      - Môn: CTDL
+      - Lớp: CN2302C
+      - Từ: mai -> 2026-09-28
+      - Đến: ngày kia -> 2026-09-29
+      - Lý do: ốm
+      - Minh chứng: Không có
+
+      Bạn xác nhận để mình lưu đơn nhé?
+    pass: true
+
+  - user: "sai rồi"
+    expected_bot:
+      - contains: ["hủy", "không lưu", "nhập thông tin mới"]
+    actual_bot: "Đã hủy đơn xin nghỉ học và không lưu thông tin. Bạn có thể nhập thông tin mới nếu muốn tạo lại đơn nhé!"
+    pass: true
+
+final_check:
+  db_status: null
+  expected_turn_count: 2
+
+result: Pass

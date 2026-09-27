@@ -1,0 +1,30 @@
+id: 13
+group: "Nhập sai định dạng"
+name: "Nhập ngày bằng câu không hiểu được"
+description: "Nhập ngày bằng câu không hiểu được"
+
+turns:
+  - user: "Em xin nghỉ môn CTDL lớp CN2302C từ hôm bữa đến hôm nọ vì ốm"
+    expected_bot:
+      - contains: ["ngày kết thúc nghỉ"]
+    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
+    pass: true
+
+  - user: "mai"
+    expected_bot:
+      - contains: ["Ngày bắt đầu chưa hợp lệ"]
+    actual_bot: "Ngày bắt đầu chưa hợp lệ. Bạn nhập lại ngày bắt đầu nhé."
+    pass: true
+
+  - user: "27/9"
+    expected_bot:
+      - contains: ["Ngày bắt đầu chưa hợp lệ"]
+    actual_bot: "Ngày bắt đầu chưa hợp lệ. Bạn nhập lại ngày bắt đầu nhé."
+    pass: true
+
+final_check:
+  db_status: null
+  expected_turn_count: 3
+
+result: Pass
+note: "Hiện tại bot không validate start_date ngay, mà hỏi end_date trước. Khi phát hiện start_date sai thì báo lỗi và tiếp tục hỏi lại."

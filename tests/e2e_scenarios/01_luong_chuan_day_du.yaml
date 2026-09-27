@@ -1,0 +1,33 @@
+id: 01
+group: "Luồng chuẩn"
+name: "Nộp đơn đầy đủ thông tin + có link minh chứng"
+description: "Nộp đơn đầy đủ: môn + lớp + ngày bắt đầu + ngày kết thúc + lý do + có link minh chứng → xác nhận lưu"
+
+turns:
+  - user: "Em xin nghỉ môn Cấu trúc dữ liệu và giải thuật lớp CN2302C từ mai đến ngày kia vì ốm, minh chứng https://drive.google.com/file/d/abc123"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
+    actual_bot: |
+      Mình đã hiểu đơn của bạn như sau:
+      - Môn: Cấu trúc dữ liệu và giải thuật
+      - Lớp: CN2302C
+      - Từ: mai -> 2026-09-28
+      - Đến: ngày kia -> 2026-09-29
+      - Lý do: ốm
+      - Minh chứng: https://drive.google.com/file/d/abc123
+
+      Bạn xác nhận để mình lưu đơn nhé?
+    pass: true
+
+  - user: "đồng ý"
+    expected_bot:
+      - contains: ["Ghi nhận thành công", "PENDING"]
+    actual_bot: "Ghi nhận thành công đơn xin nghỉ môn Cấu trúc dữ liệu và giải thuật từ ngày 2026-09-28 đến ngày 2026-09-29. Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #1."
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  has_evidence: true
+  expected_turn_count: 2
+
+result: Pass

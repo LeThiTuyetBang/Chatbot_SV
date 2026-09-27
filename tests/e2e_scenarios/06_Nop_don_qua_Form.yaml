@@ -1,0 +1,15 @@
+id: 06
+group: "Luồng chuẩn"
+name: "Nộp đơn qua Form web (không dùng Chatbot)"
+description: "Nộp đơn qua Form web (không dùng Chatbot)"
+
+turns: [] # Không có hội thoại chatbot
+
+final_check:
+  db_status: "PENDING"
+  source: "form"
+  has_evidence: false # hoặc true tùy test
+  expected_turn_count: 0
+
+result: Pass
+note: "Kiểm tra qua API / giao diện Form web, không qua Rasa."

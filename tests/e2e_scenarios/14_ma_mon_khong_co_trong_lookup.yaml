@@ -1,0 +1,34 @@
+id: 14
+group: "Nhập sai định dạng"
+name: "Mã môn không có trong lookup table"
+description: "Mã môn không có trong lookup table"
+
+turns:
+  - user: "Em xin nghỉ môn XYZ999 lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau", "Minh chứng: Không có"]
+    actual_bot: |
+      Mình đã hiểu đơn của bạn như sau:
+      - Môn: XYZ999
+      - Lớp: CN2302C
+      - Từ: mai -> 2026-09-28
+      - Đến: ngày kia -> 2026-09-29
+      - Lý do: ốm
+      - Minh chứng: Không có
+
+      Bạn xác nhận để mình lưu đơn nhé?
+    pass: true
+
+  - user: "đồng ý"
+    expected_bot:
+      - contains: ["Ghi nhận thành công", "PENDING"]
+    actual_bot: "Ghi nhận thành công đơn xin nghỉ môn XYZ999 từ ngày 2026-09-28 đến ngày 2026-09-29. Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #14."
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  course_code: "XYZ999"
+  has_evidence: false
+  expected_turn_count: 2
+
+result: Pass

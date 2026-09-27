@@ -1,0 +1,32 @@
+id: 08
+group: "Thiếu thông tin"
+name: "Cung cấp thiếu ngày kết thúc"
+description: "Cung cấp thiếu ngày kết thúc"
+
+turns:
+  - user: "Em xin nghỉ môn CTDL lớp CN2302C từ mai vì ốm"
+    expected_bot:
+      - contains: ["ngày kết thúc nghỉ"]
+    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
+    pass: true
+
+  - user: "ngày kia"
+    expected_bot:
+      - contains: ["link ảnh minh chứng"]
+    actual_bot: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
+    pass: true
+
+  - user: "không"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau"]
+    actual_bot: |
+      Mình đã hiểu đơn của bạn như sau:
+      ...
+      Bạn xác nhận để mình lưu đơn nhé?
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  expected_turn_count: 3
+
+result: Pass

@@ -1,0 +1,29 @@
+id: 12
+group: "Nhập sai định dạng"
+name: "Ngày không hợp lệ (31/02, 32/13)"
+description: "Ngày không hợp lệ (ví dụ 31/02, 32/13)"
+
+turns:
+  - user: "Em xin nghỉ môn CTDL lớp CN2302C từ 31/02/2026 đến 05/03/2026 vì ốm"
+    expected_bot:
+      - contains: ["chưa hiểu ngày", "nhập lại"]
+    actual_bot: "Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
+    pass: true
+
+  - user: "01/03/2026"
+    expected_bot:
+      - contains: ["ngày kết thúc nghỉ"]
+    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
+    pass: true
+
+  - user: "05/03/2026"
+    expected_bot:
+      - contains: ["lý do nghỉ học"]
+    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
+    pass: true
+
+final_check:
+  db_status: null # chưa lưu vì chưa hoàn thành
+  expected_turn_count: 3
+
+result: Pass

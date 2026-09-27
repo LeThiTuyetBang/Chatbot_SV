@@ -1,0 +1,64 @@
+id: 03
+group: "Luồng chuẩn"
+name: "Nộp đơn dùng ngày tương đối"
+description: "Nộp đơn dùng ngày tương đối ('mai', 'ngày kia')"
+
+turns:
+  - user: "Xin nghỉ học môn CSDL"
+    expected_bot:
+      - contains: ["mã lớp"]
+    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
+    pass: true
+
+  - user: "CN2301A"
+    expected_bot:
+      - contains: ["ngày bắt đầu nghỉ"]
+    actual_bot: "Bạn cho mình ngày bắt đầu nghỉ nhé."
+    pass: true
+
+  - user: "mai"
+    expected_bot:
+      - contains: ["ngày kết thúc nghỉ"]
+    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
+    pass: true
+
+  - user: "ngày kia"
+    expected_bot:
+      - contains: ["lý do nghỉ học"]
+    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
+    pass: true
+
+  - user: "Có việc gia đình"
+    expected_bot:
+      - contains: ["link ảnh minh chứng"]
+    actual_bot: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
+    pass: true
+
+  - user: "không"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau"]
+    actual_bot: |
+      Mình đã hiểu đơn của bạn như sau:
+      - Môn: CSDL
+      - Lớp: CN2301A
+      - Từ: mai -> 2026-09-28
+      - Đến: ngày kia -> 2026-09-29
+      - Lý do: Có việc gia đình
+      - Minh chứng: Không có
+
+      Bạn xác nhận để mình lưu đơn nhé?
+    pass: true
+
+  - user: "đúng rồi"
+    expected_bot:
+      - contains: ["Ghi nhận thành công", "PENDING"]
+    actual_bot: "Ghi nhận thành công đơn xin nghỉ môn CSDL từ ngày 2026-09-28 đến ngày 2026-09-29. Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #3."
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  start_date: "2026-09-28"
+  end_date: "2026-09-29"
+  expected_turn_count: 7
+
+result: Pass
