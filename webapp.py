@@ -2,6 +2,8 @@ import json
 import os
 import queue
 import threading
+from dotenv import load_dotenv
+load_dotenv()
 from functools import wraps
 from urllib.error import URLError, HTTPError
 from urllib.request import Request, urlopen
