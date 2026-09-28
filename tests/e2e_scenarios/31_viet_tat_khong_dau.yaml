@@ -1,0 +1,26 @@
+id: 31
+group: "Cách nói tự nhiên"
+name: "Viết tắt + không dấu – nộp đơn 1 câu"
+description: "Sinh viên gõ không dấu, viết tắt: em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om"
+
+turns:
+  - user: "em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
+    # Bot vẫn trích được môn/lớp/ngày nhờ regex + lookup + form
+    pass: true
+
+  - user: "dong y"
+    expected_bot:
+      - contains: ["Ghi nhận thành công", "PENDING"]
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  expected_turn_count: 2
+
+result: Fail
+note: >
+  Bot không parse đúng khoảng ngày "tu mai den ngay kia" trong câu không dấu.
+  end_date bị gán nhầm thành mai (trùng start_date). 
+  Bot còn hỏi lại ngày bắt đầu thay vì hiện preview ngay.

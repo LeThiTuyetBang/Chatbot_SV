@@ -1,0 +1,19 @@
+id: 22
+group: "Tra cứu & Hủy đơn"
+name: "Cố hủy đơn đã APPROVED hoặc REJECTED"
+description: "Không còn đơn PENDING → action_cancel_absence trả về thông báo không có đơn để hủy"
+
+turns:
+  - user: "hủy đơn xin nghỉ"
+    expected_bot:
+      - contains: ["Hiện không có đơn Chờ duyệt nào để hủy"]
+    # Code thực tế:
+    # if not request:
+    #     dispatcher.utter_message(text="Hiện không có đơn Chờ duyệt nào để hủy.")
+    pass: true
+
+final_check:
+  db_status_unchanged: true
+  expected_turn_count: 1
+
+result: Pass

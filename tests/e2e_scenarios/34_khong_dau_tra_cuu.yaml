@@ -1,0 +1,20 @@
+id: 34
+group: "Cách nói tự nhiên"
+name: "Tra cứu trạng thái không dấu"
+description: "xem trang thai don / kiem tra don xin nghi"
+
+turns:
+  - user: "xem trang thai don xin nghi"
+    expected_bot:
+      - contains: ["Danh sách các đơn nghỉ gần nhất", "đơn"]
+    # action_check_absence_status
+    pass: true
+
+final_check:
+  expected_turn_count: 1
+
+result: Fail
+note: >
+  Câu "xem trang thai don xin nghi" (không dấu) không được nhận là check_absence_status.
+  Bot kích hoạt form xin nghỉ và hỏi mã môn.
+  Cần bổ sung ví dụ không dấu vào nlu.yml cho intent check_absence_status.

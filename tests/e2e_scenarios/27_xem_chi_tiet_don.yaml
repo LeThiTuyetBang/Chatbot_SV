@@ -1,0 +1,17 @@
+id: 27
+group: "Giáo vụ & Phân quyền"
+name: "Xem chi tiết đơn + lịch sử + minh chứng"
+description: "GET /api/admin/requests/<id> trả về history + evidences"
+
+turns: []
+
+api_steps:
+  - method: GET
+    endpoint: /api/admin/requests/{id}
+    expected_status: 200
+    expected_fields: ["history", "evidences", "status_label"]
+
+final_check:
+  expected_turn_count: 0
+
+result: Pass

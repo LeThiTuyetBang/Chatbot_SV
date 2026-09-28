@@ -1,0 +1,23 @@
+id: 30
+group: "Fallback & Edge"
+name: "Đăng nhập sai mật khẩu"
+description: "POST /api/auth/login sai → 401, không tạo session"
+
+turns: []
+
+api_steps:
+  - method: POST
+    endpoint: /api/auth/login
+    body: { username: "066305014844", password: "sai_mat_khau" }
+    expected_status: 401
+    # webapp.py: "Sai tên đăng nhập hoặc mật khẩu."
+
+  - method: POST
+    endpoint: /api/auth/login
+    body: { username: "khong_ton_tai", password: "123456" }
+    expected_status: 401
+
+final_check:
+  expected_turn_count: 0
+
+result: Pass

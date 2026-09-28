@@ -1,0 +1,61 @@
+id: 26
+group: "Giáo vụ & Phân quyền"
+name: "Phân quyền đăng nhập theo vai trò + chặn truy cập API sai role"
+description: >
+  Đăng nhập Sinh viên → vào trang Sinh viên (không thấy trang Giáo vụ).
+  Đăng nhập Giáo vụ → vào trang Giáo vụ.
+  Sinh viên gọi API admin → bị 403.
+  Giáo vụ gọi API student → bị 403.
+
+turns: []
+
+api_steps:
+  # ----- 1. Đăng nhập Sinh viên -----
+  - method: POST
+    endpoint: /api/auth/login
+    body:
+      username: "066305014844"
+      password: "123456"
+    expected_status: 200
+    expected_data:
+      role: "STUDENT"
+    # UI thực tế (app.js renderAuthenticatedUI):
+    # studentPanel.style.display = "block"
+    # adminPanel.style.display = "none"
+
+  # Sinh viên cố gọi API Giáo vụ → 403
+  - method: GET
+    endpoint: /api/admin/requests
+    expected_status: 403
+    expected_message: "Bạn không có quyền thực hiện thao tác này."
+
+  # ----- 2. Đăng xuất rồi đăng nhập Giáo vụ -----
+  - method: POST
+    endpoint: /api/auth/logout
+    expected_status: 200
+
+  - method: POST
+    endpoint: /api/auth/login
+    body:
+      username: "gv_tien"
+      password: "123456"
+    expected_status: 200
+    expected_data:
+      role: "STAFF"
+    # UI thực tế:
+    # studentPanel.style.display = "none"
+    # adminPanel.style.display = "block"
+
+  # Giáo vụ cố gọi API Sinh viên → 403
+  - method: GET
+    endpoint: /api/student/requests
+    expected_status: 403
+    expected_message: "Bạn không có quyền thực hiện thao tác này."
+
+final_check:
+  expected_turn_count: 0
+  note: >
+    Phân quyền đúng theo role sau login (UI chuyển trang theo role).
+    API có decorator @role_required chặn truy cập chéo.
+
+result: Pass

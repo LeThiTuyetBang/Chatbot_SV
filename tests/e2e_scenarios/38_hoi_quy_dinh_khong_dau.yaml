@@ -1,0 +1,16 @@
+id: 38
+group: "Cách nói tự nhiên"
+name: "Hỏi quy định không dấu / viết tắt"
+description: "nghi bao nhieu buoi thi bi cam thi"
+
+turns:
+  - user: "nghi bao nhieu buoi thi bi cam thi"
+    expected_bot:
+      - contains: ["20%", "cấm thi"]
+    # utter_quy_dinh_nghi_hoc
+    pass: true
+
+final_check:
+  expected_turn_count: 1
+
+result: Pass

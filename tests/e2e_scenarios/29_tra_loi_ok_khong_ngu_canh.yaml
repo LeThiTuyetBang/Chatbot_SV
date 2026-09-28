@@ -1,0 +1,22 @@
+id: 29
+group: "Fallback & Edge"
+name: "Chỉ trả lời 'ok' / 'không' khi chưa có ngữ cảnh"
+description: "affirm/deny ngoài form → utter_affirm_default / utter_deny_default"
+
+turns:
+  - user: "ok"
+    expected_bot:
+      - contains: ["Dạ vâng! Bạn cần mình hỗ trợ xin nghỉ học"]
+    # domain.yml utter_affirm_default
+    pass: true
+
+  - user: "không"
+    expected_bot:
+      - contains: ["Dạ được rồi. Nếu bạn cần hỗ trợ xin nghỉ học"]
+    # domain.yml utter_deny_default
+    pass: true
+
+final_check:
+  expected_turn_count: 2
+
+result: Pass

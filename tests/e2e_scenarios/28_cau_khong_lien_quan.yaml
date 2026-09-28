@@ -1,0 +1,17 @@
+id: 28
+group: "Fallback & Edge"
+name: "Nhập câu hoàn toàn không liên quan"
+description: "Intent nlu_fallback → utter_ask_rephrase"
+
+turns:
+  - user: "hôm nay thời tiết đẹp quá, em muốn ăn phở"
+    expected_bot:
+      - contains: ["Mình chưa hiểu rõ ý của bạn"]
+    # domain.yml:
+    # utter_ask_rephrase: "Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?"
+    pass: true
+
+final_check:
+  expected_turn_count: 1
+
+result: Pass

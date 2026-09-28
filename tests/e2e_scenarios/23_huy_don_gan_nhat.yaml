@@ -1,0 +1,17 @@
+id: 23
+group: "Tra cứu & Hủy đơn"
+name: "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'"
+description: "Intent cancel_absence → action_cancel_absence hủy đúng đơn PENDING mới nhất"
+
+turns:
+  - user: "hủy đơn vừa nộp"
+    expected_bot:
+      - contains: ["Đã hủy đơn #", "Đã Huỷ"]
+    # Cùng response với kịch bản 21
+    pass: true
+
+final_check:
+  db_status: "CANCELLED"
+  expected_turn_count: 1
+
+result: Pass

@@ -1,0 +1,52 @@
+id: 33
+group: "Cách nói tự nhiên"
+name: "Cách nói thật của sinh viên (e / dc / thầy ơi)"
+description: "Câu kiểu chat thật: thầy ơi cho e nghỉ 1 buổi dc ko, e bị sốt"
+
+turns:
+  - user: "thầy ơi cho e nghỉ 1 buổi dc ko"
+    expected_bot:
+      - contains: ["mã môn hoặc tên môn"]
+    # intent inform_absence vẫn bắt được
+    pass: true
+
+  - user: "môn mạng máy tính"
+    expected_bot:
+      - contains: ["mã lớp"]
+    pass: true
+
+  - user: "e học lớp DTH2151"
+    expected_bot:
+      - contains: ["ngày bắt đầu"]
+    pass: true
+
+  - user: "mai"
+    expected_bot:
+      - contains: ["ngày kết thúc"]
+    pass: true
+
+  - user: "mai"
+    expected_bot:
+      - contains: ["lý do"]
+    pass: true
+
+  - user: "e bị sốt"
+    expected_bot:
+      - contains: ["minh chứng"]
+    pass: true
+
+  - user: "ko có"
+    expected_bot:
+      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
+    pass: true
+
+  - user: "ok"
+    expected_bot:
+      - contains: ["Ghi nhận thành công", "PENDING"]
+    pass: true
+
+final_check:
+  db_status: "PENDING"
+  expected_turn_count: 8
+
+result: Pass

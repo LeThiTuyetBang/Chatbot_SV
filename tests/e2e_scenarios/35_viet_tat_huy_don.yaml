@@ -1,0 +1,21 @@
+id: 35
+group: "Cách nói tự nhiên"
+name: "Hủy đơn viết tắt"
+description: "huy don / thoi huy / ko lam nua"
+
+turns:
+  - user: "huy don vua nop"
+    expected_bot:
+      - contains: ["Đã hủy đơn #", "Đã Huỷ"]
+    # hoặc "Hiện không có đơn Chờ duyệt nào để hủy." nếu không còn PENDING
+    pass: true
+
+final_check:
+  expected_turn_count: 1
+
+result: Fail
+note: >
+  Câu "huy don vua nop" không được nhận là cancel_absence.
+  Bot trả về utter_ask_rephrase.
+  Cần bổ sung ví dụ không dấu vào nlu.yml cho intent cancel_absence
+  (huy don, huy don vua nop, thoi huy...).
