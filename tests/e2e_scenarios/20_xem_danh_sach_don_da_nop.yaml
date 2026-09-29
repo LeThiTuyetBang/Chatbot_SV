@@ -6,7 +6,7 @@ description: "Xem danh sách đơn đã nộp"
 turns:
   - user: "xem danh sách đơn đã nộp"
     expected_bot:
-      - contains: ["PENDING", "đơn"]
+      - contains: ["Chờ duyệt", "đơn"]
     actual_bot: "(action_check_absence_status trả về danh sách các đơn của sinh viên, bao gồm trạng thái PENDING/APPROVED/REJECTED/CANCELLED)"
     pass: true
 

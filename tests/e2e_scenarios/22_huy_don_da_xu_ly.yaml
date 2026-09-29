@@ -1,19 +1,22 @@
 id: 22
 group: "Tra cứu & Hủy đơn"
 name: "Cố hủy đơn đã APPROVED hoặc REJECTED"
-description: "Không còn đơn PENDING → action_cancel_absence trả về thông báo không có đơn để hủy"
+description: >
+  Chuẩn bị sẵn 1 đơn đã được giáo vụ duyệt (APPROVED), không còn đơn PENDING
+  nào → action_cancel_absence phải trả lời không có đơn để hủy.
+
+setup:
+  type: approve_latest_request_for_student
+  # Trước turn đầu tiên, script sẽ:
+  #   1. Sinh viên nộp 1 đơn mới qua chat (đảm bảo có đơn PENDING chắc chắn).
+  #   2. Gọi thẳng store.update_staff_decision() để duyệt (APPROVED) đơn đó.
+  # Xem hàm setup_approved_request() trong run_e2e.py.
 
 turns:
   - user: "hủy đơn xin nghỉ"
     expected_bot:
       - contains: ["Hiện không có đơn Chờ duyệt nào để hủy"]
-    # Code thực tế:
-    # if not request:
-    #     dispatcher.utter_message(text="Hiện không có đơn Chờ duyệt nào để hủy.")
-    pass: true
 
 final_check:
   db_status_unchanged: true
   expected_turn_count: 1
-
-result: Pass

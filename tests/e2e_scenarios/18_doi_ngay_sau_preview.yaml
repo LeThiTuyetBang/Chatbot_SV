@@ -21,7 +21,7 @@ turns:
 
   - user: "sửa ngày bắt đầu thành ngày mốt"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau", "ngày mốt"]
+      - contains: ["Đã cập nhật thông tin đơn", "ngày mốt"]
     actual_bot: |
       Mình đã hiểu đơn của bạn như sau:
       - Môn: CTDL

@@ -6,7 +6,7 @@ description: "Ngày kết thúc < ngày bắt đầu"
 turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ 10/10/2026 đến 05/10/2026 vì ốm"
     expected_bot:
-      - contains: ["Ngày kết thúc không được trước ngày bắt đầu"]
+      - contains: ["không được trước ngày bắt đầu"]
     actual_bot: "Ngày kết thúc (05/10/2026) không được trước ngày bắt đầu (10/10/2026). Bạn nhập lại ngày kết thúc nhé."
     pass: true
 

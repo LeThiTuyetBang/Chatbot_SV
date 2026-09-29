@@ -1,0 +1,362 @@
+{
+  "total_executed": 32,
+  "passed": 20,
+  "failed": 12,
+  "skipped": 6,
+  "tcr": 62.5,
+  "average_turn_count": 3.5,
+  "details": [
+    {
+      "id": 1,
+      "name": "Nộp đơn đầy đủ thông tin + có link minh chứng",
+      "file": "01_luong_chuan_day_du.yaml",
+      "pass": true,
+      "turn_count": 2,
+      "errors": []
+    },
+    {
+      "id": 2,
+      "name": "Nộp đơn không có minh chứng",
+      "file": "02_khong_minh_chung.yaml",
+      "pass": true,
+      "turn_count": 8,
+      "errors": []
+    },
+    {
+      "id": 3,
+      "name": "Nộp đơn dùng ngày tương đối",
+      "file": "03_ngay_tuong_doi.yaml",
+      "pass": true,
+      "turn_count": 7,
+      "errors": []
+    },
+    {
+      "id": 4,
+      "name": "Nộp đơn dùng ngày tuyệt đối",
+      "file": "04_ngay_tuyet_doi.yaml",
+      "pass": true,
+      "turn_count": 5,
+      "errors": []
+    },
+    {
+      "id": 4,
+      "name": "Nộp đơn dùng ngày tuyệt đối",
+      "file": "05_nop_roi_tra_cuu.yaml",
+      "pass": true,
+      "turn_count": 5,
+      "errors": []
+    },
+    {
+      "id": 6,
+      "name": "Nộp đơn qua Form web (không dùng Chatbot)",
+      "file": "06_Nop_don_qua_Form.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Chỉ nói 'em xin nghỉ học' → bot hỏi lần lượt các slot",
+      "file": "07_ChiNoi_EmXinNghiHoc.yaml",
+      "pass": true,
+      "turn_count": 8,
+      "errors": []
+    },
+    {
+      "id": "08",
+      "name": "Cung cấp thiếu ngày kết thúc",
+      "file": "08_ThieuNgayKetThuc.yaml",
+      "pass": true,
+      "turn_count": 3,
+      "errors": []
+    },
+    {
+      "id": "09",
+      "name": "Cung cấp thiếu lý do",
+      "file": "09_ThieuLyDo.yaml",
+      "pass": true,
+      "turn_count": 3,
+      "errors": []
+    },
+    {
+      "id": 10,
+      "name": "Cung cấp thiếu mã lớp",
+      "file": "10_thieu_ma_lop.yaml",
+      "pass": true,
+      "turn_count": 3,
+      "errors": []
+    },
+    {
+      "id": 11,
+      "name": "Ngày kết thúc < ngày bắt đầu",
+      "file": "11_ngay_ket_thuc_nho_hon_bat_dau.yaml",
+      "pass": true,
+      "turn_count": 4,
+      "errors": []
+    },
+    {
+      "id": 12,
+      "name": "Ngày không hợp lệ (31/02, 32/13)",
+      "file": "12_ngay_khong_hop_le.yaml",
+      "pass": false,
+      "turn_count": 3,
+      "errors": [
+        "Turn 2: không tìm thấy ['ngày kết thúc nghỉ'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]",
+        "Turn 3: không tìm thấy ['lý do nghỉ học'] trong câu trả lời bot: ['Mình đã hiểu đơn của bạn như sau:\\n- Môn: CTDL\\n- Lớp: CN2302C\\n- Từ: 05/03/2026 -> 2026-03-05\\n- Đến: 05/03/2026 -> 2026-03-05\\n- Lý do: ốm\\n- Minh chứng: 05/03/2026', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Nhập ngày bằng câu không hiểu được",
+      "file": "13_ngay_cau_khong_hieu.yaml",
+      "pass": true,
+      "turn_count": 3,
+      "errors": []
+    },
+    {
+      "id": 14,
+      "name": "Mã môn không có trong lookup table",
+      "file": "14_ma_mon_khong_co_trong_lookup.yaml",
+      "pass": false,
+      "turn_count": 2,
+      "errors": [
+        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'Minh chứng: Không có'] trong câu trả lời bot: ['Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé.']",
+        "Turn 2: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Mình đã hiểu đơn của bạn như sau:\\n- Môn: đồng ý\\n- Lớp: XYZ999\\n- Từ: mai -> 2026-09-30\\n- Đến: ngày kia -> 2026-10-01\\n- Lý do: ốm\\n- Minh chứng: Không có', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Nhập câu linh tinh khi đang ở trong form",
+      "file": "15_nhap_cau_linh_tinh_trong_form.yaml",
+      "pass": false,
+      "turn_count": 8,
+      "errors": [
+        "Turn 2: không tìm thấy ['mã môn hoặc tên môn'] trong câu trả lời bot: ['Bạn cho mình biết mã lớp của bạn nhé.']",
+        "Turn 3: không tìm thấy ['mã lớp'] trong câu trả lời bot: ['Bạn cho mình ngày kết thúc nghỉ nhé.']",
+        "Turn 4: không tìm thấy ['ngày bắt đầu nghỉ'] trong câu trả lời bot: [\"Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày kết thúc nghỉ nhé.']",
+        "Turn 6: không tìm thấy ['ngày kết thúc nghỉ'] trong câu trả lời bot: ['Bạn cho mình lý do nghỉ học nhé.']",
+        "Turn 7: không tìm thấy ['lý do nghỉ học'] trong câu trả lời bot: ['Ngày kết thúc (mai) không được trước ngày bắt đầu (ngày kia). Bạn nhập lại ngày kết thúc nhé.', 'Bạn cho mình ngày kết thúc nghỉ nhé.']",
+        "Turn 8: không tìm thấy ['Mình đã hiểu đơn của bạn như sau'] trong câu trả lời bot: [\"Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày kết thúc nghỉ nhé.']"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Đang điền form → nói 'thôi' / 'hủy'",
+      "file": "16_doi_y_huy_khi_dang_dien_form.yaml",
+      "pass": false,
+      "turn_count": 4,
+      "errors": [
+        "Turn 3: không tìm thấy ['mã lớp'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 4: không tìm thấy ['mã lớp'] trong câu trả lời bot: ['Bạn cho mình ngày kết thúc nghỉ nhé.']"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Sau khi xem preview → nói 'sai rồi' / 'không'",
+      "file": "17_sau_preview_noi_sai_roi.yaml",
+      "pass": true,
+      "turn_count": 2,
+      "errors": []
+    },
+    {
+      "id": 18,
+      "name": "Đổi ngày nghỉ sau khi đã preview",
+      "file": "18_doi_ngay_sau_preview.yaml",
+      "pass": true,
+      "turn_count": 3,
+      "errors": []
+    },
+    {
+      "id": 19,
+      "name": "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc",
+      "file": "19_bat_dau_don_moi_khi_form_cu_chua_xong.yaml",
+      "pass": true,
+      "turn_count": 7,
+      "errors": []
+    },
+    {
+      "id": 20,
+      "name": "Xem danh sách đơn đã nộp",
+      "file": "20_xem_danh_sach_don_da_nop.yaml",
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
+    },
+    {
+      "id": 21,
+      "name": "Hủy đơn đang ở trạng thái PENDING",
+      "file": "21_huy_don_pending.yaml",
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
+    },
+    {
+      "id": 22,
+      "name": "Cố hủy đơn đã APPROVED hoặc REJECTED",
+      "file": "22_huy_don_da_xu_ly.yaml",
+      "pass": false,
+      "turn_count": 0,
+      "errors": [
+        "Setup lỗi: Chỉ có thể chỉnh sửa kết quả duyệt/từ chối của những đơn đã được xử lý trước đó."
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
+      "file": "23_huy_don_gan_nhat.yaml",
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
+    },
+    {
+      "id": 24,
+      "name": "Giáo vụ đăng nhập → duyệt đơn PENDING",
+      "file": "24_giao_vu_duyet_don.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Giáo vụ từ chối đơn",
+      "file": "25_giao_vu_tu_choi_don.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Phân quyền đăng nhập theo vai trò + chặn truy cập API sai role",
+      "file": "26_sinh_vien_truy_cap_api_giao_vu.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Xem chi tiết đơn + lịch sử + minh chứng",
+      "file": "27_xem_chi_tiet_don.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Nhập câu hoàn toàn không liên quan",
+      "file": "28_cau_khong_lien_quan.yaml",
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
+    },
+    {
+      "id": 29,
+      "name": "Chỉ trả lời 'ok' / 'không' khi chưa có ngữ cảnh",
+      "file": "29_tra_loi_ok_khong_ngu_canh.yaml",
+      "pass": true,
+      "turn_count": 2,
+      "errors": []
+    },
+    {
+      "id": 30,
+      "name": "Đăng nhập sai mật khẩu",
+      "file": "30_dang_nhap_sai.yaml",
+      "pass": null,
+      "turn_count": 0,
+      "errors": [
+        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Viết tắt + không dấu – nộp đơn 1 câu",
+      "file": "31_viet_tat_khong_dau.yaml",
+      "pass": false,
+      "turn_count": 2,
+      "errors": [
+        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 2: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Ngày bắt đầu chưa hợp lệ. Bạn nhập lại ngày bắt đầu nhé.', 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Sai chính tả tên môn",
+      "file": "32_sai_chinh_ta_mon.yaml",
+      "pass": false,
+      "turn_count": 8,
+      "errors": [
+        "Turn 8: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?']",
+        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Cách nói thật của sinh viên (e / dc / thầy ơi)",
+      "file": "33_cach_noi_that_sv.yaml",
+      "pass": false,
+      "turn_count": 8,
+      "errors": [
+        "Turn 8: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: [\"Lỗi hệ thống khi lưu CSDL: Link minh chứng chỉ được phép dùng http hoặc https. Scheme 'không có' không được chấp nhận.\"]"
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Tra cứu trạng thái không dấu",
+      "file": "34_khong_dau_tra_cuu.yaml",
+      "pass": false,
+      "turn_count": 1,
+      "errors": [
+        "Turn 1: không tìm thấy ['Danh sách các đơn nghỉ gần nhất', 'đơn'] trong câu trả lời bot: ['Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé.']"
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Hủy đơn viết tắt",
+      "file": "35_viet_tat_huy_don.yaml",
+      "pass": false,
+      "turn_count": 1,
+      "errors": [
+        "Turn 1: không tìm thấy ['Đã hủy đơn #', 'Đã Huỷ'] trong câu trả lời bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']"
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Sai chính tả / cách viết ngày",
+      "file": "36_sai_chinh_ta_ngay.yaml",
+      "pass": false,
+      "turn_count": 2,
+      "errors": [
+        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 2: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Bạn cho mình ngày kết thúc nghỉ nhé.']"
+      ]
+    },
+    {
+      "id": 37,
+      "name": "Câu mơ hồ / thiếu thông tin nặng",
+      "file": "37_cau_mo_ho.yaml",
+      "pass": false,
+      "turn_count": 2,
+      "errors": [
+        "Turn 2: không tìm thấy ['mã môn'] trong câu trả lời bot: ['Bạn cho mình biết mã lớp của bạn nhé.']"
+      ]
+    },
+    {
+      "id": 38,
+      "name": "Hỏi quy định không dấu / viết tắt",
+      "file": "38_hoi_quy_dinh_khong_dau.yaml",
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
+    }
+  ]
+}
