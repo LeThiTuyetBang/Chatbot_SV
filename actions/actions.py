@@ -123,14 +123,31 @@ def _extract_date_range_from_text(
 
     # 1. Bắt mẫu "từ A đến B"
     range_match = re.search(
-        r"(?:từ|tu)\s+([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|hôm nay|hôm qua|ngày mai|mai|ngày kia|thứ\s*[2-7]|chủ nhật)\s+(?:đến|den|-)\s+([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|hôm nay|hôm qua|ngày mai|mai|ngày kia|thứ\s*[2-7]|chủ nhật)",
+        r"(?:từ|tu)\s+"
+        r"([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|"
+        r"hôm nay|hom nay|hôm qua|hom qua|"
+        r"ngày mai|ngay mai|mai|"
+        r"ngày kia|ngay kia|ngày mốt|ngay mot|mốt|mot|"
+        r"thứ\s*[2-7]|thu\s*[2-7]|chủ nhật|chu nhat)"
+        r"\s+(?:đến|den|-)\s+"
+        r"([0-9]{1,2}[/-][0-9]{1,2}(?:[/-][0-9]{2,4})?|"
+        r"hôm nay|hom nay|hôm qua|hom qua|"
+        r"ngày mai|ngay mai|mai|"
+        r"ngày kia|ngay kia|ngày mốt|ngay mot|mốt|mot|"
+        r"thứ\s*[2-7]|thu\s*[2-7]|chủ nhật|chu nhat)",
         text_lower
     )
     if range_match:
         return range_match.group(1).strip(), range_match.group(2).strip()
 
     # 2. Tìm tất cả biểu thức ngày
-    date_pattern = r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|\b(?:hôm nay|hôm qua|ngày mai|mai|ngày kia|ngày mốt|mốt)\b|\b(?:thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b"
+    date_pattern = (
+        r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|"
+        r"\b(?:hôm nay|hom nay|hôm qua|hom qua|ngày mai|ngay mai|mai|"
+        r"ngày kia|ngay kia|ngày mốt|ngay mot|mốt|mot)\b|"
+        r"\b(?:thứ\s*[2-7]|thu\s*[2-7]|chủ nhật|chu nhat)"
+        r"(?:\s*(?:tuần|tuan)\s*(?:này|nay|sau|tới|toi))?\b"
+    )
     found_dates = re.findall(date_pattern, text_lower)
 
     if len(found_dates) >= 2:
@@ -311,7 +328,10 @@ class ValidateAbsenceForm(FormValidationAction):
 
         new_start, _ = _extract_date_range_from_text(text, entities, prefer_slot="start_date")
         if new_start:
-            return {"start_date": new_start, "normalized_start_date": _parse_date_text(new_start)}
+            parsed = _parse_date_text(new_start)
+            if parsed:  # chỉ gán khi ngày hợp lệ (không phải 31/02, 32/13...)
+                return {"start_date": new_start, "normalized_start_date": parsed}
+            return {}  # ngày sai → không gán, để validate hỏi lại
 
         if current_start and requested_slot != "start_date":
             return {"start_date": current_start}
@@ -345,7 +365,10 @@ class ValidateAbsenceForm(FormValidationAction):
 
         _, new_end = _extract_date_range_from_text(text, entities, prefer_slot=prefer)
         if new_end:
-            return {"end_date": new_end, "normalized_end_date": _parse_date_text(new_end)}
+            parsed = _parse_date_text(new_end)
+            if parsed:  # chỉ gán khi ngày hợp lệ
+                return {"end_date": new_end, "normalized_end_date": parsed}
+            return {}  # ngày sai → không gán, để validate hỏi lại
 
         if current_end and requested_slot != "end_date":
             return {"end_date": current_end}
@@ -477,13 +500,22 @@ class ValidateAbsenceForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        start_raw = slot_value or ""
+        start_raw = (slot_value or "").strip()
         normalized_start = _parse_date_text(start_raw)
-        if not normalized_start:
+
+        # Ngày không parse được hoặc không phải định dạng YYYY-MM-DD hợp lệ
+        if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(normalized_start)):
             dispatcher.utter_message(
                 text="Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
             )
-            return {"start_date": None, "normalized_start_date": None}
+            return {
+                "start_date": None,
+                "normalized_start_date": None,
+                # Xóa luôn end_date để tránh bot nhảy sang slot khác khi ngày đầu sai
+                "end_date": None,
+                "normalized_end_date": None,
+            }
+
         return {
             "start_date": start_raw,
             "normalized_start_date": normalized_start,
@@ -498,17 +530,23 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         start_raw = tracker.get_slot("start_date") or ""
         end_raw = (slot_value or "").strip()
-        normalized_start = _parse_date_text(start_raw)
+
+        normalized_start = tracker.get_slot("normalized_start_date") or _parse_date_text(start_raw)
         normalized_end = _parse_date_text(end_raw)
 
-        if not normalized_end or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_end):
+        # 1. Ngày kết thúc không hợp lệ (31/02, 32/13, chữ bậy...)
+        if not normalized_end or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(normalized_end)):
             dispatcher.utter_message(
                 text="Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
             )
-            return {"end_date": None, "normalized_end_date": None}
+            return {
+                "end_date": None,
+                "normalized_end_date": None,
+            }
 
+        # 2. Ngày bắt đầu đang bị lỗi → bắt nhập lại cả hai
         if start_raw:
-            if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", normalized_start):
+            if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(normalized_start)):
                 dispatcher.utter_message(
                     text="Ngày bắt đầu chưa hợp lệ. Bạn nhập lại ngày bắt đầu nhé."
                 )
@@ -518,9 +556,11 @@ class ValidateAbsenceForm(FormValidationAction):
                     "end_date": None,
                     "normalized_end_date": None,
                 }
+
+            # 3. start > end
             try:
-                d1 = date.fromisoformat(normalized_start)
-                d2 = date.fromisoformat(normalized_end)
+                d1 = date.fromisoformat(str(normalized_start))
+                d2 = date.fromisoformat(str(normalized_end))
                 if d1 > d2:
                     dispatcher.utter_message(
                         text=(
@@ -528,15 +568,23 @@ class ValidateAbsenceForm(FormValidationAction):
                             "Bạn nhập lại ngày kết thúc nhé."
                         )
                     )
-                    return {"end_date": None, "normalized_end_date": None}
+                    return {
+                        "end_date": None,
+                        "normalized_end_date": None,
+                    }
             except Exception:
-                pass
+                dispatcher.utter_message(
+                    text="Ngày không hợp lệ. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
+                )
+                return {
+                    "end_date": None,
+                    "normalized_end_date": None,
+                }
 
         return {
             "end_date": end_raw,
             "normalized_end_date": normalized_end,
         }
-
 
 class ActionStartAbsenceForm(Action):
     def name(self) -> Text:
@@ -587,7 +635,9 @@ class ActionSubmitAbsenceRequest(Action):
                 created_by=student_id,
                 source="chatbot",
             )
-            if evidence_url and str(evidence_url).strip().lower() not in {"không", "khong", "no", ""}:
+            _no_evidence = {"không", "khong", "no", "ko", "không có", "khong co", "ko có", "ko co", "chưa có", "chua co", ""}
+            ev = str(evidence_url).strip().lower() if evidence_url else ""
+            if evidence_url and ev not in _no_evidence and not any(ev.startswith(x) for x in ["không", "khong", "ko ", "ko có"]):
                 from db.store import add_evidence
                 add_evidence(
                     request_id=request_id,

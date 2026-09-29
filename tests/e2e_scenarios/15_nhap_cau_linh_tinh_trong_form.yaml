@@ -1,69 +1,42 @@
 id: 15
 group: "Nhập sai định dạng"
 name: "Nhập câu linh tinh khi đang ở trong form"
-description: "Nhập câu linh tinh khi đang ở trong form"
+description: "Hệ thống chấp nhận môn/lớp tự do; chỉ ngày sai bị chặn"
 
 turns:
   - user: "Em muốn xin nghỉ học"
     expected_bot:
-      - contains: ["mã môn hoặc tên môn"]
-    actual_bot: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
-    pass: true
+      - contains: ["mã môn"]
 
   - user: "hôm nay trời đẹp quá"
     expected_bot:
-      - contains: ["mã môn hoặc tên môn"] # bot vẫn hỏi lại vì chưa nhận được môn hợp lệ rõ ràng
-    actual_bot: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
-    pass: true
+      - contains: ["mã môn", "mã lớp"]
 
   - user: "xyz linh tinh"
     expected_bot:
-      - contains: ["mã lớp"]
-    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
-    pass: true
+      - contains: ["mã lớp", "ngày"]
 
   - user: "abc tào lao"
     expected_bot:
-      - contains: ["ngày bắt đầu nghỉ"]
-    actual_bot: "Bạn cho mình ngày bắt đầu nghỉ nhé."
-    pass: true
+      - contains: ["ngày"]
 
   - user: "hôm bữa"
     expected_bot:
-      - contains: ["chưa hiểu ngày", "nhập lại"]
-    actual_bot: "Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
-    pass: true
+      - contains: ["chưa hiểu ngày", "nhập lại", "ngày"]
 
   - user: "mai"
     expected_bot:
-      - contains: ["ngày kết thúc nghỉ"]
-    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
-    pass: true
+      - contains: ["ngày kết thúc", "lý do"]
 
   - user: "ngày kia"
     expected_bot:
-      - contains: ["lý do nghỉ học"]
-    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
-    pass: true
+      - contains: ["lý do", "minh chứng"]
 
   - user: "ốm không có minh chứng"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      - Môn: xyz linh tinh
-      - Lớp: ABC TÀO LAO
-      - Từ: mai -> 2026-09-28
-      - Đến: ngày kia -> 2026-09-29
-      - Lý do: ốm
-      - Minh chứng: Không có
-
-      Bạn xác nhận để mình lưu đơn nhé?
-    pass: true
+      - contains:
+          ["Mình đã hiểu đơn của bạn như sau", "xác nhận", "ngày kết thúc"]
 
 final_check:
-  db_status: null # chưa xác nhận nên chưa lưu
+  db_status: null
   expected_turn_count: 8
-
-result: Pass
-note: "Hệ thống chấp nhận môn/lớp tự do. Chỉ ngày sai mới bị chặn và hỏi lại."

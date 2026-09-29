@@ -22,8 +22,10 @@ nlu:
     examples: |
       - \b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b
       - \b\d{1,2}-\d{1,2}(?:-\d{2,4})?\b
-      - \b(hôm nay|hôm qua|ngày mai|mai|ngày kia|ngày mốt|mốt)\b
-      - \b(thứ\s*[2-7]|chủ nhật)(?:\s*(?:tuần\s*(?:này|sau|tới)))?\b
+      - \b(hôm nay|hom nay|hôm qua|hom qua|ngày mai|ngay mai|mai|ngày kia|ngay kia|ngày mốt|ngay mot|mốt|mot)\b
+      - \b(thứ\s*[2-7]|thu\s*[2-7]|chủ nhật|chu nhat)(?:\s*(?:tuần|tuan)\s*(?:này|nay|sau|tới|toi))?\b
+      - \b(ngaymai|ngaykia|ngaymot|homnay|homqua)\b
+      - \b(tu\s*mai|den\s*ngay\s*kia|tu\s*hom\s*nay)\b
 
   - regex: evidence_url
     examples: |
@@ -123,6 +125,25 @@ nlu:
       - em xin nghỉ môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [CN2302C](ma_lop) từ [hôm nay](time) đến [ngày mai](time) vì [bị sốt](reason) không có minh chứng
       - em muốn xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21IT01](ma_lop) từ [thứ 2 tuần sau](time) đến [thứ 4 tuần sau](time) do [bận việc gia đình](reason) không có minh chứng
       - thầy ơi cho em xin nghỉ môn [Kiểm thử phần mềm](ma_mon_hoc) lớp [DTH2151](ma_lop) ngày [mai](time) vì [đi khám bệnh](reason) không có giấy
+      - em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om, khong co minh chung
+      - em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om khong co minh chung
+      - xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om
+      - e xin nghi mon python lop cn2302c tu mai den ngay kia vi om
+      - em xin nghi mon mang may tinh lop dh21it01 tu hom nay den mai vi bi om
+      - xin nghi mon kiem thu phan mem lop dth2151 ngay mai vi di kham benh
+      - e muon xin nghi mon csdl tu mai den ngay kia
+      - cho e nghi mon csdl lop cn2302c tu mai den mốt
+      - em xin nghi mon [csdl](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](time) den [ngay kia](time) vi [om](reason) khong co minh chung
+      - em xin nghi mon [lap trinh python](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](time) den [ngay kia](time) vi [om](reason)
+      - thay oi cho e nghi 1 buoi dc ko
+      - thay oi cho e nghi 1 buoi duoc khong
+      - co oi cho em nghi 1 buoi voi
+      - e bi sot xin nghi 1 buoi
+      - em bi om xin nghi hoc
+      - xin nghi hoc mon csdl
+      - e muon xin nghi
+      - cho e xin nghi hoc
+      - em xin nghi mon csdl
 
   # Intent Xem trạng thái đơn
   - intent: check_absence_status
@@ -133,6 +154,25 @@ nlu:
       - tra cứu đơn xin nghỉ học
       - đơn nghỉ học hôm qua thế nào rồi
       - cho em xem danh sách đơn đã nộp
+      - xem trang thai don xin nghi
+      - xem trang thai don
+      - kiem tra trang thai don
+      - don xin nghi cua em duoc duyet chua
+      - xem danh sach don da nop
+      - tra cuu don xin nghi
+      - xem don cua em
+      - danh sach don nghi
+      - don nghi hoc the nao roi
+      - check trang thai don
+      - xem status don
+      - don cua toi duoc duyet chua
+      - cho e xem don da nop
+      - xem don vua nop
+      - trang thai don nghi hoc
+      - em muon xem trang thai don
+      - cho em check don
+      - don nghi cua e sao roi
+      - xem lich su don
 
   # Intent Hủy đơn xin nghỉ
   - intent: cancel_absence
@@ -149,6 +189,23 @@ nlu:
       - hủy đi
       - không làm nữa
       - dừng lại
+      - huy don vua nop
+      - huy don xin nghi
+      - huy don
+      - rut lai don
+      - thoi huy don
+      - huy giup em don vua nop
+      - e muon huy don
+      - huy cai don nghi vua nop
+      - khong muon nghi nua huy don
+      - thoi khong xin nghi nua
+      - huy don pending
+      - cancel don
+      - huy don gan nhat
+      - em muon huy don vua nop
+      - thoi huy
+      - dung lai huy don
+      - huy don di
 
   # Intent Cung cấp thông tin bổ sung
   - intent: cung_cap_thong_tin
@@ -260,6 +317,19 @@ nlu:
       - vắng thi có được thi lại không
       - làm sao biết mình đã vắng bao nhiêu tiết
       - quy định điểm danh của trường
+      - nghi bao nhieu buoi thi bi cam thi
+      - nghi bao nhieu % thi bi cam thi
+      - vang bao nhieu tiet thi bi cam thi
+      - quy dinh vang hoc nhu the nao
+      - nghi qua 20% thi sao
+      - vang qua 20% so tiet thi sao
+      - nghi hoc bi tru diem ren luyen khong
+      - quy che nghi hoc cua truong
+      - bi cam thi do vang hoc thi xu ly ra sao
+      - duoc vang toi da bao nhieu buoi
+      - nghi 1 buoi co bi anh huong gi khong
+      - quy dinh diem danh
+      - vang hoc khong phep phat the nao
 
   # Intent Chào hỏi / Tạm biệt / Đồng ý / Từ chối
   - intent: affirm

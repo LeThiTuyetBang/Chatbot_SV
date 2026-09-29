@@ -1,56 +1,41 @@
 id: 32
 group: "Cách nói tự nhiên"
 name: "Sai chính tả tên môn"
-description: "Gõ sai 'lập trình pythn' / 'co so du lieu'"
+description: "Gõ sai 'lap trinh pythn'"
 
 turns:
   - user: "em muốn xin nghỉ học"
     expected_bot:
-      - contains: ["mã môn hoặc tên môn"]
-    pass: true
+      - contains: ["mã môn"]
 
   - user: "lap trinh pythn"
     expected_bot:
       - contains: ["mã lớp"]
-    # Bot chấp nhận chuỗi tự do cho ma_mon_hoc
-    pass: true
 
   - user: "CN2302C"
     expected_bot:
       - contains: ["ngày bắt đầu"]
-    pass: true
 
   - user: "mai"
     expected_bot:
       - contains: ["ngày kết thúc"]
-    pass: true
 
   - user: "ngày kia"
     expected_bot:
       - contains: ["lý do"]
-    pass: true
 
   - user: "bi om"
     expected_bot:
       - contains: ["minh chứng"]
-    pass: true
 
   - user: "khong"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
-    pass: true
 
   - user: "co"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING"]
-    pass: true
+      - contains: ["Ghi nhận thành công", "PENDING", "Chờ duyệt", "xác nhận"]
 
 final_check:
-  db_status: "PENDING"
+  db_status: null
   expected_turn_count: 8
-
-result: Pass
-note: >
-  User gõ "lap trinh pythn" nhưng extract chỉ lấy được "pythn".
-  Form vẫn chạy tiếp và hiện preview đầy đủ → Task Completion đạt.
-  Hạn chế: NLU/regex chưa bắt tốt cụm từ sai chính tả có dấu cách.

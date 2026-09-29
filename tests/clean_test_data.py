@@ -9,6 +9,10 @@ Cách dùng:
     3. venv\\Scripts\\python.exe tests\\clean_test_data.py --yes      (xóa thật)
 """
 
+#python tests/reset_db.py restore
+#python tests/run_e2e.py
+
+
 import sqlite3
 import sys
 from pathlib import Path

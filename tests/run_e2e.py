@@ -167,7 +167,7 @@ def setup_approved_request(session: requests.Session):
     if not staff:
         raise RuntimeError("Không tìm thấy tài khoản giáo vụ test để setup #22")
 
-    store.update_staff_decision(
+    store.update_request_status(
         request_id=pending[0]["id"],
         new_status=store.STATUS_APPROVED,
         changed_by=staff["id"],

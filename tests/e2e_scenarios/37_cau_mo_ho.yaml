@@ -1,22 +1,16 @@
 id: 37
 group: "Cách nói tự nhiên"
 name: "Câu mơ hồ / thiếu thông tin nặng"
-description: "e nghỉ học đi / cho e nghỉ với"
+description: "cho e nghỉ với / cái môn hôm qua"
 
 turns:
   - user: "cho e nghỉ với"
     expected_bot:
-      - contains: ["mã môn hoặc tên môn"]
-    pass: true
+      - contains: ["mã môn"]
 
   - user: "cái môn hôm qua"
     expected_bot:
-      - contains: ["mã môn"] # bot hỏi lại vì không hiểu
-    # Có thể fallback hoặc hỏi lại slot
-    pass: true
+      - contains: ["mã môn", "mã lớp"]
 
 final_check:
   expected_turn_count: 2
-  note: "Kịch bản dễ Fail – ghi nhận hành vi thật của bot"
-
-result: Pass

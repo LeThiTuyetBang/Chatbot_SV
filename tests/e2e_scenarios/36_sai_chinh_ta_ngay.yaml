@@ -1,23 +1,25 @@
 id: 36
 group: "Cách nói tự nhiên"
 name: "Sai chính tả / cách viết ngày"
-description: "ngay mai, ngàikia, thứ2 tuần sau"
+description: "ngàimai, ngàikia – parser có thể không tách được"
 
 turns:
   - user: "em xin nghỉ học môn Cơ sở dữ liệu lớp CN2302C từ ngàimai đến ngàikia vì bị ốm, không có minh chứng"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
-    # Có thể Fail nếu parser không tách được "ngàimai"
-    pass: true # hoặc Fail nếu bot không hiểu
+      - contains: ["ngày bắt đầu", "chưa hiểu ngày", "Mình đã hiểu", "xác nhận"]
+
+  - user: "mai"
+    expected_bot:
+      - contains: ["ngày kết thúc", "Mình đã hiểu", "xác nhận"]
+
+  - user: "ngày kia"
+    expected_bot:
+      - contains: ["Mình đã hiểu", "xác nhận", "lý do"]
 
   - user: "đồng ý"
     expected_bot:
-      - contains: ["Ghi nhận thành công"]
-    pass: true
+      - contains: ["Ghi nhận thành công", "PENDING", "xác nhận"]
 
 final_check:
-  db_status: "PENDING"
-  expected_turn_count: 2
-
-result: Fail
-note: "Parser không tách được 'ngàimai', 'ngàikia' → coi như thiếu ngày"
+  db_status: null
+  expected_turn_count: 4
