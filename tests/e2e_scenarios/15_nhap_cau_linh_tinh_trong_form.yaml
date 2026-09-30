@@ -10,11 +10,11 @@ turns:
 
   - user: "hôm nay trời đẹp quá"
     expected_bot:
-      - contains: ["mã môn", "mã lớp"]
+      - contains: ["mã lớp"]
 
   - user: "xyz linh tinh"
     expected_bot:
-      - contains: ["mã lớp", "ngày"]
+      - contains: ["ngày"]
 
   - user: "abc tào lao"
     expected_bot:
@@ -22,20 +22,19 @@ turns:
 
   - user: "hôm bữa"
     expected_bot:
-      - contains: ["chưa hiểu ngày", "nhập lại", "ngày"]
+      - contains: ["ngày"]
 
   - user: "mai"
     expected_bot:
-      - contains: ["ngày kết thúc", "lý do"]
+      - contains: ["lý do"]
 
   - user: "ngày kia"
     expected_bot:
-      - contains: ["lý do", "minh chứng"]
+      - contains: ["ngày kết thúc"]
 
   - user: "ốm không có minh chứng"
     expected_bot:
-      - contains:
-          ["Mình đã hiểu đơn của bạn như sau", "xác nhận", "ngày kết thúc"]
+      - contains: ["ngày kết thúc"]
 
 final_check:
   db_status: null

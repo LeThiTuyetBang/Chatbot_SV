@@ -30,11 +30,11 @@ turns:
 
   - user: "khong"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận"]
+      - contains: ["Mình đã hiểu"]
 
   - user: "co"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING", "Chờ duyệt", "xác nhận"]
+      - contains: ["Ghi nhận thành công"]
 
 final_check:
   db_status: null

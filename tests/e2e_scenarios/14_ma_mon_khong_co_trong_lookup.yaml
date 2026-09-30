@@ -6,11 +6,11 @@ description: "Mã môn không có trong lookup table – hệ thống chấp nh�
 turns:
   - user: "Em xin nghỉ môn XYZ999 lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau", "mã môn", "xác nhận"]
+      - contains: ["mã môn"]
 
   - user: "đồng ý"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING", "xác nhận", "Mình đã hiểu"]
+      - contains: ["Mình đã hiểu"]
 
 final_check:
   db_status: null

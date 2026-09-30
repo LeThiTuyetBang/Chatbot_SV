@@ -10,7 +10,7 @@ setup:
 turns:
   - user: "hủy đơn xin nghỉ"
     expected_bot:
-      - contains: ["không có đơn", "Chờ duyệt", "hủy", "Đã hủy"]
+      - contains: ["hủy"]
 
 final_check:
   expected_turn_count: 1

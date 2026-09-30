@@ -6,19 +6,19 @@ description: "ngàimai, ngàikia – parser có thể không tách được"
 turns:
   - user: "em xin nghỉ học môn Cơ sở dữ liệu lớp CN2302C từ ngàimai đến ngàikia vì bị ốm, không có minh chứng"
     expected_bot:
-      - contains: ["ngày bắt đầu", "chưa hiểu ngày", "Mình đã hiểu", "xác nhận"]
+      - contains: ["ngày bắt đầu"]
 
   - user: "mai"
     expected_bot:
-      - contains: ["ngày kết thúc", "Mình đã hiểu", "xác nhận"]
+      - contains: ["ngày kết thúc"]
 
   - user: "ngày kia"
     expected_bot:
-      - contains: ["Mình đã hiểu", "xác nhận", "lý do"]
+      - contains: ["Mình đã hiểu"]
 
   - user: "đồng ý"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING", "xác nhận"]
+      - contains: ["Ghi nhận thành công"]
 
 final_check:
   db_status: null

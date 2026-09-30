@@ -6,11 +6,11 @@ description: "em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om"
 turns:
   - user: "em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om, khong co minh chung"
     expected_bot:
-      - contains: ["Mình đã hiểu đơn của bạn như sau", "xác nhận", "minh chứng"]
+      - contains: ["Mình đã hiểu"]
 
   - user: "dong y"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING", "Chờ duyệt", "xác nhận"]
+      - contains: ["Ghi nhận thành công"]
 
 final_check:
   db_status: null

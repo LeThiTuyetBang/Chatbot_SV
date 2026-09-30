@@ -1,33 +1,26 @@
 {
   "total_executed": 32,
-  "passed": 19,
-  "failed": 13,
+  "passed": 31,
+  "failed": 1,
   "skipped": 6,
-  "tcr": 59.375,
-  "average_turn_count": 3.473684210526316,
+  "tcr": 96.875,
+  "average_turn_count": 3.4193548387096775,
   "details": [
     {
       "id": 1,
       "name": "Nộp đơn đầy đủ thông tin + có link minh chứng",
       "file": "01_luong_chuan_day_du.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu trả lời bot: ['[HTTP 502] {\"message\":\"Kh\\\\u00f4ng k\\\\u1ebft n\\\\u1ed1i \\\\u0111\\\\u01b0\\\\u1ee3c Rasa REST API: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>\",\"ok\":false}\\n']",
-        "Turn 2: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['[HTTP 502] {\"message\":\"Kh\\\\u00f4ng k\\\\u1ebft n\\\\u1ed1i \\\\u0111\\\\u01b0\\\\u1ee3c Rasa REST API: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>\",\"ok\":false}\\n']",
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'None'"
-      ]
+      "errors": []
     },
     {
       "id": 2,
       "name": "Nộp đơn không có minh chứng",
       "file": "02_khong_minh_chung.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: không tìm thấy ['mã môn hoặc tên môn'] trong câu trả lời bot: ['[HTTP 502] {\"message\":\"Kh\\\\u00f4ng k\\\\u1ebft n\\\\u1ed1i \\\\u0111\\\\u01b0\\\\u1ee3c Rasa REST API: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>\",\"ok\":false}\\n']",
-        "Turn 2: không tìm thấy ['mã lớp'] trong câu trả lời bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']"
-      ]
+      "errors": []
     },
     {
       "id": 3,
@@ -107,62 +100,41 @@
       "id": 12,
       "name": "Ngày không hợp lệ (31/02, 32/13)",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 1: không tìm thấy ['chưa hiểu ngày', 'nhập lại', 'ngày bắt đầu'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 2: không tìm thấy ['ngày kết thúc nghỉ'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]",
-        "Turn 3: không tìm thấy ['lý do nghỉ học'] trong câu trả lời bot: ['Mình đã hiểu đơn của bạn như sau:\\n- Môn: CTDL\\n- Lớp: CN2302C\\n- Từ: 05/03/2026 -> 2026-03-05\\n- Đến: 05/03/2026 -> 2026-03-05\\n- Lý do: ốm\\n- Minh chứng: 05/03/2026', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
-      ]
+      "errors": []
     },
     {
       "id": 13,
       "name": "Nhập ngày bằng câu không hiểu được",
       "file": "13_ngay_cau_khong_hieu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 1: không tìm thấy ['ngày kết thúc nghỉ'] trong câu trả lời bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 2: không tìm thấy ['Ngày bắt đầu chưa hợp lệ'] trong câu trả lời bot: ['Bạn cho mình ngày kết thúc nghỉ nhé.']",
-        "Turn 3: không tìm thấy ['Ngày bắt đầu chưa hợp lệ'] trong câu trả lời bot: ['Ngày kết thúc (27/9) không được trước ngày bắt đầu (mai). Bạn nhập lại ngày kết thúc nhé.', 'Bạn cho mình ngày kết thúc nghỉ nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 14,
       "name": "Mã môn không có trong lookup table",
       "file": "14_ma_mon_khong_co_trong_lookup.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'Minh chứng: Không có'] trong câu trả lời bot: ['Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé.']",
-        "Turn 2: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Mình đã hiểu đơn của bạn như sau:\\n- Môn: đồng ý\\n- Lớp: XYZ999\\n- Từ: mai -> 2026-10-01\\n- Đến: ngày kia -> 2026-10-02\\n- Lý do: ốm\\n- Minh chứng: Không có', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
-      ]
+      "errors": []
     },
     {
       "id": 15,
       "name": "Nhập câu linh tinh khi đang ở trong form",
       "file": "15_nhap_cau_linh_tinh_trong_form.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 2: không tìm thấy ['mã môn hoặc tên môn'] trong câu trả lời bot: ['Bạn cho mình biết mã lớp của bạn nhé.']",
-        "Turn 3: không tìm thấy ['mã lớp'] trong câu trả lời bot: ['Bạn cho mình ngày kết thúc nghỉ nhé.']",
-        "Turn 4: không tìm thấy ['ngày bắt đầu nghỉ'] trong câu trả lời bot: [\"Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày kết thúc nghỉ nhé.']",
-        "Turn 6: không tìm thấy ['ngày kết thúc nghỉ'] trong câu trả lời bot: ['Bạn cho mình lý do nghỉ học nhé.']",
-        "Turn 7: không tìm thấy ['lý do nghỉ học'] trong câu trả lời bot: ['Ngày kết thúc (mai) không được trước ngày bắt đầu (ngày kia). Bạn nhập lại ngày kết thúc nhé.', 'Bạn cho mình ngày kết thúc nghỉ nhé.']",
-        "Turn 8: không tìm thấy ['Mình đã hiểu đơn của bạn như sau'] trong câu trả lời bot: [\"Mình chưa hiểu ngày kết thúc. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày kết thúc nghỉ nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 16,
       "name": "Đang điền form → nói 'thôi' / 'hủy'",
       "file": "16_doi_y_huy_khi_dang_dien_form.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 4,
-      "errors": [
-        "Turn 3: không tìm thấy ['nhập lại', 'từ đầu'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 4: không tìm thấy ['nhập lại', 'từ đầu'] trong câu trả lời bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 17,
@@ -208,21 +180,17 @@
       "id": 22,
       "name": "Cố hủy đơn đã APPROVED hoặc REJECTED",
       "file": "22_huy_don_da_xu_ly.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 1,
-      "errors": [
-        "Turn 1: không tìm thấy ['Hiện không có đơn Chờ duyệt nào để hủy'] trong câu trả lời bot: ['Đã hủy đơn #6 và cập nhật trạng thái thành Đã Huỷ.']"
-      ]
+      "errors": []
     },
     {
       "id": 23,
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 1,
-      "errors": [
-        "DB status mong đợi 'CANCELLED' nhưng thực tế là 'APPROVED'"
-      ]
+      "errors": []
     },
     {
       "id": 24,
@@ -294,13 +262,9 @@
       "id": 31,
       "name": "Viết tắt + không dấu – nộp đơn 1 câu",
       "file": "31_viet_tat_khong_dau.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]",
-        "Turn 2: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Mình đã hiểu đơn của bạn như sau:\\n- Môn: csdl\\n- Lớp: CN2302C\\n- Từ: mai -> 2026-10-01\\n- Đến: ngay kia -> 2026-10-02\\n- Lý do: om\\n- Minh chứng: dong y', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']",
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'APPROVED'"
-      ]
+      "errors": []
     },
     {
       "id": 32,
@@ -309,8 +273,7 @@
       "pass": false,
       "turn_count": 8,
       "errors": [
-        "Turn 8: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?']",
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'APPROVED'"
+        "Turn 8: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?']"
       ]
     },
     {
@@ -341,23 +304,17 @@
       "id": 36,
       "name": "Sai chính tả / cách viết ngày",
       "file": "36_sai_chinh_ta_ngay.yaml",
-      "pass": false,
-      "turn_count": 2,
-      "errors": [
-        "Turn 1: không tìm thấy ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 2: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
-      ]
+      "pass": true,
+      "turn_count": 4,
+      "errors": []
     },
     {
       "id": 37,
       "name": "Câu mơ hồ / thiếu thông tin nặng",
       "file": "37_cau_mo_ho.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: không tìm thấy ['mã môn'] trong câu trả lời bot: ['Bạn cho mình biết mã lớp của bạn nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 38,

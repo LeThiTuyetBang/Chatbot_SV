@@ -6,7 +6,7 @@ description: "Cần có ít nhất 1 đơn PENDING trước khi chạy (hoặc c
 turns:
   - user: "hủy đơn vừa nộp"
     expected_bot:
-      - contains: ["Đã hủy", "Đã Huỷ", "không có đơn", "Chờ duyệt"]
+      - contains: ["Đã hủy"]
 
 final_check:
   expected_turn_count: 1

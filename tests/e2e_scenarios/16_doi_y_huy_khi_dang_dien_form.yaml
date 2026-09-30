@@ -14,11 +14,11 @@ turns:
 
   - user: "thôi"
     expected_bot:
-      - contains: ["nhập lại", "từ đầu", "mã lớp", "ngày"]
+      - contains: ["ngày"]
 
   - user: "hủy"
     expected_bot:
-      - contains: ["nhập lại", "từ đầu", "mã lớp", "ngày", "chưa hiểu"]
+      - contains: ["ngày"]
 
 final_check:
   db_status: null

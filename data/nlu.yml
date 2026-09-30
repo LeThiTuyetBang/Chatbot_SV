@@ -363,6 +363,9 @@ nlu:
       - ừm
       - chuẩn
       - chuẩn ạ
+      - co
+      - coá
+      - coa
 
   - intent: deny
     examples: |
