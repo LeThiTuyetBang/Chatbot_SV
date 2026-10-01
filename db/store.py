@@ -25,8 +25,15 @@ ALLOWED_TRANSITIONS = {
 }
 
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    """Băm mật khẩu bằng thuật toán an toàn (pbkdf2:sha256 + salt)."""
+    return generate_password_hash(password)
+
+def check_password(password_hash: str, password: str) -> bool:
+    """Kiểm tra mật khẩu."""
+    return check_password_hash(password_hash, password)
 
 
 def parse_date_obj(date_str: str) -> Optional[date]:
@@ -171,18 +178,22 @@ def resolve_user_id_from_metadata(metadata: Dict[str, Any]) -> int:
 
 
 def get_user_by_credentials(username: str, password: str) -> Optional[Dict[str, Any]]:
-    password_hash = hash_password(password)
     with connect_db() as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT id, username, full_name, role, class_code
+            SELECT id, username, password_hash, full_name, role, class_code
             FROM Users
-            WHERE username = ? AND password_hash = ?
+            WHERE username = ?
             """,
-            (username, password_hash),
+            (username,),
         )
-        return row_to_dict(cursor.fetchone())
+        row = cursor.fetchone()
+        if row and check_password(row["password_hash"], password):
+            user = dict(row)
+            del user["password_hash"]   # không trả password_hash ra ngoài
+            return user
+        return None
 
 
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:

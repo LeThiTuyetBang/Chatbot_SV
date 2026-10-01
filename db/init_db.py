@@ -1,20 +1,18 @@
 import sqlite3
-import hashlib
 import os
+from werkzeug.security import generate_password_hash
 
 # Xác định đường dẫn file CSDL nằm cùng thư mục với file script này
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatbot.db")
 
-def hash_password(password: str) -> str:
-    """Mã hóa mật khẩu bằng SHA-256"""
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
 
 def init_database():
     # Đảm bảo thư mục chứa CSDL tồn tại
     db_dir = os.path.dirname(DB_PATH)
-    if db_dir and not os.path.exists(db_dir):
+    if db_dir and not os.path.exists(db_dir): 
         os.makedirs(db_dir)
-
+ 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -75,9 +73,9 @@ def init_database():
         FOREIGN KEY (request_id) REFERENCES AbsenceRequests(id)
     )
     ''')
-
-    # Tạo mật khẩu mặc định được băm SHA-256 (Mật khẩu: 123456)
-    default_password_hash = hash_password("123456")
+    # Tạo mật khẩu mặc định được băm an toàn (pbkdf2 + salt)
+    # Mật khẩu mới: UTH@2026
+    default_password_hash = generate_password_hash("UTH@2026")
 
     # Chèn dữ liệu mẫu cho sinh viên thực hiện đề tài
     cursor.execute('''

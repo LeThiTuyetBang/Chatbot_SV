@@ -26,9 +26,9 @@ SCENARIOS_DIR = Path(__file__).parent / "e2e_scenarios"
 DB_PATH = Path(__file__).parent.parent / "db" / "chatbot.db"
 
 STUDENT_USER = "066305014844"
-STUDENT_PASS = "123456"
+STUDENT_PASS = "UTH@2026"
 STAFF_USER = "gv_tien"
-STAFF_PASS = "123456"
+STAFF_PASS = "UTH@2026"
 
 # Timeout mỗi request (giây)
 TIMEOUT = 30

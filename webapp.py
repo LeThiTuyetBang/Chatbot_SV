@@ -46,13 +46,25 @@ sse_listeners = []
 sse_lock = threading.Lock()
 
 
-def broadcast_event(event_type: str, data: dict):
-    """Broadcasting events to all SSE subscribers"""
+def broadcast_event(event_type: str, data: dict, target_user_id: int = None, target_role: str = None):
+    """
+    Gửi event.
+    - Nếu target_user_id có giá trị → chỉ gửi cho user đó.
+    - Nếu target_role có giá trị → chỉ gửi cho role đó (ví dụ 'STAFF').
+    - Nếu cả hai đều None → gửi cho tất cả người đã đăng nhập (giữ tương thích cũ).
+    """
     msg = f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
     with sse_lock:
         dead = []
         for q in sse_listeners:
             try:
+                # Lấy thông tin user gắn với queue (sẽ thêm ở bước sau)
+                listener_info = getattr(q, "user_info", None)
+                if listener_info:
+                    if target_user_id and listener_info.get("user_id") != target_user_id:
+                        continue
+                    if target_role and listener_info.get("role") != target_role:
+                        continue
                 q.put_nowait(msg)
             except queue.Full:
                 dead.append(q)
@@ -148,6 +160,12 @@ def admin_view():
 def sse_events():
     def stream():
         q = queue.Queue(maxsize=50)
+        # Gắn thông tin user vào queue để lọc sau này
+        q.user_info = {
+            "user_id": session.get("user_id"),
+            "role": session.get("role"),
+            "username": session.get("username"),
+        }
         with sse_lock:
             sse_listeners.append(q)
         yield "event: ping\ndata: {}\n\n"
@@ -162,6 +180,16 @@ def sse_events():
             with sse_lock:
                 if q in sse_listeners:
                     sse_listeners.remove(q)
+
+    return Response(
+        stream(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
     return Response(
         stream(),
@@ -259,7 +287,12 @@ def student_create_request():
             add_evidence(request_id=req_id, file_name="minh_chung", file_url=evidence_url)
 
         request_data = get_request_by_id(req_id)
-        broadcast_event("request_created", {"request_id": req_id, "student_id": student_id})
+        # Chỉ thông báo cho giáo vụ (STAFF)
+        broadcast_event(
+            "request_created",
+            {"request_id": req_id},
+            target_role="STAFF"
+        )
         return _json_response(data=request_data, message="Gửi đơn thành công.")
 
     except ValueError as ve:
@@ -299,7 +332,12 @@ def student_cancel_request(request_id: int):
             changed_by=student_id,
             note="Sinh viên đã huỷ đơn xin nghỉ",
         )
-        broadcast_event("request_updated", {"request_id": request_id, "status": STATUS_CANCELLED})
+        # Thông báo cho giáo vụ biết đơn đã bị hủy
+        broadcast_event(
+            "request_updated",
+            {"request_id": request_id, "status": STATUS_CANCELLED},
+            target_role="STAFF"
+        )
         return _json_response(data=updated, message="Đã huỷ đơn thành công.")
     except Exception as error:
         return _json_response(message=str(error), ok=False, status_code=400)
@@ -321,7 +359,11 @@ def student_cancel_latest():
     if not updated:
         return _json_response(message="Không có đơn Chờ duyệt nào để huỷ.", ok=False, status_code=404)
 
-    broadcast_event("request_updated", {"request_id": updated["id"], "status": STATUS_CANCELLED})
+    broadcast_event(
+    "request_updated",
+    {"request_id": updated["id"], "status": STATUS_CANCELLED},
+    target_role="STAFF"
+)
     return _json_response(data=updated, message="Đã huỷ đơn thành công.")
 
 
@@ -375,7 +417,13 @@ def approve_request(request_id: int):
             changed_by=admin_id,
             note="Giáo vụ đã duyệt đơn xin nghỉ học",
         )
-        broadcast_event("request_updated", {"request_id": request_id, "status": STATUS_APPROVED})
+        # Chỉ gửi cho đúng sinh viên sở hữu đơn
+        student_id = updated.get("student_id")
+        broadcast_event(
+            "request_updated",
+            {"request_id": request_id, "status": STATUS_APPROVED},
+            target_user_id=student_id
+        )
         return _json_response(data=updated, message="Duyệt đơn thành công.")
     except Exception as error:
         status_code = 409 if "xử lý trước đó" in str(error) else 400
@@ -397,7 +445,12 @@ def reject_request(request_id: int):
             changed_by=admin_id,
             note=note_text,
         )
-        broadcast_event("request_updated", {"request_id": request_id, "status": STATUS_REJECTED})
+        student_id = updated.get("student_id")
+        broadcast_event(
+            "request_updated",
+            {"request_id": request_id, "status": STATUS_REJECTED},
+            target_user_id=student_id
+        )
         return _json_response(data=updated, message="Đã từ chối đơn.")
     except Exception as error:
         status_code = 409 if "xử lý trước đó" in str(error) else 400
@@ -407,7 +460,7 @@ def reject_request(request_id: int):
 @app.put("/api/admin/requests/<int:request_id>")
 @role_required("STAFF")
 def edit_request(request_id: int):
-    payload = request.get_json(force=True, silent=True) or {}
+    payload = request.get_json(force=True, silent=True) or {} 
     admin_id = session["user_id"]
     new_status = (payload.get("new_status") or "").strip()
     note = (payload.get("note") or "").strip()
@@ -422,7 +475,12 @@ def edit_request(request_id: int):
             changed_by=admin_id,
             note=note,
         )
-        broadcast_event("request_updated", {"request_id": request_id, "status": updated["status"]})
+        student_id = updated.get("student_id")
+        broadcast_event(
+            "request_updated",
+            {"request_id": request_id, "status": updated["status"]},
+            target_user_id=student_id
+        )
         return _json_response(data=updated, message=f"Đã điều chỉnh trạng thái đơn thành [{STATUS_LABELS[new_status]}].")
     except Exception as error:
         return _json_response(message=str(error), ok=False, status_code=400)

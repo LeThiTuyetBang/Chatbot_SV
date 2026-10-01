@@ -52,7 +52,7 @@ class SystemTestCase(unittest.TestCase):
         # 1. Đăng nhập sinh viên
         login_res = self.client.post('/api/auth/login', data=json.dumps({
             'username': '066305014844',
-            'password': '123456'
+            'password': 'UTH@2026'
         }), content_type='application/json')
         self.assertEqual(login_res.status_code, 200)
 
@@ -87,7 +87,7 @@ class SystemTestCase(unittest.TestCase):
         # Đăng nhập sinh viên
         self.client.post('/api/auth/login', data=json.dumps({
             'username': '066305014844',
-            'password': '123456'
+            'password': 'UTH@2026'
         }), content_type='application/json')
 
         # Thử gọi API danh sách giáo vụ
@@ -101,7 +101,7 @@ class SystemTestCase(unittest.TestCase):
         # Đăng nhập giáo vụ
         login_res = self.client.post('/api/auth/login', data=json.dumps({
             'username': 'gv_tien',
-            'password': '123456'
+            'password': 'UTH@2026'
         }), content_type='application/json')
         self.assertEqual(login_res.status_code, 200)
 

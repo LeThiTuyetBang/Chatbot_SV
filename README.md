@@ -2,8 +2,8 @@
 
 Hệ thống chatbot hội thoại hướng tác vụ (Task-Oriented Dialogue System) hỗ trợ sinh viên nộp đơn xin nghỉ học, tra cứu trạng thái, hủy đơn và hỗ trợ giáo vụ duyệt/từ chối đơn.
 
-**Trường Đại học Giao thông Vận tải TP. Hồ Chí Minh**   
-**Sinh viên thực hiện:** Lê Thị Tuyết Băng – 066305014844  
+**Trường Đại học Giao thông Vận tải TP. Hồ Chí Minh**  
+**Sinh viên thực hiện:** Lê Thị Tuyết Băng – 066305014844
 
 ---
 
@@ -69,6 +69,9 @@ Chatbot_SV/
 ├── templates/
 │   └── index.html              # Giao diện web duy nhất
 ├── tests/
+│   ├── e2e_scenarios/          # 38 kịch bản End-to-End
+│   ├── run_e2e.py              # Script chạy kiểm thử E2E tự động
+│   ├── e2e_results.json
 │   ├── test_stories.yml
 │   └── test_system.py
 ├── config.yml                  # Cấu hình pipeline NLU + Policy
@@ -122,6 +125,19 @@ pip install rasa-sdk
 pip install flask
 ```
 
+> Khuyến nghị tạo file `requirements.txt` để dễ tái lập môi trường:
+>
+> ```bash
+> pip freeze > requirements.txt
+> ```
+
+### Bước 3.1: Thiết lập biến môi trường (bắt buộc)
+
+Tạo file `.env` ở thư mục gốc dự án với nội dung:
+
+````bash
+SECRET_KEY=your-very-secret-key-here-change-this
+
 > Nếu gặp lỗi phiên bản, có thể dùng:
 >
 > ```bash
@@ -132,7 +148,7 @@ pip install flask
 
 ```bash
 python db/init_db.py
-```
+````
 
 Lệnh này sẽ tạo file `db/chatbot.db` và thêm 2 tài khoản mẫu.
 
@@ -170,10 +186,10 @@ Truy cập giao diện: **http://localhost:5000**
 
 ## 7. Tài khoản mặc định
 
-| Vai trò   | Tài khoản      | Mật khẩu | Ghi chú                     |
-| --------- | -------------- | -------- | --------------------------- |
-| Sinh viên | `066305014844` | `123456` | Lê Thị Tuyết Băng - CN2302C |
-| Giáo vụ   | `gv_tien`      | `123456` | ThS. Nguyễn Thanh Tiến      |
+| Vai trò   | Tài khoản      | Mật khẩu   | Ghi chú                     |
+| --------- | -------------- | ---------- | --------------------------- |
+| Sinh viên | `066305014844` | `UTH@2026` | Lê Thị Tuyết Băng - DTH2151 |
+| Giáo vụ   | `gv_tien`      | `UTH@2026` | ThS. Nguyễn Thanh Tiến      |
 
 ---
 
