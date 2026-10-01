@@ -52,7 +52,7 @@ Hệ thống chatbot hội thoại hướng tác vụ (Task-Oriented Dialogue Sy
 
 ## 3. Cấu trúc thư mục dự án
 
-```
+```text
 Chatbot_SV/
 ├── actions/
 │   └── actions.py              # Custom actions (validate, submit, cancel, check status...)
@@ -77,6 +77,7 @@ Chatbot_SV/
 ├── config.yml                  # Cấu hình pipeline NLU + Policy
 ├── domain.yml                  # Intents, entities, slots, forms, responses
 ├── endpoints.yml               # Địa chỉ Action Server
+├── requirements.txt            # Danh sách thư viện khóa phiên bản
 ├── credentials.yml
 ├── webapp.py                   # Ứng dụng Flask
 └── README.md
@@ -120,35 +121,36 @@ source venv/bin/activate
 
 ```bash
 pip install --upgrade pip
-pip install rasa==3.6.20
-pip install rasa-sdk
-pip install flask
+pip install -r requirements.txt
 ```
 
-> Khuyến nghị tạo file `requirements.txt` để dễ tái lập môi trường:
->
-> ```bash
-> pip freeze > requirements.txt
-> ```
+> **Lưu ý:** Dự án đã có file `requirements.txt` khóa phiên bản để dễ tái lập môi trường.
 
-### Bước 3.1: Thiết lập biến môi trường (bắt buộc)
+### Bước 3.1: Thiết lập biến môi trường SECRET_KEY (bắt buộc)
 
 Tạo file `.env` ở thư mục gốc dự án với nội dung:
 
-````bash
-SECRET_KEY=your-very-secret-key-here-change-this
+```env
+SECRET_KEY=your-secret-key-change-this
+```
 
-> Nếu gặp lỗi phiên bản, có thể dùng:
->
-> ```bash
-> pip install rasa==3.6.20 rasa-sdk flask
-> ```
+Hoặc chạy lệnh sau trước khi khởi động hệ thống:
+
+```bash
+# Linux / macOS
+export SECRET_KEY="your-secret-key-change-this"
+
+# Windows PowerShell
+$env:SECRET_KEY="your-secret-key-change-this"
+```
+
+_Nếu không có SECRET_KEY, chương trình sẽ báo lỗi và không chạy được._
 
 ### Bước 4: Khởi tạo cơ sở dữ liệu
 
 ```bash
 python db/init_db.py
-````
+```
 
 Lệnh này sẽ tạo file `db/chatbot.db` và thêm 2 tài khoản mẫu.
 
@@ -164,7 +166,7 @@ Hệ thống cần chạy **3 tiến trình** đồng thời (mở 3 terminal).
 rasa run actions
 ```
 
-Chạy tại: `http://localhost:5055`
+_Chạy tại:_ `http://localhost:5055`
 
 ### Terminal 2: Rasa Server
 
@@ -172,7 +174,7 @@ Chạy tại: `http://localhost:5055`
 rasa run --enable-api --cors "*" --port 5005
 ```
 
-Chạy tại: `http://localhost:5005`
+_Chạy tại:_ `http://localhost:5005`
 
 ### Terminal 3: Flask Web App
 
@@ -180,7 +182,7 @@ Chạy tại: `http://localhost:5005`
 python webapp.py
 ```
 
-Truy cập giao diện: **http://localhost:5000**
+_Truy cập giao diện:_ **http://localhost:5000**
 
 ---
 
@@ -199,9 +201,7 @@ Truy cập giao diện: **http://localhost:5000**
 rasa train
 ```
 
-Model sẽ được lưu trong thư mục `models/`.
-
-Sau khi train xong, khởi động lại Rasa Server (Terminal 2).
+Model sẽ được lưu trong thư mục `models/`. Sau khi train xong, khởi động lại Rasa Server (Terminal 2).
 
 ---
 
@@ -264,5 +264,3 @@ rasa test
 
 - **Sinh viên:** Lê Thị Tuyết Băng – MSSV 066305014844
 - **Đề tài:** Xây dựng chatbot hỗ trợ xử lý chuyên cần của sinh viên (vắng buổi học)
-
----

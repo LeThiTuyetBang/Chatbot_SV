@@ -1,0 +1,7 @@
+rasa==3.6.20
+rasa-sdk==3.6.2
+flask==3.0.3
+python-dotenv==1.0.1
+werkzeug==3.0.3
+requests==2.32.3
+PyYAML==6.0.2
