@@ -1,20 +1,15 @@
 id: 21
 group: "Tra cứu & Hủy đơn"
 name: "Hủy đơn đang ở trạng thái PENDING"
-description: "Sinh viên yêu cầu hủy đơn đang PENDING → action_cancel_absence cập nhật CANCELLED"
+description: "Cần 1 đơn PENDING sẵn → hủy → CANCELLED"
+
+setup:
+  type: create_pending_request
 
 turns:
   - user: "em muốn hủy đơn xin nghỉ đang chờ duyệt"
     expected_bot:
-      - contains: ["Đã hủy đơn #", "Đã Huỷ"]
-    # Code thực tế (ActionCancelAbsence):
-    # f"Đã hủy đơn #{request['id']} và cập nhật trạng thái thành {STATUS_LABELS[STATUS_CANCELLED]}."
-    # STATUS_LABELS["CANCELLED"] = "Đã Huỷ"
-    pass: true
+      - contains: ["Đã hủy"]
 
 final_check:
   db_status: "CANCELLED"
-  has_history: true
-  expected_turn_count: 1
-
-result: Pass

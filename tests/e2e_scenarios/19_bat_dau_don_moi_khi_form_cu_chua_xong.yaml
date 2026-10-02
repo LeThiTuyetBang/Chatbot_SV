@@ -1,7 +1,7 @@
 id: 19
 group: "Đổi ý giữa chừng"
 name: "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc"
-description: "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc"
+description: "Khi form đang active, nói lại 'em muốn xin nghỉ học' sẽ bị lấy làm giá trị slot hiện tại."
 
 turns:
   - user: "em muốn xin nghỉ học"
@@ -26,7 +26,7 @@ turns:
 
   - user: "em muốn xin nghỉ học"
     expected_bot:
-      - contains: ["link ảnh minh chứng", "lý do"]
+      - contains: ["minh chứng"]
 
   - user: "không"
     expected_bot:

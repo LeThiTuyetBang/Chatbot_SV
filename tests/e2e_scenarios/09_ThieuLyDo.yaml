@@ -1,32 +1,20 @@
 id: 09
 group: "Thiếu thông tin"
 name: "Cung cấp thiếu lý do"
-description: "Cung cấp thiếu lý do"
+description: "Cung cấp thiếu lý do → bot hỏi bổ sung → preview (chưa xác nhận nên không lưu DB)"
 
 turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ mai đến ngày kia"
     expected_bot:
       - contains: ["lý do nghỉ học"]
-    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
-    pass: true
 
   - user: "Bị sốt"
     expected_bot:
       - contains: ["link ảnh minh chứng"]
-    actual_bot: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
-    pass: true
 
   - user: "không"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      ...
-      Bạn xác nhận để mình lưu đơn nhé?
-    pass: true
 
 final_check:
-  db_status: "PENDING"
-  expected_turn_count: 3
-
-result: Pass
+  db_status: null

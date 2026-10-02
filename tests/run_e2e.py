@@ -78,6 +78,38 @@ def restart_chat(session: requests.Session):
         print(f"  [WARN] restart chat: {e}")
 
 
+def cancel_all_pending_of_student(username: str = STUDENT_USER) -> int:
+    """
+    Hủy TẤT CẢ đơn PENDING của sinh viên test.
+    Tránh lỗi 'chồng lấn khoảng ngày' khi các kịch bản dùng ngày tương đối
+    (mai / ngày kia) hoặc cùng môn học.
+    Trả về số đơn đã hủy.
+    """
+    try:
+        student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
+        if not student:
+            return 0
+        student_id = student["id"]
+        cancelled = 0
+        while True:
+            result = store.cancel_latest_pending_request(
+                student_id=student_id,
+                changed_by=student_id,
+                note="[E2E] Tự động hủy trước kịch bản mới để tránh chồng lấn ngày",
+            )
+            if result is None:
+                break
+            cancelled += 1
+            if cancelled > 50:  # safety
+                break
+        if cancelled:
+            print(f"  [CLEAN] Đã hủy {cancelled} đơn PENDING của {username}")
+        return cancelled
+    except Exception as e:
+        print(f"  [CLEAN WARN] {e}")
+        return 0
+
+
 def send_message(session: requests.Session, text: str) -> list[str]:
     """
     Gửi 1 câu chat, trả về list các câu bot trả lời (text).
@@ -137,23 +169,32 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
         print(f"  [DB WARN] {e}")
         return None
 
-
-def setup_approved_request(session: requests.Session):
-    """
-    Chuẩn bị dữ liệu cho kịch bản #22: nộp 1 đơn mới qua chat (chắc chắn
-    PENDING), sau đó gọi thẳng store.update_staff_decision() để duyệt luôn.
-    Gọi hàm này TRƯỚC khi restart_chat() và chạy các turn của kịch bản.
-    """
-    # 1) Nộp đơn qua chat để chắc chắn có 1 đơn PENDING mới nhất
+def _submit_one_pending_via_chat(session: requests.Session) -> None:
+    """Nộp 1 đơn PENDING qua chat (ngày tuyệt đối xa để tránh chồng lấn)."""
     restart_chat(session)
     time.sleep(0.3)
     send_message(
         session,
-        "em xin nghỉ môn CTDL lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng",
+        "em xin nghỉ môn CTDL lớp CN2302C từ 20/10/2026 đến 22/10/2026 vì ốm, không có minh chứng",
     )
     send_message(session, "có")
 
-    # 2) Lấy student_id và đơn PENDING mới nhất vừa nộp
+
+def setup_pending_request(session: requests.Session):
+    """Chuẩn bị 1 đơn PENDING cho các kịch bản hủy đơn (#21, #23, #35)."""
+    _submit_one_pending_via_chat(session)
+    student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
+    if not student:
+        raise RuntimeError("Setup PENDING: không tìm thấy tài khoản sinh viên test")
+    pending = store.list_requests_by_student(student["id"], limit=1)
+    if not pending or pending[0]["status"] != store.STATUS_PENDING:
+        raise RuntimeError("Setup PENDING: không tạo được đơn PENDING")
+
+
+def setup_approved_request(session: requests.Session):
+    """Chuẩn bị đơn PENDING rồi duyệt thành APPROVED (cho #22)."""
+    _submit_one_pending_via_chat(session)
+
     student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
     if not student:
         raise RuntimeError("Không tìm thấy tài khoản sinh viên test để setup #22")
@@ -162,7 +203,6 @@ def setup_approved_request(session: requests.Session):
     if not pending or pending[0]["status"] != store.STATUS_PENDING:
         raise RuntimeError("Setup #22: không tạo được đơn PENDING để duyệt")
 
-    # 3) Giáo vụ duyệt đơn đó luôn (gọi thẳng store, không qua API)
     staff = store.get_user_by_credentials(STAFF_USER, STAFF_PASS)
     if not staff:
         raise RuntimeError("Không tìm thấy tài khoản giáo vụ test để setup #22")
@@ -177,6 +217,7 @@ def setup_approved_request(session: requests.Session):
 
 SETUP_FUNCTIONS = {
     "approve_latest_request_for_student": setup_approved_request,
+    "create_pending_request": setup_pending_request,
 }
 
 
@@ -210,6 +251,8 @@ def run_chat_scenario(scenario: dict) -> dict:
         result["pass"] = False
         result["errors"].append("Không đăng nhập được tài khoản sinh viên")
         return result
+    # Dọn sạch đơn PENDING trước mỗi kịch bản (tránh chồng lấn ngày)
+    cancel_all_pending_of_student()
 
     setup = scenario.get("setup") or {}
     setup_fn = SETUP_FUNCTIONS.get(setup.get("type")) if isinstance(setup, dict) else None

@@ -1,7 +1,10 @@
 id: 23
 group: "Tra cứu & Hủy đơn"
 name: "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'"
-description: "Cần có ít nhất 1 đơn PENDING trước khi chạy (hoặc chấp nhận thông báo không có đơn)"
+description: "Cần 1 đơn PENDING sẵn"
+
+setup:
+  type: create_pending_request
 
 turns:
   - user: "hủy đơn vừa nộp"

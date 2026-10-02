@@ -1,10 +1,10 @@
 {
   "total_executed": 32,
-  "passed": 25,
-  "failed": 7,
+  "passed": 22,
+  "failed": 10,
   "skipped": 6,
-  "tcr": 78.125,
-  "average_turn_count": 3.28,
+  "tcr": 68.75,
+  "average_turn_count": 4.0,
   "details": [
     {
       "id": 1,
@@ -42,11 +42,9 @@
       "id": 5,
       "name": "Nộp đơn rồi tra cứu",
       "file": "05_nop_roi_tra_cuu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 5,
-      "errors": [
-        "Turn 5: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #4 (Chờ duyệt) cho môn Lập trình Python từ 2026-10-05 đến 2026-10-07. Không được nộp đơn chồng lấn khoảng ngày.']"
-      ]
+      "errors": []
     },
     {
       "id": 6,
@@ -62,35 +60,39 @@
       "id": 7,
       "name": "Chỉ nói 'em xin nghỉ học' → bot hỏi lần lượt các slot",
       "file": "07_ChiNoi_EmXinNghiHoc.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 8: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #2 (Chờ duyệt) cho môn Cơ sở dữ liệu từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
-      ]
+      "errors": []
     },
     {
       "id": "08",
       "name": "Cung cấp thiếu ngày kết thúc",
       "file": "08_ThieuNgayKetThuc.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 3,
-      "errors": []
+      "errors": [
+        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
+      ]
     },
     {
       "id": "09",
       "name": "Cung cấp thiếu lý do",
       "file": "09_ThieuLyDo.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 3,
-      "errors": []
+      "errors": [
+        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
+      ]
     },
     {
       "id": 10,
       "name": "Cung cấp thiếu mã lớp",
       "file": "10_thieu_ma_lop.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 3,
-      "errors": []
+      "errors": [
+        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
+      ]
     },
     {
       "id": 11,
@@ -176,17 +178,21 @@
       "id": 20,
       "name": "Xem danh sách đơn đã nộp",
       "file": "20_xem_danh_sach_don_da_nop.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 1,
-      "errors": []
+      "errors": [
+        "Turn 1: không tìm thấy ['Chờ duyệt', 'đơn'] trong câu trả lời bot: ['Danh sách các đơn nghỉ gần nhất của bạn:\\n- #8: CTDL | lớp CN2302C | 2026-10-04 đến 2026-10-04 | Đã Huỷ\\n- #7: CTDL | lớp CN2302C | 2026-10-10 đến 2026-10-12 | Đã Huỷ\\n- #6: Cơ sở dữ liệu | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #5: Lập trình Python | lớp CN2303B | 2026-10-05 đến 2026-10-07 | Đã Huỷ\\n- #4: Lập trình Python | lớp CN2303B | 2026-10-05 đến 2026-10-07 | Đã Huỷ\\n- #3: CSDL | lớp CN2301A | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #2: Cơ sở dữ liệu | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #1: Cấu trúc dữ liệu và giải thuật | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ']"
+      ]
     },
     {
       "id": 21,
       "name": "Hủy đơn đang ở trạng thái PENDING",
       "file": "21_huy_don_pending.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 1,
-      "errors": []
+      "errors": [
+        "Turn 1: không tìm thấy ['Đã hủy đơn #', 'Đã Huỷ'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
+      ]
     },
     {
       "id": 22,
@@ -200,9 +206,11 @@
       "id": 23,
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 1,
-      "errors": []
+      "errors": [
+        "Turn 1: không tìm thấy ['Đã hủy'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
+      ]
     },
     {
       "id": 24,
@@ -274,11 +282,9 @@
       "id": 31,
       "name": "Viết tắt + không dấu – nộp đơn 1 câu",
       "file": "31_viet_tat_khong_dau.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #3 (Chờ duyệt) cho môn csdl từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
-      ]
+      "errors": []
     },
     {
       "id": 32,
@@ -308,19 +314,19 @@
       "id": 35,
       "name": "Hủy đơn viết tắt",
       "file": "35_viet_tat_huy_don.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 1,
-      "errors": []
+      "errors": [
+        "Turn 1: không tìm thấy ['Đã hủy đơn #', 'Đã Huỷ'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
+      ]
     },
     {
       "id": 36,
       "name": "Sai chính tả / cách viết ngày",
       "file": "36_sai_chinh_ta_ngay.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 4,
-      "errors": [
-        "Turn 4: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #2 (Chờ duyệt) cho môn Cơ sở dữ liệu từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
-      ]
+      "errors": []
     },
     {
       "id": 37,

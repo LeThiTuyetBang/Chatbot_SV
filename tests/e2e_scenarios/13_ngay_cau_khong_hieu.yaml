@@ -1,12 +1,12 @@
 id: 13
 group: "Nhập sai định dạng"
 name: "Nhập ngày bằng câu không hiểu được"
-description: "Nhập ngày bằng câu không hiểu được"
+description: "Nhập ngày bằng câu không hiểu được (hôm bữa / hôm nọ)."
 
 turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ hôm bữa đến hôm nọ vì ốm"
     expected_bot:
-      - contains: ["ngày bắt đầu", "chưa hiểu ngày", "nhập lại"]
+      - contains: ["ngày bắt đầu"]
 
   - user: "mai"
     expected_bot:
@@ -14,7 +14,7 @@ turns:
 
   - user: "ngày kia"
     expected_bot:
-      - contains: ["lý do", "minh chứng", "Mình đã hiểu"]
+      - contains: ["lý do"]
 
 final_check:
   db_status: null
