@@ -69,11 +69,12 @@ Chatbot_SV/
 ├── templates/
 │   └── index.html              # Giao diện web duy nhất
 ├── tests/
-│   ├── e2e_scenarios/          # 38 kịch bản End-to-End
-│   ├── run_e2e.py              # Script chạy kiểm thử E2E tự động
-│   ├── e2e_results.json
-│   ├── test_stories.yml
-│   └── test_system.py
+│   ├── e2e_scenarios/          # 38 kịch bản End-to-End (YAML)
+│   ├── run_e2e.py              # Chạy E2E tự động
+│   ├── clean_test_data.py      # Dọn dữ liệu test
+│   ├── test_core.py            # Unit test logic ngày / URL / DB
+│   ├── test_system.py
+│   └── e2e_results.json
 ├── config.yml                  # Cấu hình pipeline NLU + Policy
 ├── domain.yml                  # Intents, entities, slots, forms, responses
 ├── endpoints.yml               # Địa chỉ Action Server
@@ -216,7 +217,9 @@ python -m pytest tests/test_system.py -v
 ### Kiểm thử hội thoại (Rasa)
 
 ```bash
-rasa test
+# End-to-End (cần 3 service đang chạy)
+python tests/clean_test_data.py --yes
+python tests/run_e2e.py
 ```
 
 ---
