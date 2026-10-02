@@ -373,12 +373,9 @@ nlu:
       - sai rồi
       - chưa đúng
       - em muốn sửa lại
-      - hủy thao tác
+      - hủy thao tác  # (hoặc có thể bỏ luôn cụm này nếu không cần thiết)
       - không
       - không ạ
-      - thôi
-      - thôi ạ
-      - hủy
       - không lưu
       - không xác nhận
       - nhập lại
@@ -386,7 +383,6 @@ nlu:
       - không đúng
       - sai
       - no
-      - huỷ
 
   - intent: greet
     examples: |

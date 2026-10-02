@@ -2,7 +2,7 @@ import hashlib
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Any, Dict, Iterable, List, Optional
 from urllib.parse import urlparse
 
@@ -61,8 +61,8 @@ def normalize_date(date_str: str) -> str:
 
 def validate_evidence_url(url: str) -> str:
     """
-    Chỉ chấp nhận http/https.
-    Ném ValueError nếu scheme khác hoặc URL quá dài / rỗng.
+    Chỉ chấp nhận http/https thuần túy, loại bỏ các scheme nguy hiểm như javascript:.
+    Ném ValueError nếu không hợp lệ hoặc quá dài.
     """
     if not url or not url.strip():
         return ""   # Cho phép để trống (không có minh chứng)
@@ -79,15 +79,28 @@ def validate_evidence_url(url: str) -> str:
         )
     if not parsed.netloc:
         raise ValueError("Link minh chứng không hợp lệ.")
+        
+    # Chặn bổ sung các trường hợp chèn mã độc qua scheme
+    lowered_url = url.lower()
+    if "javascript:" in lowered_url or "data:" in lowered_url or "vbscript:" in lowered_url:
+        raise ValueError("Link minh chứng chứa định dạng không được phép.")
 
     return url
 
 
-def validate_date_range(start_date_str: str, end_date_str: str) -> tuple[str, str]:
+def validate_date_range(
+    start_date_str: str,
+    end_date_str: str,
+    allow_past_days: int = 0,      # 0 = không cho phép ngày quá khứ
+    max_future_days: int = 90,     # tối đa 90 ngày trong tương lai
+    max_duration_days: int = 30,   # khoảng nghỉ tối đa 30 ngày
+) -> tuple[str, str]:
     """
     Validate + chuẩn hóa cả hai ngày.
     - Ném ValueError nếu một trong hai ngày không parse được.
     - Ném ValueError nếu start > end.
+    - Ném ValueError nếu ngày bắt đầu nằm trong quá khứ (mặc định).
+    - Ném ValueError nếu khoảng nghỉ quá dài hoặc quá xa trong tương lai.
     Trả về (normalized_start, normalized_end) dạng YYYY-MM-DD.
     """
     start_norm = normalize_date(start_date_str)
@@ -95,11 +108,70 @@ def validate_date_range(start_date_str: str, end_date_str: str) -> tuple[str, st
 
     d_start = date.fromisoformat(start_norm)
     d_end = date.fromisoformat(end_norm)
+    today = date.today()
 
+    # 1. start không được sau end
     if d_start > d_end:
         raise ValueError("Ngày kết thúc không được trước ngày bắt đầu.")
 
+    # 2. Chặn ngày quá khứ
+    earliest_allowed = today - timedelta(days=allow_past_days)
+    if d_start < earliest_allowed:
+        if allow_past_days == 0:
+            raise ValueError(
+                f"Không được xin nghỉ ngày trong quá khứ (ngày bắt đầu {start_norm}). "
+                "Vui lòng chọn từ hôm nay trở đi."
+            )
+        else:
+            raise ValueError(
+                f"Ngày bắt đầu không được quá {allow_past_days} ngày trước hôm nay."
+            )
+
+    # 3. Giới hạn khoảng nghỉ quá dài
+    if (d_end - d_start).days > max_duration_days:
+        raise ValueError(
+            f"Khoảng thời gian xin nghỉ không được vượt quá {max_duration_days} ngày."
+        )
+
+    # 4. Không cho xin quá xa trong tương lai
+    if d_start > today + timedelta(days=max_future_days):
+        raise ValueError(
+            f"Ngày bắt đầu không được quá xa trong tương lai (tối đa {max_future_days} ngày)."
+        )
+
     return start_norm, end_norm
+
+def has_overlapping_request(
+    student_id: int,
+    course_code: str,
+    start_date: str,
+    end_date: str,
+    exclude_request_id: Optional[int] = None,
+) -> Optional[Dict[str, Any]]:
+    """
+    Kiểm tra xem sinh viên đã có đơn PENDING hoặc APPROVED
+    chồng lấn khoảng ngày với cùng môn học chưa.
+    Trả về dict đơn bị chồng nếu có, None nếu không.
+    """
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        query = """
+            SELECT id, course_code, start_date, end_date, status, reason
+            FROM AbsenceRequests
+            WHERE student_id = ?
+              AND LOWER(course_code) = LOWER(?)
+              AND status IN ('PENDING', 'APPROVED')
+              AND NOT (end_date < ? OR start_date > ?)
+        """
+        params: list = [student_id, course_code, start_date, end_date]
+
+        if exclude_request_id is not None:
+            query += " AND id != ?"
+            params.append(exclude_request_id)
+
+        cursor.execute(query, tuple(params))
+        row = cursor.fetchone()
+        return row_to_dict(row) if row else None
 
 
 @contextmanager
@@ -220,9 +292,27 @@ def create_absence_request(
     created_by: Optional[int] = None,
     source: str = "form",  # "form" | "chatbot"
 ) -> int:
+    # 1. Validate ngày (đã chặn quá khứ + khoảng quá dài)
     start_date, end_date = validate_date_range(start_date, end_date)
+
+    # 2. Kiểm tra đơn trùng / chồng lấn
+    overlap = has_overlapping_request(
+        student_id=student_id,
+        course_code=course_code,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    if overlap:
+        status_label = STATUS_LABELS.get(overlap["status"], overlap["status"])
+        raise ValueError(
+            f"Bạn đã có đơn #{overlap['id']} ({status_label}) "
+            f"cho môn {course_code} từ {overlap['start_date']} đến {overlap['end_date']}. "
+            "Không được nộp đơn chồng lấn khoảng ngày."
+        )
+
     actor_id = created_by or student_id
     with connect_db() as conn:
+        # ... phần còn lại giữ nguyên hoàn toàn
         cursor = conn.cursor()
         user_info = _fetch_one(cursor, "SELECT full_name FROM Users WHERE id = ?", (actor_id,))
         actor_name = user_info["full_name"] if user_info else f"Sinh viên #{actor_id}"

@@ -503,7 +503,7 @@ class ValidateAbsenceForm(FormValidationAction):
         start_raw = (slot_value or "").strip()
         normalized_start = _parse_date_text(start_raw)
 
-        # Ngày không parse được hoặc không phải định dạng YYYY-MM-DD hợp lệ
+        # 1. Ngày không parse được
         if not normalized_start or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(normalized_start)):
             dispatcher.utter_message(
                 text="Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé."
@@ -511,7 +511,30 @@ class ValidateAbsenceForm(FormValidationAction):
             return {
                 "start_date": None,
                 "normalized_start_date": None,
-                # Xóa luôn end_date để tránh bot nhảy sang slot khác khi ngày đầu sai
+                "end_date": None,
+                "normalized_end_date": None,
+            }
+
+        # 2. Chặn ngày quá khứ
+        try:
+            d_start = date.fromisoformat(str(normalized_start))
+            if d_start < date.today():
+                dispatcher.utter_message(
+                    text="Ngày bắt đầu không được nằm trong quá khứ. Bạn chọn từ hôm nay trở đi nhé."
+                )
+                return {
+                    "start_date": None,
+                    "normalized_start_date": None,
+                    "end_date": None,
+                    "normalized_end_date": None,
+                }
+        except Exception:
+            dispatcher.utter_message(
+                text="Ngày bắt đầu không hợp lệ. Bạn nhập lại nhé."
+            )
+            return {
+                "start_date": None,
+                "normalized_start_date": None,
                 "end_date": None,
                 "normalized_end_date": None,
             }
@@ -567,6 +590,15 @@ class ValidateAbsenceForm(FormValidationAction):
                             f"Ngày kết thúc ({end_raw}) không được trước ngày bắt đầu ({start_raw}). "
                             "Bạn nhập lại ngày kết thúc nhé."
                         )
+                    )
+                    return {
+                        "end_date": None,
+                        "normalized_end_date": None,
+                    }
+                            # 4. Khoảng nghỉ quá dài
+                if (d2 - d1).days > 30:
+                    dispatcher.utter_message(
+                        text="Khoảng thời gian xin nghỉ không được vượt quá 30 ngày. Bạn chọn lại ngày kết thúc nhé."
                     )
                     return {
                         "end_date": None,

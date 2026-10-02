@@ -196,7 +196,7 @@ responses:
     - text: "Mình đã hiểu đơn của bạn như sau: môn {ma_mon_hoc}, lớp {ma_lop}, từ {normalized_start_date} đến {normalized_end_date}, lý do: {reason}. Bạn xác nhận để mình lưu đơn nhé?"
 
   utter_quy_dinh_nghi_hoc:
-    - text: "Theo quy định: Sinh viên không được vắng quá 20% tổng số tiết của môn học. Nếu vắng quá 20% (dù có phép hay không phép), bạn sẽ bị cấm thi kết thúc học phần và phải học lại môn đó."
+    - text: "Theo Quy chế đào tạo của Trường Đại học Giao thông Vận tải TP.HCM (UTH), sinh viên sẽ bị cấm dự thi kết thúc học phần nếu vắng mặt quá số giờ quy định trên lớp hoặc vi phạm quy chế điểm danh. Đối với các buổi nghỉ có lý do chính đáng, sinh viên cần nộp đơn xin phép và minh chứng kịp thời cho giảng viên hoặc giáo vụ bộ môn để được xem xét giải quyết theo đúng quy định."
 
   utter_xac_nhan_thong_tin:
     - text: "Hệ thống đã nhận thông tin của bạn. Vui lòng đảm bảo bạn đã gửi minh chứng đầy đủ cho giảng viên bộ môn!"
