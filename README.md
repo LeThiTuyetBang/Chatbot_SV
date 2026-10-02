@@ -73,7 +73,7 @@ Chatbot_SV/
 │   ├── run_e2e.py              # Script chạy kiểm thử E2E tự động
 │   ├── e2e_results.json
 │   ├── test_stories.yml
-│   └── test_system.py...
+│   └── test_system.py
 ├── config.yml                  # Cấu hình pipeline NLU + Policy
 ├── domain.yml                  # Intents, entities, slots, forms, responses
 ├── endpoints.yml               # Địa chỉ Action Server
