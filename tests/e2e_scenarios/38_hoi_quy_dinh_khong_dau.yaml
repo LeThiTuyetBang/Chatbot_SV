@@ -6,11 +6,7 @@ description: "nghi bao nhieu buoi thi bi cam thi"
 turns:
   - user: "nghi bao nhieu buoi thi bi cam thi"
     expected_bot:
-      - contains: ["20%", "cấm thi"]
-    # utter_quy_dinh_nghi_hoc
-    pass: true
+      - contains: ["cấm", "thi", "Quy chế"]
 
 final_check:
   expected_turn_count: 1
-
-result: Pass

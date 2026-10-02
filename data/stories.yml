@@ -8,22 +8,8 @@ stories:
       - intent: goodbye
       - action: utter_goodbye
 
-  - story: Luồng nộp đơn xin nghỉ từng bước
-    steps:
-      - intent: inform_absence
-      - action: absence_form
-      - active_loop: absence_form
-      - action: absence_form
-      - active_loop: null
-      - slot_was_set:
-          - requested_slot: null
-      - action: action_preview_absence_request
-      - slot_was_set:
-          - awaiting_request_confirmation: true
-      - intent: affirm
-      - action: action_submit_absence_request
-
-  - story: Nộp đơn xin nghỉ đủ thông tin 1 câu (inform_absence)
+  # Happy path 1: User nói 1 câu đủ thông tin (inform_absence)
+  - story: Nộp đơn đủ thông tin 1 câu (inform_absence)
     steps:
       - intent: inform_absence
       - action: absence_form
@@ -37,7 +23,8 @@ stories:
       - intent: affirm
       - action: action_submit_absence_request
 
-  - story: Nộp đơn xin nghỉ đủ thông tin 1 câu (cung_cap_thong_tin)
+  # Happy path 2: User nói 1 câu đủ thông tin (cung_cap_thong_tin)
+  - story: Nộp đơn đủ thông tin 1 câu (cung_cap_thong_tin)
     steps:
       - intent: cung_cap_thong_tin
       - action: absence_form
@@ -51,13 +38,12 @@ stories:
       - intent: affirm
       - action: action_submit_absence_request
 
-  - story: Nộp đơn xin nghỉ điền bổ sung bằng cung_cap_thong_tin
+  # Happy path 3: Form nhiều lượt (chỉ mô tả mức cao)
+  - story: Nộp đơn xin nghỉ nhiều lượt
     steps:
       - intent: inform_absence
       - action: absence_form
       - active_loop: absence_form
-      - intent: cung_cap_thong_tin
-      - action: absence_form
       - active_loop: null
       - slot_was_set:
           - requested_slot: null
@@ -67,6 +53,7 @@ stories:
       - intent: affirm
       - action: action_submit_absence_request
 
+  # Sửa thông tin khi đang chờ xác nhận
   - story: Sửa thông tin khi chờ xác nhận
     steps:
       - intent: inform_absence

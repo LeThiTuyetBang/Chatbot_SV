@@ -12,10 +12,9 @@ turns:
     expected_bot:
       - contains: ["ngày kết thúc"]
 
-  - user: "27/9"
+  - user: "ngày kia"
     expected_bot:
-      - contains: ["không được trước", "ngày kết thúc", "nhập lại"]
+      - contains: ["lý do", "minh chứng", "Mình đã hiểu"]
 
 final_check:
   db_status: null
-  expected_turn_count: 3

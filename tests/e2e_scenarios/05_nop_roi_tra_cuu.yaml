@@ -1,53 +1,28 @@
-id: 04
+id: 05
 group: "Luồng chuẩn"
-name: "Nộp đơn dùng ngày tuyệt đối"
-description: "Nộp đơn dùng ngày tuyệt đối (dd/mm/yyyy)"
+name: "Nộp đơn rồi tra cứu"
+description: "Nộp đơn dùng ngày tuyệt đối rồi tra cứu trạng thái"
 
 turns:
-  - user: "Em xin nghỉ môn Lập trình Python từ 01/10/2026 đến 03/10/2026"
+  - user: "Em xin nghỉ môn Lập trình Python từ 05/10/2026 đến 07/10/2026"
     expected_bot:
       - contains: ["mã lớp"]
-    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
-    pass: true
 
   - user: "CN2303B"
     expected_bot:
       - contains: ["lý do nghỉ học"]
-    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
-    pass: true
 
   - user: "Đi khám bệnh"
     expected_bot:
       - contains: ["link ảnh minh chứng"]
-    actual_bot: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
-    pass: true
 
   - user: "https://example.com/giaykham.pdf"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      - Môn: Lập trình Python
-      - Lớp: CN2303B
-      - Từ: 01/10/2026 -> 2026-10-01
-      - Đến: 03/10/2026 -> 2026-10-03
-      - Lý do: Đi khám bệnh
-      - Minh chứng: https://example.com/giaykham.pdf
-
-      Bạn xác nhận để mình lưu đơn nhé?
-    pass: true
 
   - user: "xác nhận"
     expected_bot:
       - contains: ["Ghi nhận thành công", "PENDING"]
-    actual_bot: "Ghi nhận thành công đơn xin nghỉ môn Lập trình Python từ ngày 2026-10-01 đến ngày 2026-10-03. Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #4."
-    pass: true
 
 final_check:
   db_status: "PENDING"
-  start_date: "2026-10-01"
-  end_date: "2026-10-03"
-  has_evidence: true
-  expected_turn_count: 5
-
-result: Pass

@@ -1,10 +1,10 @@
 {
   "total_executed": 32,
-  "passed": 31,
-  "failed": 1,
+  "passed": 25,
+  "failed": 7,
   "skipped": 6,
-  "tcr": 96.875,
-  "average_turn_count": 3.4193548387096775,
+  "tcr": 78.125,
+  "average_turn_count": 3.28,
   "details": [
     {
       "id": 1,
@@ -39,12 +39,14 @@
       "errors": []
     },
     {
-      "id": 4,
-      "name": "Nộp đơn dùng ngày tuyệt đối",
+      "id": 5,
+      "name": "Nộp đơn rồi tra cứu",
       "file": "05_nop_roi_tra_cuu.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 5,
-      "errors": []
+      "errors": [
+        "Turn 5: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #4 (Chờ duyệt) cho môn Lập trình Python từ 2026-10-05 đến 2026-10-07. Không được nộp đơn chồng lấn khoảng ngày.']"
+      ]
     },
     {
       "id": 6,
@@ -60,9 +62,11 @@
       "id": 7,
       "name": "Chỉ nói 'em xin nghỉ học' → bot hỏi lần lượt các slot",
       "file": "07_ChiNoi_EmXinNghiHoc.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 8,
-      "errors": []
+      "errors": [
+        "Turn 8: không tìm thấy ['Ghi nhận thành công', 'PENDING'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #2 (Chờ duyệt) cho môn Cơ sở dữ liệu từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
+      ]
     },
     {
       "id": "08",
@@ -100,17 +104,23 @@
       "id": 12,
       "name": "Ngày không hợp lệ (31/02, 32/13)",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": true,
-      "turn_count": 3,
-      "errors": []
+      "pass": false,
+      "turn_count": 2,
+      "errors": [
+        "Turn 1: không tìm thấy ['ngày bắt đầu', 'chưa hiểu ngày', 'nhập lại', 'không hợp lệ'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 2: không tìm thấy ['ngày kết thúc', 'lý do', 'minh chứng'] trong câu trả lời bot: ['Ngày kết thúc (05/03/2026) không được trước ngày bắt đầu (05/10/2026). Bạn nhập lại ngày kết thúc nhé.', 'Bạn cho mình ngày kết thúc nghỉ nhé.']"
+      ]
     },
     {
       "id": 13,
       "name": "Nhập ngày bằng câu không hiểu được",
       "file": "13_ngay_cau_khong_hieu.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 3,
-      "errors": []
+      "errors": [
+        "Turn 1: không tìm thấy ['ngày bắt đầu', 'chưa hiểu ngày', 'nhập lại'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 3: không tìm thấy ['lý do', 'minh chứng', 'Mình đã hiểu'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]"
+      ]
     },
     {
       "id": 14,
@@ -156,9 +166,11 @@
       "id": 19,
       "name": "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc",
       "file": "19_bat_dau_don_moi_khi_form_cu_chua_xong.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 7,
-      "errors": []
+      "errors": [
+        "Turn 6: không tìm thấy ['link ảnh minh chứng', 'lý do'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]"
+      ]
     },
     {
       "id": 20,
@@ -262,19 +274,19 @@
       "id": 31,
       "name": "Viết tắt + không dấu – nộp đơn 1 câu",
       "file": "31_viet_tat_khong_dau.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 2,
-      "errors": []
+      "errors": [
+        "Turn 2: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #3 (Chờ duyệt) cho môn csdl từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
+      ]
     },
     {
       "id": 32,
       "name": "Sai chính tả tên môn",
       "file": "32_sai_chinh_ta_mon.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 8: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Xin chào! Mình là chatbot hỗ trợ sinh viên. Bạn cần hỗ trợ xin nghỉ học hay tra cứu quy định vắng học?']"
-      ]
+      "errors": []
     },
     {
       "id": 33,
@@ -304,9 +316,11 @@
       "id": 36,
       "name": "Sai chính tả / cách viết ngày",
       "file": "36_sai_chinh_ta_ngay.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 4,
-      "errors": []
+      "errors": [
+        "Turn 4: không tìm thấy ['Ghi nhận thành công'] trong câu trả lời bot: ['Lỗi hệ thống khi lưu CSDL: Bạn đã có đơn #2 (Chờ duyệt) cho môn Cơ sở dữ liệu từ 2026-10-03 đến 2026-10-04. Không được nộp đơn chồng lấn khoảng ngày.']"
+      ]
     },
     {
       "id": 37,

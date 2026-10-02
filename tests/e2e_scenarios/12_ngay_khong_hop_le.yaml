@@ -1,21 +1,16 @@
 id: 12
 group: "Nhập sai định dạng"
 name: "Ngày không hợp lệ (31/02, 32/13)"
-description: "Ngày không hợp lệ (ví dụ 31/02, 32/13)"
+description: "Ngày không hợp lệ (ví dụ 31/02)"
 
 turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ 31/02/2026 đến 05/03/2026 vì ốm"
     expected_bot:
-      - contains: ["ngày bắt đầu"]
+      - contains: ["ngày bắt đầu", "chưa hiểu ngày", "nhập lại", "không hợp lệ"]
 
-  - user: "01/03/2026"
+  - user: "05/10/2026"
     expected_bot:
-      - contains: ["minh chứng"]
-
-  - user: "05/03/2026"
-    expected_bot:
-      - contains: ["Mình đã hiểu"]
+      - contains: ["ngày kết thúc", "lý do", "minh chứng"]
 
 final_check:
   db_status: null
-  expected_turn_count: 3

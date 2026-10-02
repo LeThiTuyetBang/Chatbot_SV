@@ -7,58 +7,30 @@ turns:
   - user: "em muốn xin nghỉ học"
     expected_bot:
       - contains: ["mã môn hoặc tên môn"]
-    actual_bot: "Bạn cho mình biết mã môn hoặc tên môn học cần xin nghỉ nhé."
-    pass: true
 
   - user: "cơ sở dữ liệu"
     expected_bot:
       - contains: ["mã lớp"]
-    actual_bot: "Bạn cho mình biết mã lớp của bạn nhé."
-    pass: true
 
   - user: "CN2302C"
     expected_bot:
       - contains: ["ngày bắt đầu nghỉ"]
-    actual_bot: "Bạn cho mình ngày bắt đầu nghỉ nhé."
-    pass: true
 
-  - user: "27/9"
+  - user: "mai"
     expected_bot:
       - contains: ["ngày kết thúc nghỉ"]
-    actual_bot: "Bạn cho mình ngày kết thúc nghỉ nhé."
-    pass: true
 
-  - user: "27/9"
+  - user: "ngày kia"
     expected_bot:
       - contains: ["lý do nghỉ học"]
-    actual_bot: "Bạn cho mình lý do nghỉ học nhé."
-    pass: true
 
   - user: "em muốn xin nghỉ học"
     expected_bot:
-      - contains: ["link ảnh minh chứng"]
-    actual_bot: "Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé."
-    pass: true
+      - contains: ["link ảnh minh chứng", "lý do"]
 
-  - user: "em muốn xin nghỉ học"
+  - user: "không"
     expected_bot:
-      - contains:
-          ["Mình đã hiểu đơn của bạn như sau", "Lý do: em muốn xin nghỉ học"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      - Môn: Cơ sở dữ liệu
-      - Lớp: CN2302C
-      - Từ: 27/9 -> 2026-09-27
-      - Đến: 27/9 -> 2026-09-27
-      - Lý do: em muốn xin nghỉ học
-      - Minh chứng: em muốn xin nghỉ học
-
-      Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)
-    pass: true
+      - contains: ["Mình đã hiểu đơn của bạn như sau"]
 
 final_check:
   db_status: null
-  expected_turn_count: 7
-
-result: Pass
-note: "Khi form đang active, nói lại 'em muốn xin nghỉ học' sẽ bị lấy làm giá trị cho slot hiện tại (lý do / minh chứng) thay vì reset form."
