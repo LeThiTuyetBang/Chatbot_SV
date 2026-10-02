@@ -170,12 +170,13 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
         return None
 
 def _submit_one_pending_via_chat(session: requests.Session) -> None:
-    """Nộp 1 đơn PENDING qua chat (ngày tuyệt đối xa để tránh chồng lấn)."""
+    """Nộp 1 đơn PENDING qua chat (ngày tuyệt đối xa, tránh chồng với setup #22)."""
     restart_chat(session)
     time.sleep(0.3)
+    # Dùng khoảng ngày khác hẳn 20-22/10 để không đụng đơn APPROVED của #22
     send_message(
         session,
-        "em xin nghỉ môn CTDL lớp CN2302C từ 20/10/2026 đến 22/10/2026 vì ốm, không có minh chứng",
+        "em xin nghỉ môn Kiểm thử phần mềm lớp CN2302C từ 25/11/2026 đến 27/11/2026 vì ốm, không có minh chứng",
     )
     send_message(session, "có")
 

@@ -14,7 +14,7 @@ turns:
 
   - user: "ngày kia"
     expected_bot:
-      - contains: ["lý do"]
+      - contains: ["minh chứng"] # lý do đã có từ "vì ốm"
 
 final_check:
   db_status: null

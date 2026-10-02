@@ -1,10 +1,10 @@
 {
   "total_executed": 32,
-  "passed": 22,
-  "failed": 10,
+  "passed": 30,
+  "failed": 2,
   "skipped": 6,
-  "tcr": 68.75,
-  "average_turn_count": 4.0,
+  "tcr": 93.75,
+  "average_turn_count": 3.7,
   "details": [
     {
       "id": 1,
@@ -68,31 +68,25 @@
       "id": "08",
       "name": "Cung cấp thiếu ngày kết thúc",
       "file": "08_ThieuNgayKetThuc.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "09",
       "name": "Cung cấp thiếu lý do",
       "file": "09_ThieuLyDo.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": 10,
       "name": "Cung cấp thiếu mã lớp",
       "file": "10_thieu_ma_lop.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "DB status mong đợi 'PENDING' nhưng thực tế là 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": 11,
@@ -106,23 +100,17 @@
       "id": 12,
       "name": "Ngày không hợp lệ (31/02, 32/13)",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 1: không tìm thấy ['ngày bắt đầu', 'chưa hiểu ngày', 'nhập lại', 'không hợp lệ'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 2: không tìm thấy ['ngày kết thúc', 'lý do', 'minh chứng'] trong câu trả lời bot: ['Ngày kết thúc (05/03/2026) không được trước ngày bắt đầu (05/10/2026). Bạn nhập lại ngày kết thúc nhé.', 'Bạn cho mình ngày kết thúc nghỉ nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 13,
       "name": "Nhập ngày bằng câu không hiểu được",
       "file": "13_ngay_cau_khong_hieu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 1: không tìm thấy ['ngày bắt đầu', 'chưa hiểu ngày', 'nhập lại'] trong câu trả lời bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 3: không tìm thấy ['lý do', 'minh chứng', 'Mình đã hiểu'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]"
-      ]
+      "errors": []
     },
     {
       "id": 14,
@@ -168,31 +156,25 @@
       "id": 19,
       "name": "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc",
       "file": "19_bat_dau_don_moi_khi_form_cu_chua_xong.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 7,
-      "errors": [
-        "Turn 6: không tìm thấy ['link ảnh minh chứng', 'lý do'] trong câu trả lời bot: [\"Bạn có thể gửi link ảnh minh chứng (Google Drive, Imgur...) nếu có. Nếu không có thì gõ 'không' nhé.\"]"
-      ]
+      "errors": []
     },
     {
       "id": 20,
       "name": "Xem danh sách đơn đã nộp",
       "file": "20_xem_danh_sach_don_da_nop.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 1,
-      "errors": [
-        "Turn 1: không tìm thấy ['Chờ duyệt', 'đơn'] trong câu trả lời bot: ['Danh sách các đơn nghỉ gần nhất của bạn:\\n- #8: CTDL | lớp CN2302C | 2026-10-04 đến 2026-10-04 | Đã Huỷ\\n- #7: CTDL | lớp CN2302C | 2026-10-10 đến 2026-10-12 | Đã Huỷ\\n- #6: Cơ sở dữ liệu | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #5: Lập trình Python | lớp CN2303B | 2026-10-05 đến 2026-10-07 | Đã Huỷ\\n- #4: Lập trình Python | lớp CN2303B | 2026-10-05 đến 2026-10-07 | Đã Huỷ\\n- #3: CSDL | lớp CN2301A | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #2: Cơ sở dữ liệu | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ\\n- #1: Cấu trúc dữ liệu và giải thuật | lớp CN2302C | 2026-10-03 đến 2026-10-04 | Đã Huỷ']"
-      ]
+      "errors": []
     },
     {
       "id": 21,
       "name": "Hủy đơn đang ở trạng thái PENDING",
       "file": "21_huy_don_pending.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 1,
-      "errors": [
-        "Turn 1: không tìm thấy ['Đã hủy đơn #', 'Đã Huỷ'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
-      ]
+      "errors": []
     },
     {
       "id": 22,
@@ -207,9 +189,9 @@
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
       "pass": false,
-      "turn_count": 1,
+      "turn_count": 0,
       "errors": [
-        "Turn 1: không tìm thấy ['Đã hủy'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
+        "Setup lỗi: Setup PENDING: không tạo được đơn PENDING"
       ]
     },
     {
@@ -315,9 +297,9 @@
       "name": "Hủy đơn viết tắt",
       "file": "35_viet_tat_huy_don.yaml",
       "pass": false,
-      "turn_count": 1,
+      "turn_count": 0,
       "errors": [
-        "Turn 1: không tìm thấy ['Đã hủy đơn #', 'Đã Huỷ'] trong câu trả lời bot: ['Hiện không có đơn Chờ duyệt nào để hủy.']"
+        "Setup lỗi: Setup PENDING: không tạo được đơn PENDING"
       ]
     },
     {
