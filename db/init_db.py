@@ -74,8 +74,9 @@ def init_database():
     )
     ''')
     # Tạo mật khẩu mặc định được băm an toàn (pbkdf2 + salt)
-    # Mật khẩu mới: UTH@2026
-    default_password_hash = generate_password_hash("UTH@2026")
+    # Lấy từ biến môi trường DEFAULT_PASSWORD, fallback chỉ dùng cho môi trường dev
+    default_password = os.getenv("DEFAULT_PASSWORD", "UTH@2026")
+    default_password_hash = generate_password_hash(default_password)
 
     # Chèn dữ liệu mẫu cho sinh viên thực hiện đề tài
     cursor.execute('''

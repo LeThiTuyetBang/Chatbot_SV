@@ -25,10 +25,11 @@ BASE_URL = "http://127.0.0.1:5000"          # Flask
 SCENARIOS_DIR = Path(__file__).parent / "e2e_scenarios"
 DB_PATH = Path(__file__).parent.parent / "db" / "chatbot.db"
 
-STUDENT_USER = "066305014844"
-STUDENT_PASS = "UTH@2026"
-STAFF_USER = "gv_tien"
-STAFF_PASS = "UTH@2026"
+# Lấy từ biến môi trường, có fallback cho local test
+STUDENT_USER = os.getenv("E2E_STUDENT_USER", "066305014844")
+STUDENT_PASS = os.getenv("E2E_STUDENT_PASS", "UTH@2026")   # chỉ dùng khi chạy test local
+STAFF_USER   = os.getenv("E2E_STAFF_USER", "gv_tien")
+STAFF_PASS   = os.getenv("E2E_STAFF_PASS", "UTH@2026")
 
 # Timeout mỗi request (giây)
 TIMEOUT = 30

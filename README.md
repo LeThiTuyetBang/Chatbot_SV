@@ -187,12 +187,17 @@ _Truy cập giao diện:_ **http://localhost:5000**
 
 ---
 
-## 7. Tài khoản mặc định
+## 7. Tài khoản mặc định (chỉ dùng cho môi trường phát triển)
 
-| Vai trò   | Tài khoản      | Mật khẩu   | Ghi chú                     |
-| --------- | -------------- | ---------- | --------------------------- |
-| Sinh viên | `066305014844` | `UTH@2026` | Lê Thị Tuyết Băng - DTH2151 |
-| Giáo vụ   | `gv_tien`      | `UTH@2026` | ThS. Nguyễn Thanh Tiến      |
+| Vai trò   | Tài khoản      | Ghi chú                     |
+| --------- | -------------- | --------------------------- |
+| Sinh viên | `066305014844` | Lê Thị Tuyết Băng - DTH2151 |
+| Giáo vụ   | `gv_tien`      | ThS. Nguyễn Thanh Tiến      |
+
+> **Lưu ý bảo mật:**  
+> Mật khẩu mặc định được seed trong `db/init_db.py`.  
+> **Không commit mật khẩu thật lên GitHub.**  
+> Khi triển khai thật, hãy đổi mật khẩu ngay sau lần đăng nhập đầu tiên hoặc seed bằng biến môi trường.
 
 ---
 

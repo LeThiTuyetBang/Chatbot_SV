@@ -82,14 +82,20 @@ def _date_display(raw_value: Text, normalized_value: Text) -> Text:
     return normalized_value or raw_value.strip()
 
 
-def _get_student_id(tracker: Tracker) -> int:
+def _get_student_id(tracker: Tracker) -> Optional[int]:
+    """
+    Lấy student_id từ metadata (ưu tiên) hoặc sender_id.
+    Trả về None nếu không xác định được → action phải từ chối xử lý.
+    """
     metadata = tracker.latest_message.get("metadata") or {}
-    student_id = resolve_user_id_from_metadata(metadata) if metadata else None
-    if not student_id or student_id == 1:
+    student_id = resolve_user_id_from_metadata(metadata)
+
+    if student_id is None:
         sender_id = tracker.sender_id
         if sender_id:
             student_id = resolve_user_id_from_metadata({"username": sender_id})
-    return student_id or 1
+
+    return student_id   # Không còn fallback về 1
 
 
 KNOWN_SUBJECTS = [
@@ -657,8 +663,13 @@ class ActionSubmitAbsenceRequest(Action):
                 return []
 
             student_id = _get_student_id(tracker)
+            if student_id is None:
+                dispatcher.utter_message(
+                    text="Không xác định được tài khoản của bạn. Vui lòng đăng nhập lại qua hệ thống web."
+                )
+                return []
             request_id = create_absence_request(
-                student_id=student_id,
+                student_id=student_id, 
                 course_code=course_code,
                 class_code=class_code or "",
                 start_date=start_date,
@@ -1108,6 +1119,12 @@ class ActionCheckAbsenceStatus(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         try:
             student_id = _get_student_id(tracker)
+            if student_id is None:
+                dispatcher.utter_message(
+                    text="Không xác định được tài khoản của bạn. Vui lòng đăng nhập lại qua hệ thống web."
+                )
+                return []
+
             requests = list_requests_by_student(student_id=student_id, limit=10)
             if not requests:
                 dispatcher.utter_message(text="Bạn chưa có đơn xin nghỉ nào trong hệ thống.")
@@ -1135,6 +1152,12 @@ class ActionCancelAbsence(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         try:
             student_id = _get_student_id(tracker)
+            if student_id is None:
+                dispatcher.utter_message(
+                    text="Không xác định được tài khoản của bạn. Vui lòng đăng nhập lại qua hệ thống web."
+                )
+                return []
+
             request = cancel_latest_pending_request(
                 student_id=student_id,
                 changed_by=student_id,

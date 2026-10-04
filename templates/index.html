@@ -89,9 +89,9 @@
                 <span>Tài khoản Sinh viên (MSSV)</span>
                 <input
                   id="student-username"
-                  placeholder="Nhập MSSV (VD: 066305014844)"
-                  value="066305014844"
+                  placeholder="Nhập MSSV"
                   required
+                  autocomplete="username"
                 />
               </label>
               <label>
@@ -99,8 +99,8 @@
                 <input
                   id="student-password"
                   type="password"
-                  value="UTH@2026"
                   required
+                  autocomplete="current-password"
                 />
               </label>
               <div class="login-btn-wrap">
@@ -114,51 +114,40 @@
               </div>
             </div>
           </form>
-          <div class="login-hint-box">
-            📌 Tài khoản mẫu Sinh viên: <b>066305014844</b> | Mật khẩu:
-            <b>UTH@2026</b> (Lê Thị Tuyết Băng - Lớp DTH2151 )
-          </div>
+          <!-- Đã xóa hộp gợi ý mật khẩu -->
         </div>
 
-        <!-- Form Đăng nhập Giáo vụ -->
-        <div id="login-staff-block" class="login-block" style="display: none">
-          <form id="staff-login-form" onsubmit="return false;">
-            <div class="login-grid admin-login">
-              <label>
-                <span>Tài khoản Giáo vụ</span>
-                <input
-                  id="admin-username"
-                  placeholder="Nhập tên đăng nhập (VD: gv_tien)"
-                  value="gv_tien"
-                  required
-                />
-              </label>
-              <label>
-                <span>Mật khẩu</span>
-                <input
-                  id="admin-password"
-                  type="password"
-                  value="UTH@2026"
-                  required
-                />
-              </label>
-              <div class="login-btn-wrap">
-                <button
-                  id="admin-login-btn"
-                  type="submit"
-                  class="secondary-btn full-w"
-                >
-                  Đăng Nhập Giáo Vụ
-                </button>
-              </div>
-            </div>
-          </form>
-          <div class="login-hint-box">
-            📌 Tài khoản mẫu Giáo vụ: <b>gv_tien</b> | Mật khẩu:
-            <b>UTH@2026</b> (ThS. Nguyễn Thanh Tiên)
-          </div>
-        </div>
-      </section>
+<!-- Form Đăng nhập Giáo vụ -->
+<div id="login-staff-block" class="login-block" style="display: none">
+  <form id="staff-login-form" onsubmit="return false;">
+    <div class="login-grid admin-login">
+      <label>
+        <span>Tài khoản Giáo vụ</span>
+        <input
+          id="admin-username"
+          placeholder="Nhập tên đăng nhập"
+          required
+          autocomplete="username"
+        />
+      </label>
+      <label>
+        <span>Mật khẩu</span>
+        <input
+          id="admin-password"
+          type="password"
+          required
+          autocomplete="current-password"
+        />
+      </label>
+      <div class="login-btn-wrap">
+        <button id="admin-login-btn" type="submit" class="secondary-btn full-w">
+          Đăng Nhập Giáo Vụ
+        </button>
+      </div>
+    </div>
+  </form>
+  <!-- Đã xóa hộp gợi ý mật khẩu -->
+</div>
 
       <!-- PANEL 2: STUDENT PANEL -->
       <section

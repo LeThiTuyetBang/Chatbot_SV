@@ -222,19 +222,30 @@ def resolve_user_id(cursor: sqlite3.Cursor, metadata: Dict[str, Any]) -> int:
     return 1
 
 
-def resolve_user_id_from_metadata(metadata: Dict[str, Any]) -> int:
+def resolve_user_id_from_metadata(metadata: Dict[str, Any]) -> Optional[int]:
+    """
+    Trả về user_id nếu tìm thấy, None nếu thiếu metadata hoặc không tồn tại.
+    Không bao giờ fallback về user_id = 1.
+    """
+    if not metadata:
+        return None
+
     identifier = metadata.get("student_id") or metadata.get("username") or metadata.get("mssv")
     if identifier is None:
-        return 1
+        return None
 
     with connect_db() as conn:
         cursor = conn.cursor()
+
         if isinstance(identifier, int):
             cursor.execute("SELECT id FROM Users WHERE id = ?", (identifier,))
             row = cursor.fetchone()
-            return int(row["id"]) if row else 1
+            return int(row["id"]) if row else None
 
         identifier_text = str(identifier).strip()
+        if not identifier_text:
+            return None
+
         cursor.execute("SELECT id FROM Users WHERE username = ?", (identifier_text,))
         row = cursor.fetchone()
         if row:
@@ -246,7 +257,7 @@ def resolve_user_id_from_metadata(metadata: Dict[str, Any]) -> int:
             if row:
                 return int(row["id"])
 
-    return 1
+    return None
 
 
 def get_user_by_credentials(username: str, password: str) -> Optional[Dict[str, Any]]:

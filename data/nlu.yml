@@ -46,6 +46,7 @@ nlu:
       - Trí tuệ nhân tạo
       - Hệ quản trị CSDL
       - Thực tập tốt nghiệp
+      - Kinh tế chính trị
 
   # --- 3. INTENTS ---
   # Intent Xin nghỉ học (Đã gộp inform_absence và xin_nghi_hoc)
