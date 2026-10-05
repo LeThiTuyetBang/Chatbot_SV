@@ -1,15 +1,39 @@
 id: 06
 group: "Luồng chuẩn"
 name: "Nộp đơn qua Form web (không dùng Chatbot)"
-description: "Nộp đơn qua Form web (không dùng Chatbot)"
+description: "Sinh viên đăng nhập → POST /api/student/requests → đơn PENDING, source=form"
 
-turns: [] # Không có hội thoại chatbot
+turns: [] # Không dùng chatbot
+
+api_steps:
+  # 1. Đăng nhập sinh viên
+  - method: POST
+    endpoint: /api/auth/login
+    body:
+      username: "066305014844"
+      password: "UTH@2026"
+    expected_status: 200
+    expected_data:
+      role: "STUDENT"
+
+  # 2. Nộp đơn qua Form (API)
+  - method: POST
+    endpoint: /api/student/requests
+    body:
+      course_code: "Cơ sở dữ liệu"
+      class_code: "DTH2151"
+      start_date: "2026-11-20" # ngày tuyệt đối trong tương lai (tránh quá khứ / chồng lấn)
+      end_date: "2026-11-22"
+      reason: "Đi khám bệnh"
+      evidence_url: "" # không có minh chứng
+    expected_status: 200
+    # response message từ webapp.py: "Gửi đơn thành công."
 
 final_check:
   db_status: "PENDING"
   source: "form"
-  has_evidence: false # hoặc true tùy test
+  has_evidence: false
   expected_turn_count: 0
 
 result: Pass
-note: "Kiểm tra qua API / giao diện Form web, không qua Rasa."
+note: "Kiểm tra qua API Form web, không qua Rasa."
