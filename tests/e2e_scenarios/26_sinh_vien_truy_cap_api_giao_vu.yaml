@@ -15,7 +15,7 @@ api_steps:
     endpoint: /api/auth/login
     body:
       username: "066305014844"
-      password: "123456"
+      password: "UTH@2026"
     expected_status: 200
     expected_data:
       role: "STUDENT"
@@ -38,7 +38,7 @@ api_steps:
     endpoint: /api/auth/login
     body:
       username: "gv_tien"
-      password: "123456"
+      password: "UTH@2026"
     expected_status: 200
     expected_data:
       role: "STAFF"

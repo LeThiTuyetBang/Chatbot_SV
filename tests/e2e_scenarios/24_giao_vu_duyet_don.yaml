@@ -9,7 +9,7 @@ turns: []
 api_steps:
   - method: POST
     endpoint: /api/auth/login
-    body: { username: "gv_tien", password: "123456" }
+    body: { username: "gv_tien", password: "UTH@2026" }
     expected_status: 200
   - method: POST
     endpoint: /api/admin/requests/{id}/approve

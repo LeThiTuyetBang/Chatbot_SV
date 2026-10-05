@@ -135,17 +135,21 @@ def send_message(session: requests.Session, text: str) -> list[str]:
     return texts if texts else ["(bot không trả lời gì)"]
 
 
-def check_contains(bot_texts: list[str], expected_contains: list[str]) -> bool:
-    """True nếu mọi chuỗi trong expected_contains đều xuất hiện trong bot_texts."""
-    joined = " ".join(bot_texts)
-    for needle in expected_contains:
-        if needle.lower() not in joined.lower():
-            return False
-    return True
+def check_contains(bot_texts: list[str], expected_contains: list[str]) -> tuple[bool, list[str]]:
+    """
+    True nếu mọi chuỗi trong expected_contains đều xuất hiện trong bot_texts.
+    Trả thêm danh sách từ khóa bị thiếu để log rõ lỗi.
+    """
+    joined = " ".join(bot_texts).lower()
+    missing = [n for n in expected_contains if n.lower() not in joined]
+    return len(missing) == 0, missing
 
 
-def get_latest_student_request_status(student_username: str = STUDENT_USER) -> str | None:
-    """Đọc status đơn mới nhất của sinh viên từ SQLite (nếu có)."""
+def get_latest_student_request(student_username: str = STUDENT_USER) -> dict | None:
+    """
+    Trả về thông tin đơn mới nhất của sinh viên + số lượng minh chứng.
+    Dùng để kiểm tra final_check: db_status, has_evidence...
+    """
     if not DB_PATH.exists():
         return None
     try:
@@ -154,7 +158,8 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT ar.status
+            SELECT ar.id, ar.status, ar.course_code, ar.start_date, ar.end_date,
+                   (SELECT COUNT(*) FROM Evidences e WHERE e.request_id = ar.id) AS evidence_count
             FROM AbsenceRequests ar
             JOIN Users u ON u.id = ar.student_id
             WHERE u.username = ?
@@ -165,10 +170,16 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
         )
         row = cur.fetchone()
         conn.close()
-        return row["status"] if row else None
+        return dict(row) if row else None
     except Exception as e:
         print(f"  [DB WARN] {e}")
         return None
+
+
+def get_latest_student_request_status(student_username: str = STUDENT_USER) -> str | None:
+    """Giữ lại để tương thích (nếu chỗ khác còn gọi)."""
+    latest = get_latest_student_request(student_username)
+    return latest["status"] if latest else None
 
 def _submit_one_pending_via_chat(session: requests.Session) -> None:
     """Nộp 1 đơn PENDING qua chat (ngày tuyệt đối xa, tránh chồng với setup #22)."""
@@ -221,7 +232,157 @@ SETUP_FUNCTIONS = {
     "approve_latest_request_for_student": setup_approved_request,
     "create_pending_request": setup_pending_request,
 }
+def run_api_scenario(scenario: dict) -> dict:
+    """
+    Chạy kịch bản API-only (form / admin / phân quyền / đăng nhập sai).
+    Kiểm tra status code, message, role, và final_check DB.
+    """
+    sid = scenario.get("id", "?")
+    name = scenario.get("name", "")
+    result = {
+        "id": sid,
+        "name": name,
+        "file": scenario.get("_file"),
+        "pass": True,
+        "turn_count": 0,
+        "errors": [],
+    }
 
+    api_steps = scenario.get("api_steps") or []
+    if not api_steps:
+        result["pass"] = None
+        result["errors"].append("Kịch bản API nhưng không có api_steps → bỏ qua")
+        return result
+
+    session = requests.Session()
+    request_id = None  # dùng cho endpoint có {id}
+
+    # Chuẩn bị dữ liệu nếu cần (duyệt / từ chối / xem chi tiết)
+    if sid in ("24", "25", "27"):
+        # Tạo 1 đơn PENDING trước
+        if not login(session, STUDENT_USER, STUDENT_PASS):
+            result["pass"] = False
+            result["errors"].append("Không login được SV để setup đơn PENDING")
+            return result
+        cancel_all_pending_of_student()
+        try:
+            setup_pending_request(session)
+            student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
+            pending = store.list_requests_by_student(student["id"], limit=1)
+            if pending:
+                request_id = pending[0]["id"]
+        except Exception as e:
+            result["pass"] = False
+            result["errors"].append(f"Setup PENDING lỗi: {e}")
+            return result
+        session = requests.Session()  # reset session (sẽ login lại theo api_steps)
+
+    for i, step in enumerate(api_steps, start=1):
+        method = (step.get("method") or "GET").upper()
+        endpoint = step.get("endpoint", "")
+        body = step.get("body")
+        expected_status = step.get("expected_status", 200)
+        expected_message = step.get("expected_message")
+        expected_data = step.get("expected_data") or {}
+        expected_db_status = step.get("expected_db_status")
+        expected_fields = step.get("expected_fields") or []
+
+        # Thay {id} bằng request_id thật
+        if "{id}" in endpoint:
+            if request_id is None:
+                result["pass"] = False
+                result["errors"].append(f"Step {i}: endpoint cần {{id}} nhưng chưa có request_id")
+                continue
+            endpoint = endpoint.replace("{id}", str(request_id))
+
+        url = f"{BASE_URL}{endpoint}"
+        try:
+            if method == "GET":
+                r = session.get(url, timeout=TIMEOUT)
+            elif method == "POST":
+                r = session.post(url, json=body, timeout=TIMEOUT)
+            elif method == "PUT":
+                r = session.put(url, json=body, timeout=TIMEOUT)
+            else:
+                result["pass"] = False
+                result["errors"].append(f"Step {i}: method {method} chưa hỗ trợ")
+                continue
+        except Exception as e:
+            result["pass"] = False
+            result["errors"].append(f"Step {i}: request lỗi – {e}")
+            continue
+
+        # 1. Kiểm tra status code
+        if r.status_code != expected_status:
+            result["pass"] = False
+            result["errors"].append(
+                f"Step {i} {method} {endpoint}: status mong đợi {expected_status}, nhận {r.status_code} – {r.text[:200]}"
+            )
+            continue
+
+        data = {}
+        try:
+            data = r.json()
+        except Exception:
+            pass
+
+        # 2. Kiểm tra message (nếu có)
+        if expected_message:
+            actual_msg = data.get("message", "")
+            if expected_message.lower() not in actual_msg.lower():
+                result["pass"] = False
+                result["errors"].append(
+                    f"Step {i}: message mong đợi chứa '{expected_message}', nhận '{actual_msg}'"
+                )
+
+        # 3. Kiểm tra expected_data (role, …)
+        if expected_data:
+            actual_data = data.get("data") or data
+            for key, val in expected_data.items():
+                if actual_data.get(key) != val:
+                    result["pass"] = False
+                    result["errors"].append(
+                        f"Step {i}: data.{key} mong đợi '{val}', nhận '{actual_data.get(key)}'"
+                    )
+
+        # 4. Kiểm tra expected_fields (history, evidences…)
+        if expected_fields:
+            actual_data = data.get("data") or data
+            for field in expected_fields:
+                if field not in actual_data:
+                    result["pass"] = False
+                    result["errors"].append(f"Step {i}: thiếu field '{field}' trong response")
+
+        # 5. Kiểm tra DB status ngay sau bước (nếu có)
+        if expected_db_status and request_id:
+            req = store.get_request_by_id(request_id)
+            actual = req["status"] if req else None
+            if actual != expected_db_status:
+                result["pass"] = False
+                result["errors"].append(
+                    f"Step {i}: DB status mong đợi '{expected_db_status}', thực tế '{actual}'"
+                )
+
+        print(f"    API Step {i}: {method} {endpoint} → {r.status_code}")
+
+    # Final check DB (nếu có)
+    final_check = scenario.get("final_check") or {}
+    if final_check.get("db_status") and request_id:
+        req = store.get_request_by_id(request_id)
+        actual = req["status"] if req else None
+        if actual != final_check["db_status"]:
+            result["pass"] = False
+            result["errors"].append(
+                f"final_check db_status mong đợi '{final_check['db_status']}', thực tế '{actual}'"
+            )
+
+    if final_check.get("has_history") and request_id:
+        history = store.get_request_history(request_id)
+        if not history:
+            result["pass"] = False
+            result["errors"].append("final_check has_history=True nhưng không có lịch sử")
+
+    return result
 
 def run_chat_scenario(scenario: dict) -> dict:
     """
@@ -243,10 +404,8 @@ def run_chat_scenario(scenario: dict) -> dict:
     }
 
     if not turns:
-        # Kịch bản API-only → bỏ qua ở phiên bản 1
-        result["pass"] = None  # skipped
-        result["errors"].append("Không có turns (kịch bản API) → bỏ qua phiên bản 1")
-        return result
+        # Kịch bản API-only → chạy thật bằng run_api_scenario
+        return run_api_scenario(scenario)
 
     session = requests.Session()
     if not login(session, STUDENT_USER, STUDENT_PASS):
@@ -286,20 +445,44 @@ def run_chat_scenario(scenario: dict) -> dict:
         print(f"    Turn {i}: USER → {user_text[:60]}{'...' if len(user_text) > 60 else ''}")
         print(f"           BOT  → {bot_texts[0][:80] if bot_texts else '(rỗng)'}...")
 
-        if contains_list and not check_contains(bot_texts, contains_list):
-            result["pass"] = False
-            result["errors"].append(
-                f"Turn {i}: không tìm thấy {contains_list} trong câu trả lời bot: {bot_texts}"
-            )
+        if contains_list:
+            ok, missing = check_contains(bot_texts, contains_list)
+            if not ok:
+                result["pass"] = False
+                result["errors"].append(
+                    f"Turn {i}: thiếu từ khóa {missing} trong câu bot: {bot_texts}"
+                )
 
-    # Kiểm tra DB nếu kịch bản yêu cầu
-    expected_status = final_check.get("db_status")
-    if expected_status:
-        actual_status = get_latest_student_request_status()
-        if actual_status != expected_status:
+    # === Kiểm tra final_check đầy đủ ===
+    if final_check:
+        latest = get_latest_student_request()
+
+        # 1. db_status
+        expected_status = final_check.get("db_status")
+        if expected_status:
+            actual_status = latest["status"] if latest else None
+            if actual_status != expected_status:
+                result["pass"] = False
+                result["errors"].append(
+                    f"DB status mong đợi '{expected_status}' nhưng thực tế '{actual_status}'"
+                )
+
+        # 2. has_evidence
+        if "has_evidence" in final_check:
+            expected_ev = bool(final_check["has_evidence"])
+            actual_ev = bool(latest and latest.get("evidence_count", 0) > 0)
+            if actual_ev != expected_ev:
+                result["pass"] = False
+                result["errors"].append(
+                    f"has_evidence mong đợi {expected_ev} nhưng thực tế {actual_ev}"
+                )
+
+        # 3. expected_turn_count
+        expected_turns = final_check.get("expected_turn_count")
+        if expected_turns is not None and result["turn_count"] != expected_turns:
             result["pass"] = False
             result["errors"].append(
-                f"DB status mong đợi '{expected_status}' nhưng thực tế là '{actual_status}'"
+                f"Số turn mong đợi {expected_turns} nhưng thực tế {result['turn_count']}"
             )
 
     return result
