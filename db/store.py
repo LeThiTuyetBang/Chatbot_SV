@@ -524,43 +524,20 @@ def update_staff_decision(
     changed_by: int,
     note: Optional[str] = None,
 ) -> Dict[str, Any]:
+    """
+    Giáo vụ chỉ được duyệt / từ chối đơn đang ở trạng thái PENDING.
+    Không cho phép đổi trạng thái cuối (APPROVED / REJECTED / CANCELLED).
+    """
     if new_status not in (STATUS_APPROVED, STATUS_REJECTED):
         raise ValueError("Giáo vụ chỉ được phép chuyển trạng thái đơn thành Đã duyệt hoặc Từ chối.")
 
-    with connect_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, status FROM AbsenceRequests WHERE id = ?", (request_id,))
-        row = cursor.fetchone()
-        if not row:
-            raise ValueError(f"Không tìm thấy đơn #{request_id}")
-
-        current_status = row["status"]
-        if current_status not in (STATUS_APPROVED, STATUS_REJECTED):
-            raise ValueError("Chỉ có thể chỉnh sửa kết quả duyệt/từ chối của những đơn đã được xử lý trước đó.")
-
-        if current_status == new_status:
-            return get_request_by_id(request_id) or {}
-
-        cursor.execute(
-            "UPDATE AbsenceRequests SET status = ? WHERE id = ?",
-            (new_status, request_id),
-        )
-
-        user_info = _fetch_one(cursor, "SELECT full_name FROM Users WHERE id = ?", (changed_by,))
-        user_name = user_info["full_name"] if user_info else f"Giáo vụ #{changed_by}"
-
-        old_label = STATUS_LABELS.get(current_status, current_status)
-        new_label = STATUS_LABELS.get(new_status, new_status)
-        history_note = note or f"{user_name} đã điều chỉnh kết quả đơn từ [{old_label}] sang [{new_label}]"
-
-        cursor.execute(
-            """
-            INSERT INTO RequestStatusHistory (request_id, old_status, new_status, changed_by, note)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (request_id, current_status, new_status, changed_by, history_note),
-        )
-        return get_request_by_id(request_id) or {}
+    # Dùng chung logic với update_request_status → tôn trọng ALLOWED_TRANSITIONS
+    return update_request_status(
+        request_id=request_id,
+        new_status=new_status,
+        changed_by=changed_by,
+        note=note,
+    )
 
 
 def cancel_latest_pending_request(student_id: int, changed_by: int, note: Optional[str] = None) -> Optional[Dict[str, Any]]:
