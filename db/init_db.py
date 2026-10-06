@@ -87,7 +87,7 @@ def init_database():
     # Chèn dữ liệu mẫu cho tài khoản giáo vụ/giảng viên duyệt đơn
     cursor.execute('''
     INSERT OR IGNORE INTO Users (username, password_hash, full_name, role, class_code) 
-    VALUES ('gv_tien', ?, 'ThS. Nguyễn Thanh Tiên', 'STAFF', NULL)
+    VALUES ('gv_tien', ?, 'ThS. Nguyễn Thanh Tiến', 'STAFF', NULL)
     ''', (default_password_hash,))
 
     conn.commit()

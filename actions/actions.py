@@ -17,6 +17,7 @@ from db.store import (
     STATUS_REJECTED,
     cancel_latest_pending_request,
     create_absence_request,
+    get_known_subjects,
     list_requests_by_student,
     resolve_user_id_from_metadata,
 )
@@ -98,13 +99,9 @@ def _get_student_id(tracker: Tracker) -> Optional[int]:
     return student_id   # Không còn fallback về 1
 
 
-KNOWN_SUBJECTS = [
-    "Lập trình Python", "Cơ sở dữ liệu", "CSDL", "Mạng máy tính",
-    "Cấu trúc dữ liệu và giải thuật", "CTDL", "Software Testing",
-    "Kiểm thử phần mềm", "Trí tuệ nhân tạo", "AI", "Hệ quản trị CSDL",
-    "Thực tập tốt nghiệp", "An toàn thông tin", "Phát triển ứng dụng web"
-]
-
+def _known_subjects() -> list:
+    """Danh sách môn lấy từ cấu hình (subjects.yml) + DB, không hardcode."""
+    return get_known_subjects(include_from_db=True)
 
 def _is_class_code(val: str) -> bool:
     """Kiểm tra một chuỗi có mang cấu trúc của mã lớp hay không (ví dụ: CN2302C, DTH2151, DH21IT01, 010112610016)."""
@@ -209,8 +206,9 @@ class ValidateAbsenceForm(FormValidationAction):
         requested_slot = tracker.get_slot("requested_slot")
         current = tracker.get_slot("ma_mon_hoc")
 
-        # Nếu current bị gán nhầm giá trị của một mã lớp (VD: DTH2151, CN2302C) thì hủy bỏ
-        if current and _is_class_code(current) and not any(current.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
+        if current and _is_class_code(current) and not any(
+            current.lower() == sub.lower() for sub in _known_subjects()
+        ):
             current = None
 
         text = tracker.latest_message.get("text", "")
@@ -227,8 +225,7 @@ class ValidateAbsenceForm(FormValidationAction):
             if candidate and len(candidate) >= 2:
                 return {"ma_mon_hoc": candidate}
 
-        # 2. Tìm tên môn trong danh sách các môn phổ biến (kể cả CSDL, CTDL, AI)
-        for sub in KNOWN_SUBJECTS:
+        for sub in _known_subjects():
             if re.search(r"\b" + re.escape(sub.lower()) + r"\b", text_lower):
                 return {"ma_mon_hoc": sub}
 
@@ -236,8 +233,10 @@ class ValidateAbsenceForm(FormValidationAction):
         for e in entities:
             if e.get("entity") == "ma_mon_hoc" and e.get("value"):
                 val = e.get("value").strip()
-                if not _is_class_code(val) or any(val.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
-                    return {"ma_mon_hoc": val}
+        if not _is_class_code(val) or any(
+            val.lower() == sub.lower() for sub in _known_subjects()
+        ):
+            return {"ma_mon_hoc": val}
 
         # 4. Entity ma_mon: CHỈ chấp nhận nếu có từ "môn" phía trước hoặc không phải định dạng mã lớp
         for e in entities:
@@ -495,7 +494,9 @@ class ValidateAbsenceForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         val = (slot_value or "").strip()
         # Nếu slot_value bị gán nhầm là một mã lớp và không có trong danh sách môn
-        if _is_class_code(val) and not any(val.lower() == sub.lower() for sub in KNOWN_SUBJECTS):
+        if _is_class_code(val) and not any(
+            val.lower() == sub.lower() for sub in _known_subjects()
+        ):
             return {"ma_mon_hoc": None, "ma_lop": val.upper()}
         return {"ma_mon_hoc": val}
 
@@ -882,7 +883,7 @@ class ActionHandleAbsenceCorrection(Action):
                 if m_mon and m_mon.group(1).strip():
                     mon_updated = m_mon.group(1).strip()
             if not mon_updated:
-                for sub in KNOWN_SUBJECTS:
+                for sub in _known_subjects():
                     if re.search(r"\b" + re.escape(sub.lower()) + r"\b", text):
                         mon_updated = sub
                         break
@@ -891,7 +892,7 @@ class ActionHandleAbsenceCorrection(Action):
                     if e.get("entity") == "ma_mon_hoc":
                         mon_updated = e.get("value")
                         break
-            mon_valid = mon_updated and not (_is_class_code(mon_updated) and not any(mon_updated.lower() == s.lower() for s in KNOWN_SUBJECTS))
+            mon_valid = mon_updated and not (_is_class_code(mon_updated) and not any(mon_updated.lower() == s.lower() for s in _known_subjects()))
             if mon_valid:
                 slot_events.append(SlotSet("ma_mon_hoc", mon_updated))
                 updated_fields.append(f"Môn học: {mon_updated}")

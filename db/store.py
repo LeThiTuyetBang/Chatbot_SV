@@ -191,6 +191,76 @@ def row_to_dict(row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
         return None
     return dict(row)
 
+import yaml 
+
+_SUBJECTS_CACHE: Optional[List[str]] = None
+_SUBJECTS_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "subjects.yml")
+
+
+def get_known_subjects(include_from_db: bool = True) -> List[str]:
+    """
+    Đọc danh sách môn từ data/subjects.yml.
+    Nếu include_from_db=True: gộp thêm course_code từng xuất hiện trong AbsenceRequests
+    (để không phải sửa code khi đã có đơn với môn mới).
+    """
+    global _SUBJECTS_CACHE
+    if _SUBJECTS_CACHE is not None:
+        return list(_SUBJECTS_CACHE)
+
+    names: List[str] = []
+
+    # 1) Từ file cấu hình
+    path = os.path.abspath(_SUBJECTS_PATH)
+    if os.path.isfile(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            raw = data.get("subjects") or []
+            for item in raw:
+                s = str(item).strip()
+                if s and s not in names:
+                    names.append(s)
+        except Exception:
+            pass  # file lỗi → vẫn có thể lấy từ DB
+
+    # 2) Từ DB (các môn đã từng nộp đơn)
+    if include_from_db:
+        try:
+            with connect_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT DISTINCT course_code
+                    FROM AbsenceRequests
+                    WHERE course_code IS NOT NULL AND TRIM(course_code) != ''
+                    ORDER BY course_code
+                    """
+                )
+                for row in cursor.fetchall():
+                    s = (row["course_code"] or "").strip()
+                    if s and not any(s.lower() == x.lower() for x in names):
+                        names.append(s)
+        except Exception:
+            pass
+
+    # Fallback tối thiểu nếu cả YAML + DB trống
+    if not names:
+        names = [
+            "Lập trình Python",
+            "Cơ sở dữ liệu",
+            "CSDL",
+            "Mạng máy tính",
+            "Kiểm thử phần mềm",
+        ]
+
+    _SUBJECTS_CACHE = names
+    return list(names)
+
+
+def clear_known_subjects_cache() -> None:
+    """Gọi sau khi sửa subjects.yml (hoặc trong test)."""
+    global _SUBJECTS_CACHE
+    _SUBJECTS_CACHE = None
 
 def _fetch_one(cursor: sqlite3.Cursor, query: str, params: tuple[Any, ...]) -> Optional[Dict[str, Any]]:
     cursor.execute(query, params)
