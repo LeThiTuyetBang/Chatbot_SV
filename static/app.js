@@ -311,7 +311,7 @@ function renderAuthenticatedUI() {
   }
 
   // Bật kết nối Realtime SSE
-  initRealtimeSSE();
+  // initRealtimeSSE();
 }
 
 async function handleLogin(username, password) {

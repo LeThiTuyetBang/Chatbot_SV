@@ -1,10 +1,10 @@
 {
-  "total_executed": 32,
-  "passed": 30,
-  "failed": 2,
-  "skipped": 6,
-  "tcr": 93.75,
-  "average_turn_count": 3.7,
+  "total_executed": 38,
+  "passed": 32,
+  "failed": 6,
+  "skipped": 0,
+  "tcr": 84.21052631578947,
+  "average_turn_count": 3.125,
   "details": [
     {
       "id": 1,
@@ -34,27 +34,38 @@
       "id": 4,
       "name": "Nộp đơn dùng ngày tuyệt đối",
       "file": "04_ngay_tuyet_doi.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 5,
-      "errors": []
+      "errors": [
+        "Turn 2: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 3: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 5: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'",
+        "has_evidence mong đợi True nhưng thực tế False"
+      ]
     },
     {
       "id": 5,
       "name": "Nộp đơn rồi tra cứu",
       "file": "05_nop_roi_tra_cuu.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 5,
-      "errors": []
+      "errors": [
+        "Turn 2: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 3: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "Turn 5: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
+        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
+      ]
     },
     {
       "id": 6,
       "name": "Nộp đơn qua Form web (không dùng Chatbot)",
       "file": "06_Nop_don_qua_Form.yaml",
-      "pass": null,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
-      ]
+      "errors": []
     },
     {
       "id": 7,
@@ -100,9 +111,11 @@
       "id": 12,
       "name": "Ngày không hợp lệ (31/02, 32/13)",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": true,
+      "pass": false,
       "turn_count": 2,
-      "errors": []
+      "errors": [
+        "Turn 2: thiếu từ khóa ['ngày kết thúc'] trong câu bot: ['Ngày bắt đầu không được nằm trong quá khứ. Bạn chọn từ hôm nay trở đi nhé.', 'Bạn cho mình ngày bắt đầu nghỉ nhé.']"
+      ]
     },
     {
       "id": 13,
@@ -188,50 +201,44 @@
       "id": 23,
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
-      "pass": false,
-      "turn_count": 0,
-      "errors": [
-        "Setup lỗi: Setup PENDING: không tạo được đơn PENDING"
-      ]
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
     },
     {
       "id": 24,
       "name": "Giáo vụ đăng nhập → duyệt đơn PENDING",
       "file": "24_giao_vu_duyet_don.yaml",
-      "pass": null,
+      "pass": false,
       "turn_count": 0,
       "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+        "Setup PENDING lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
       ]
     },
     {
       "id": 25,
       "name": "Giáo vụ từ chối đơn",
       "file": "25_giao_vu_tu_choi_don.yaml",
-      "pass": null,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
-      ]
+      "errors": []
     },
     {
       "id": 26,
       "name": "Phân quyền đăng nhập theo vai trò + chặn truy cập API sai role",
       "file": "26_sinh_vien_truy_cap_api_giao_vu.yaml",
-      "pass": null,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
-      ]
+      "errors": []
     },
     {
       "id": 27,
       "name": "Xem chi tiết đơn + lịch sử + minh chứng",
       "file": "27_xem_chi_tiet_don.yaml",
-      "pass": null,
+      "pass": false,
       "turn_count": 0,
       "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
+        "Setup PENDING lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
       ]
     },
     {
@@ -254,11 +261,9 @@
       "id": 30,
       "name": "Đăng nhập sai mật khẩu",
       "file": "30_dang_nhap_sai.yaml",
-      "pass": null,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Không có turns (kịch bản API) → bỏ qua phiên bản 1"
-      ]
+      "errors": []
     },
     {
       "id": 31,
@@ -299,7 +304,7 @@
       "pass": false,
       "turn_count": 0,
       "errors": [
-        "Setup lỗi: Setup PENDING: không tạo được đơn PENDING"
+        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
       ]
     },
     {

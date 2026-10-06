@@ -7,8 +7,8 @@ load_dotenv()
 from functools import wraps
 from urllib.error import URLError, HTTPError
 from urllib.request import Request, urlopen
+from flask import Flask, Response, jsonify, render_template, request, session, stream_with_context
 
-from flask import Flask, Response, jsonify, render_template, request, session
 
 from db.store import (
     STATUS_APPROVED,
@@ -158,18 +158,21 @@ def admin_view():
 @app.get("/api/events")
 @login_required
 def sse_events():
+    # Lấy thông tin user ngay trong request context
+    user_info = {
+        "user_id": session.get("user_id"),
+        "role": session.get("role"),
+        "username": session.get("username"),
+    }
+
+    @stream_with_context
     def stream():
         q = queue.Queue(maxsize=50)
-        # Gắn thông tin user vào queue để lọc sau này
-        q.user_info = {
-            "user_id": session.get("user_id"),
-            "role": session.get("role"),
-            "username": session.get("username"),
-        }
+        q.user_info = user_info
         with sse_lock:
             sse_listeners.append(q)
-        yield "event: ping\ndata: {}\n\n"
         try:
+            yield "event: ping\ndata: {}\n\n"
             while True:
                 try:
                     msg = q.get(timeout=20)
@@ -180,16 +183,6 @@ def sse_events():
             with sse_lock:
                 if q in sse_listeners:
                     sse_listeners.remove(q)
-
-    return Response(
-        stream(),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
 
     return Response(
         stream(),

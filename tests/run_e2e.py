@@ -11,6 +11,8 @@ import json
 import time
 import sqlite3
 from pathlib import Path
+import random
+from datetime import date, timedelta
 
 import requests
 import yaml
@@ -181,52 +183,77 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
     latest = get_latest_student_request(student_username)
     return latest["status"] if latest else None
 
-def _submit_one_pending_via_chat(session: requests.Session) -> None:
-    """Nộp 1 đơn PENDING qua chat (ngày tuyệt đối xa, tránh chồng với setup #22)."""
-    restart_chat(session)
-    time.sleep(0.3)
-    # Dùng khoảng ngày khác hẳn 20-22/10 để không đụng đơn APPROVED của #22
-    send_message(
-        session,
-        "em xin nghỉ môn Kiểm thử phần mềm lớp CN2302C từ 25/11/2026 đến 27/11/2026 vì ốm, không có minh chứng",
-    )
-    send_message(session, "có")
+def create_pending_request_via_api(session: requests.Session) -> int:
+    """
+    Tạo 1 đơn PENDING ổn định qua API Form (không phụ thuộc NLU/chat).
+    Trả về request_id.
+    """
+    # Tạo ngày ngẫu nhiên xa trong tương lai để không bao giờ chồng với đơn cũ
+    base = date(2026, 12, 15) + timedelta(days=random.randint(0, 40))
+    start = base.isoformat()
+    end = (base + timedelta(days=2)).isoformat()
 
+    body = {
+        "course_code": f"Môn setup E2E {random.randint(100,999)}",  # môn khác nhau mỗi lần
+        "class_code": "CN2302C",
+        "start_date": start,
+        "end_date": end,
+        "reason": "Ốm – setup tự động cho E2E",
+        "evidence_url": "",
+    }
+    r = session.post(
+        f"{BASE_URL}/api/student/requests",
+        json=body,
+        timeout=TIMEOUT,
+    )
+    if r.status_code != 200:
+        raise RuntimeError(
+            f"Setup PENDING qua API thất bại: status={r.status_code} body={r.text[:300]}"
+        )
+    data = r.json()
+    if not data.get("ok"):
+        raise RuntimeError(f"Setup PENDING qua API thất bại: {data.get('message')}")
+
+    req_id = (data.get("data") or {}).get("id")
+    if not req_id:
+        student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
+        pending = store.list_requests_by_student(student["id"], limit=1)
+        if not pending or pending[0]["status"] != store.STATUS_PENDING:
+            raise RuntimeError("Setup PENDING: không lấy được request_id sau khi tạo")
+        req_id = pending[0]["id"]
+    return int(req_id)
 
 def setup_pending_request(session: requests.Session):
-    """Chuẩn bị 1 đơn PENDING cho các kịch bản hủy đơn (#21, #23, #35)."""
-    _submit_one_pending_via_chat(session)
-    student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
-    if not student:
-        raise RuntimeError("Setup PENDING: không tìm thấy tài khoản sinh viên test")
-    pending = store.list_requests_by_student(student["id"], limit=1)
-    if not pending or pending[0]["status"] != store.STATUS_PENDING:
-        raise RuntimeError("Setup PENDING: không tạo được đơn PENDING")
+    """Chuẩn bị 1 đơn PENDING cho các kịch bản hủy đơn (#21, #23, #35) và API (#24, #25, #27)."""
+    # Đảm bảo đã login SV
+    if not session.cookies:
+        if not login(session, STUDENT_USER, STUDENT_PASS):
+            raise RuntimeError("Setup PENDING: không login được sinh viên")
+    
+    cancel_all_pending_of_student()   # dọn sạch trước
+    req_id = create_pending_request_via_api(session)
+     
+    # Verify
+    req = store.get_request_by_id(req_id)
+    if not req or req["status"] != store.STATUS_PENDING:
+        raise RuntimeError(f"Setup PENDING: đơn #{req_id} không ở trạng thái PENDING")
+    return req_id
 
 
 def setup_approved_request(session: requests.Session):
     """Chuẩn bị đơn PENDING rồi duyệt thành APPROVED (cho #22)."""
-    _submit_one_pending_via_chat(session)
-
-    student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
-    if not student:
-        raise RuntimeError("Không tìm thấy tài khoản sinh viên test để setup #22")
-
-    pending = store.list_requests_by_student(student["id"], limit=1)
-    if not pending or pending[0]["status"] != store.STATUS_PENDING:
-        raise RuntimeError("Setup #22: không tạo được đơn PENDING để duyệt")
+    req_id = setup_pending_request(session)
 
     staff = store.get_user_by_credentials(STAFF_USER, STAFF_PASS)
     if not staff:
         raise RuntimeError("Không tìm thấy tài khoản giáo vụ test để setup #22")
 
     store.update_request_status(
-        request_id=pending[0]["id"],
+        request_id=req_id,
         new_status=store.STATUS_APPROVED,
         changed_by=staff["id"],
         note="Setup tự động cho kịch bản #22",
     )
-
 
 SETUP_FUNCTIONS = {
     "approve_latest_request_for_student": setup_approved_request,
@@ -258,19 +285,9 @@ def run_api_scenario(scenario: dict) -> dict:
     request_id = None  # dùng cho endpoint có {id}
 
     # Chuẩn bị dữ liệu nếu cần (duyệt / từ chối / xem chi tiết)
-    if sid in ("24", "25", "27"):
-        # Tạo 1 đơn PENDING trước
-        if not login(session, STUDENT_USER, STUDENT_PASS):
-            result["pass"] = False
-            result["errors"].append("Không login được SV để setup đơn PENDING")
-            return result
-        cancel_all_pending_of_student()
+    if sid in (24, 25, 27) or str(sid) in ("24", "25", "27"):
         try:
-            setup_pending_request(session)
-            student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
-            pending = store.list_requests_by_student(student["id"], limit=1)
-            if pending:
-                request_id = pending[0]["id"]
+            request_id = setup_pending_request(session)
         except Exception as e:
             result["pass"] = False
             result["errors"].append(f"Setup PENDING lỗi: {e}")
