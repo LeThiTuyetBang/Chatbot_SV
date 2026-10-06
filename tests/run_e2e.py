@@ -262,9 +262,9 @@ SETUP_FUNCTIONS = {
 def run_api_scenario(scenario: dict) -> dict:
     """
     Chạy kịch bản API-only (form / admin / phân quyền / đăng nhập sai).
-    Kiểm tra status code, message, role, và final_check DB.
+    Kiểm tra status code, message, role, DB status, history.
     """
-    sid = scenario.get("id", "?")
+    sid = str(scenario.get("id", "?"))
     name = scenario.get("name", "")
     result = {
         "id": sid,
@@ -282,17 +282,37 @@ def run_api_scenario(scenario: dict) -> dict:
         return result
 
     session = requests.Session()
-    request_id = None  # dùng cho endpoint có {id}
+    request_id = None
 
-    # Chuẩn bị dữ liệu nếu cần (duyệt / từ chối / xem chi tiết)
-    if sid in (24, 25, 27) or str(sid) in ("24", "25", "27"):
+    # Setup đơn PENDING cho các kịch bản cần {id}: duyệt / từ chối / xem chi tiết
+    if sid in ("24", "25", "27"):
+        setup_sess = requests.Session()
+        if not login(setup_sess, STUDENT_USER, STUDENT_PASS):
+            result["pass"] = False
+            result["errors"].append("Không login được SV để setup đơn PENDING")
+            return result
+        cancel_all_pending_of_student()
         try:
-            request_id = setup_pending_request(session)
+            setup_pending_request(setup_sess)
+            student = store.get_user_by_credentials(STUDENT_USER, STUDENT_PASS)
+            pending = store.list_requests_by_student(student["id"], limit=1)
+            if pending:
+                request_id = pending[0]["id"]
+            else:
+                result["pass"] = False
+                result["errors"].append("Setup PENDING: không lấy được request_id")
+                return result
         except Exception as e:
             result["pass"] = False
             result["errors"].append(f"Setup PENDING lỗi: {e}")
             return result
-        session = requests.Session()  # reset session (sẽ login lại theo api_steps)
+
+        # #27: YAML không có login → tự login STAFF trước khi chạy steps
+        if sid == "27":
+            if not login(session, STAFF_USER, STAFF_PASS):
+                result["pass"] = False
+                result["errors"].append("Không login được STAFF cho kịch bản #27")
+                return result
 
     for i, step in enumerate(api_steps, start=1):
         method = (step.get("method") or "GET").upper()
@@ -304,7 +324,6 @@ def run_api_scenario(scenario: dict) -> dict:
         expected_db_status = step.get("expected_db_status")
         expected_fields = step.get("expected_fields") or []
 
-        # Thay {id} bằng request_id thật
         if "{id}" in endpoint:
             if request_id is None:
                 result["pass"] = False
@@ -329,11 +348,12 @@ def run_api_scenario(scenario: dict) -> dict:
             result["errors"].append(f"Step {i}: request lỗi – {e}")
             continue
 
-        # 1. Kiểm tra status code
+        # 1. Status code
         if r.status_code != expected_status:
             result["pass"] = False
             result["errors"].append(
-                f"Step {i} {method} {endpoint}: status mong đợi {expected_status}, nhận {r.status_code} – {r.text[:200]}"
+                f"Step {i} {method} {endpoint}: status mong đợi {expected_status}, "
+                f"nhận {r.status_code} – {r.text[:200]}"
             )
             continue
 
@@ -343,18 +363,18 @@ def run_api_scenario(scenario: dict) -> dict:
         except Exception:
             pass
 
-        # 2. Kiểm tra message (nếu có)
+        # 2. Message (substring)
         if expected_message:
-            actual_msg = data.get("message", "")
+            actual_msg = str(data.get("message", ""))
             if expected_message.lower() not in actual_msg.lower():
                 result["pass"] = False
                 result["errors"].append(
                     f"Step {i}: message mong đợi chứa '{expected_message}', nhận '{actual_msg}'"
                 )
 
-        # 3. Kiểm tra expected_data (role, …)
+        # 3. expected_data (role, …) — data nằm trong payload["data"]
         if expected_data:
-            actual_data = data.get("data") or data
+            actual_data = data.get("data") if isinstance(data.get("data"), dict) else data
             for key, val in expected_data.items():
                 if actual_data.get(key) != val:
                     result["pass"] = False
@@ -362,15 +382,21 @@ def run_api_scenario(scenario: dict) -> dict:
                         f"Step {i}: data.{key} mong đợi '{val}', nhận '{actual_data.get(key)}'"
                     )
 
-        # 4. Kiểm tra expected_fields (history, evidences…)
+        # 4. expected_fields
         if expected_fields:
-            actual_data = data.get("data") or data
+            actual_data = data.get("data") if isinstance(data.get("data"), dict) else data
             for field in expected_fields:
                 if field not in actual_data:
                     result["pass"] = False
                     result["errors"].append(f"Step {i}: thiếu field '{field}' trong response")
 
-        # 5. Kiểm tra DB status ngay sau bước (nếu có)
+        # 5. Bắt request_id từ response tạo đơn (#06)
+        if method == "POST" and endpoint.rstrip("/").endswith("/api/student/requests"):
+            created = data.get("data") if isinstance(data.get("data"), dict) else {}
+            if created.get("id"):
+                request_id = created["id"]
+
+        # 6. DB status ngay sau bước
         if expected_db_status and request_id:
             req = store.get_request_by_id(request_id)
             actual = req["status"] if req else None
@@ -382,7 +408,7 @@ def run_api_scenario(scenario: dict) -> dict:
 
         print(f"    API Step {i}: {method} {endpoint} → {r.status_code}")
 
-    # Final check DB (nếu có)
+    # Final check DB
     final_check = scenario.get("final_check") or {}
     if final_check.get("db_status") and request_id:
         req = store.get_request_by_id(request_id)
@@ -392,12 +418,32 @@ def run_api_scenario(scenario: dict) -> dict:
             result["errors"].append(
                 f"final_check db_status mong đợi '{final_check['db_status']}', thực tế '{actual}'"
             )
+    elif final_check.get("db_status") and not request_id:
+        # #06: nếu không bắt được id, fallback đơn mới nhất của SV
+        latest = get_latest_student_request()
+        actual = latest["status"] if latest else None
+        if actual != final_check["db_status"]:
+            result["pass"] = False
+            result["errors"].append(
+                f"final_check db_status mong đợi '{final_check['db_status']}', "
+                f"thực tế '{actual}' (fallback latest)"
+            )
 
     if final_check.get("has_history") and request_id:
         history = store.get_request_history(request_id)
         if not history:
             result["pass"] = False
             result["errors"].append("final_check has_history=True nhưng không có lịch sử")
+
+    if final_check.get("has_evidence") is not None and request_id:
+        ev = store.get_evidences_by_request(request_id)
+        actual_ev = len(ev) > 0
+        expected_ev = bool(final_check["has_evidence"])
+        if actual_ev != expected_ev:
+            result["pass"] = False
+            result["errors"].append(
+                f"has_evidence mong đợi {expected_ev} nhưng thực tế {actual_ev}"
+            )
 
     return result
 
@@ -507,7 +553,7 @@ def run_chat_scenario(scenario: dict) -> dict:
 
 def main():
     print("=" * 60)
-    print("CHẠY BỘ KỊCH BẢN END-TO-END (phiên bản 1 – chỉ chat)")
+    print("CHẠY BỘ KỊCH BẢN END-TO-END (chat + API)")
     print("=" * 60)
 
     if not SCENARIOS_DIR.exists():
@@ -523,12 +569,17 @@ def main():
         res = run_chat_scenario(sc)
         results.append(res)
 
+        # Phân loại: có turns = chat; không turns = API
+        is_api = not (sc.get("turns") or [])
+
         if res["pass"] is None:
-            print("  → SKIP (API-only)\n")
+            print("  → SKIP\n")
         elif res["pass"]:
-            print(f"  → PASS  (turns={res['turn_count']})\n")
+            kind = "API" if is_api else "chat"
+            print(f"  → PASS ({kind}, turns={res['turn_count']})\n")
         else:
-            print(f"  → FAIL  (turns={res['turn_count']})")
+            kind = "API" if is_api else "chat"
+            print(f"  → FAIL ({kind}, turns={res['turn_count']})")
             for e in res["errors"]:
                 print(f"     • {e}")
             print()
@@ -545,16 +596,23 @@ def main():
         sum(r["turn_count"] for r in passed) / len(passed) if passed else 0.0
     )
 
+    # Đếm riêng chat / API (để báo cáo CD4 / TCR rõ ràng)
+    api_ids = {"06", "6", "24", "25", "26", "27", "30"}
+    passed_api = [r for r in passed if str(r.get("id")) in api_ids]
+    passed_chat = [r for r in passed if str(r.get("id")) not in api_ids]
+    failed_api = [r for r in failed if str(r.get("id")) in api_ids]
+    failed_chat = [r for r in failed if str(r.get("id")) not in api_ids]
+
     print("=" * 60)
     print("TỔNG HỢP KẾT QUẢ")
     print("=" * 60)
     print(f"Tổng file YAML        : {len(results)}")
-    print(f"Đã chạy (có turns)    : {total}")
-    print(f"Pass                  : {len(passed)}")
-    print(f"Fail                  : {len(failed)}")
-    print(f"Skip (API-only)       : {len(skipped)}")
+    print(f"Đã chạy (executed)    : {total}")
+    print(f"  - Pass              : {len(passed)}  (chat={len(passed_chat)}, API={len(passed_api)})")
+    print(f"  - Fail              : {len(failed)}  (chat={len(failed_chat)}, API={len(failed_api)})")
+    print(f"Skip                  : {len(skipped)}")
     print(f"TCR                   : {tcr:.2f}%   (= {len(passed)}/{total})")
-    print(f"Average Turn Count    : {avg_turns:.2f}")
+    print(f"Average Turn Count    : {avg_turns:.2f}  (chỉ tính kịch bản chat pass)")
     print()
 
     if failed:
@@ -564,7 +622,7 @@ def main():
             for e in r["errors"]:
                 print(f"      {e}")
 
-    # Ghi file kết quả JSON để đưa vào phụ lục sau này
+    # Ghi file kết quả JSON (thêm chat/api counts cho báo cáo)
     out_path = Path(__file__).parent / "e2e_results.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(
@@ -573,6 +631,10 @@ def main():
                 "passed": len(passed),
                 "failed": len(failed),
                 "skipped": len(skipped),
+                "passed_chat": len(passed_chat),
+                "passed_api": len(passed_api),
+                "failed_chat": len(failed_chat),
+                "failed_api": len(failed_api),
                 "tcr": tcr,
                 "average_turn_count": avg_turns,
                 "details": results,
@@ -582,6 +644,10 @@ def main():
             indent=2,
         )
     print(f"\nĐã ghi kết quả chi tiết → {out_path}")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":

@@ -1,10 +1,14 @@
 {
   "total_executed": 38,
-  "passed": 32,
-  "failed": 6,
+  "passed": 30,
+  "failed": 8,
   "skipped": 0,
-  "tcr": 84.21052631578947,
-  "average_turn_count": 3.125,
+  "passed_chat": 25,
+  "passed_api": 5,
+  "failed_chat": 7,
+  "failed_api": 1,
+  "tcr": 78.94736842105263,
+  "average_turn_count": 3.2333333333333334,
   "details": [
     {
       "id": 1,
@@ -60,7 +64,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "Nộp đơn qua Form web (không dùng Chatbot)",
       "file": "06_Nop_don_qua_Form.yaml",
       "pass": true,
@@ -185,30 +189,44 @@
       "id": 21,
       "name": "Hủy đơn đang ở trạng thái PENDING",
       "file": "21_huy_don_pending.yaml",
-      "pass": true,
-      "turn_count": 1,
-      "errors": []
+      "pass": false,
+      "turn_count": 0,
+      "errors": [
+        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
+      ]
     },
     {
       "id": 22,
       "name": "Cố hủy đơn đã APPROVED hoặc REJECTED",
       "file": "22_huy_don_da_xu_ly.yaml",
-      "pass": true,
-      "turn_count": 1,
-      "errors": []
+      "pass": false,
+      "turn_count": 0,
+      "errors": [
+        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
+      ]
     },
     {
       "id": 23,
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
+      "pass": false,
+      "turn_count": 0,
+      "errors": [
+        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
+      ]
+    },
+    {
+      "id": "24",
+      "name": "Giáo vụ đăng nhập → duyệt đơn PENDING",
+      "file": "24_giao_vu_duyet_don.yaml",
       "pass": true,
-      "turn_count": 1,
+      "turn_count": 0,
       "errors": []
     },
     {
-      "id": 24,
-      "name": "Giáo vụ đăng nhập → duyệt đơn PENDING",
-      "file": "24_giao_vu_duyet_don.yaml",
+      "id": "25",
+      "name": "Giáo vụ từ chối đơn",
+      "file": "25_giao_vu_tu_choi_don.yaml",
       "pass": false,
       "turn_count": 0,
       "errors": [
@@ -216,15 +234,7 @@
       ]
     },
     {
-      "id": 25,
-      "name": "Giáo vụ từ chối đơn",
-      "file": "25_giao_vu_tu_choi_don.yaml",
-      "pass": true,
-      "turn_count": 0,
-      "errors": []
-    },
-    {
-      "id": 26,
+      "id": "26",
       "name": "Phân quyền đăng nhập theo vai trò + chặn truy cập API sai role",
       "file": "26_sinh_vien_truy_cap_api_giao_vu.yaml",
       "pass": true,
@@ -232,14 +242,12 @@
       "errors": []
     },
     {
-      "id": 27,
+      "id": "27",
       "name": "Xem chi tiết đơn + lịch sử + minh chứng",
       "file": "27_xem_chi_tiet_don.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Setup PENDING lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "errors": []
     },
     {
       "id": 28,
@@ -258,7 +266,7 @@
       "errors": []
     },
     {
-      "id": 30,
+      "id": "30",
       "name": "Đăng nhập sai mật khẩu",
       "file": "30_dang_nhap_sai.yaml",
       "pass": true,

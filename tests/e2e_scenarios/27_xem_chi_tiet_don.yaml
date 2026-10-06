@@ -6,6 +6,10 @@ description: "GET /api/admin/requests/<id> trả về history + evidences"
 turns: []
 
 api_steps:
+  - method: POST
+    endpoint: /api/auth/login
+    body: { username: "gv_tien", password: "UTH@2026" }
+    expected_status: 200
   - method: GET
     endpoint: /api/admin/requests/{id}
     expected_status: 200
