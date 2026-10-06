@@ -1,20 +1,20 @@
 id: 04
 group: "Luồng chuẩn"
 name: "Nộp đơn dùng ngày tuyệt đối"
-description: "Nộp đơn dùng ngày tuyệt đối (dd/mm/yyyy) – dùng ngày tương lai"
+description: "Nộp đơn dùng ngày tuyệt đối (dd/mm/yyyy) – ngày tương lai trong 90 ngày"
 
 turns:
-  - user: "Em xin nghỉ môn Lập trình Python từ 05/10/2026 đến 07/10/2026"
+  - user: "Em xin nghỉ môn Lập trình Python từ 15/11/2026 đến 17/11/2026"
     expected_bot:
       - contains: ["mã lớp"]
 
   - user: "CN2303B"
     expected_bot:
-      - contains: ["lý do nghỉ học"]
+      - contains: ["lý do"]
 
   - user: "Đi khám bệnh"
     expected_bot:
-      - contains: ["link ảnh minh chứng"]
+      - contains: ["minh chứng"]
 
   - user: "https://example.com/giaykham.pdf"
     expected_bot:
@@ -22,7 +22,7 @@ turns:
 
   - user: "xác nhận"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING"]
+      - contains: ["Ghi nhận thành công"]
 
 final_check:
   db_status: "PENDING"

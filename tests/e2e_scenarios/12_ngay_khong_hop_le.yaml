@@ -1,14 +1,9 @@
-id: 12
-group: "Nhập sai định dạng"
-name: "Ngày không hợp lệ (31/02, 32/13)"
-description: "Ngày không hợp lệ (ví dụ 31/02). Bot phải hỏi lại ngày bắt đầu."
-
 turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ 31/02/2026 đến 05/03/2026 vì ốm"
     expected_bot:
       - contains: ["ngày bắt đầu"]
 
-  - user: "05/10/2026"
+  - user: "20/11/2026"
     expected_bot:
       - contains: ["ngày kết thúc"]
 

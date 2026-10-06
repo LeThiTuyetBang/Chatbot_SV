@@ -185,20 +185,22 @@ def get_latest_student_request_status(student_username: str = STUDENT_USER) -> s
 
 def create_pending_request_via_api(session: requests.Session) -> int:
     """
-    Tạo 1 đơn PENDING ổn định qua API Form (không phụ thuộc NLU/chat).
-    Trả về request_id.
+    Tạo 1 đơn PENDING qua API Form.
+    Ngày luôn trong khoảng [today+3, today+60] → không quá khứ, không vượt 90 ngày.
     """
-    # Tạo ngày ngẫu nhiên xa trong tương lai để không bao giờ chồng với đơn cũ
-    base = date(2026, 12, 15) + timedelta(days=random.randint(0, 40))
+    today = date.today()
+    # 3..60 ngày tới: an toàn với max_future_days=90 và tránh trùng "mai"
+    offset = random.randint(3, 60)
+    base = today + timedelta(days=offset)
     start = base.isoformat()
     end = (base + timedelta(days=2)).isoformat()
 
     body = {
-        "course_code": f"Môn setup E2E {random.randint(100,999)}",  # môn khác nhau mỗi lần
+        "course_code": f"Mon setup E2E {random.randint(100, 999)}",
         "class_code": "CN2302C",
         "start_date": start,
         "end_date": end,
-        "reason": "Ốm – setup tự động cho E2E",
+        "reason": "Om – setup tu dong cho E2E",
         "evidence_url": "",
     }
     r = session.post(

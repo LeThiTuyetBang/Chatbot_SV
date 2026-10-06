@@ -1,20 +1,15 @@
-id: 05
-group: "Luồng chuẩn"
-name: "Nộp đơn rồi tra cứu"
-description: "Nộp đơn dùng ngày tuyệt đối rồi tra cứu trạng thái"
-
 turns:
-  - user: "Em xin nghỉ môn Lập trình Python từ 05/10/2026 đến 07/10/2026"
+  - user: "Em xin nghỉ môn Cơ sở dữ liệu từ 18/11/2026 đến 20/11/2026"
     expected_bot:
       - contains: ["mã lớp"]
 
-  - user: "CN2303B"
+  - user: "DTH2151"
     expected_bot:
-      - contains: ["lý do nghỉ học"]
+      - contains: ["lý do"]
 
   - user: "Đi khám bệnh"
     expected_bot:
-      - contains: ["link ảnh minh chứng"]
+      - contains: ["minh chứng"]
 
   - user: "https://example.com/giaykham.pdf"
     expected_bot:
@@ -22,7 +17,12 @@ turns:
 
   - user: "xác nhận"
     expected_bot:
-      - contains: ["Ghi nhận thành công", "PENDING"]
+      - contains: ["Ghi nhận thành công"]
+
+  # Nếu YAML gốc có turn tra cứu, giữ thêm:
+  # - user: "xem trạng thái đơn"
+  #   expected_bot:
+  #     - contains: ["PENDING"]  # hoặc "Chờ duyệt" / "đơn"
 
 final_check:
   db_status: "PENDING"

@@ -105,10 +105,10 @@ nlu:
       - em muốn nghỉ học có phép
       - em xin nghỉ ngày mai
       - em xin nghỉ hôm nay
-      - em xin nghỉ từ [3/4](time) đến [5/4](time)
-      - cho em nghỉ vào [thứ 2 tuần sau](time)
-      - em xin nghỉ buổi học [mai](time)
-      - em muốn nghỉ từ [10/4](time) đến [12/4](time)
+      - em xin nghỉ từ [3/4](start_date) đến [5/4](end_date) 
+      - cho em nghỉ vào [thứ 2 tuần sau](start_date)
+      - em xin nghỉ buổi học [mai](start_date)
+      - em muốn nghỉ từ [10/4](start_date) đến [12/4](end_date)
       - mã lớp [CN2302C](ma_lop)
       - lớp [DL75GK](ma_lop)
       - em học lớp [CN2302C](ma_lop)
@@ -121,11 +121,11 @@ nlu:
       - xin nghỉ học môn [INT2204](ma_mon) lớp [DH22SE01](ma_lop) nghỉ từ [15/05/2026](start_date) đến [17/05/2026](end_date) lý do [nhiễm covid](reason)
       - em xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21CN01](ma_lop) ngày [20/04/2026](start_date) đến [22/04/2026](end_date) vì [bị ốm nặng](reason) link [https://drive.google.com/doc](evidence_url)
       - xin vắng học môn [Trí tuệ nhân tạo](ma_mon_hoc) lớp [SE101](ma_lop) từ [hôm nay](start_date) do [hỏng xe trên đường](reason)
-      - em xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](time) đến [ngày kia](time) vì [bị ốm](reason), không có minh chứng
-      - xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](time) đến [ngày kia](time) vì [bị ốm](reason)
-      - em xin nghỉ môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [CN2302C](ma_lop) từ [hôm nay](time) đến [ngày mai](time) vì [bị sốt](reason) không có minh chứng
-      - em muốn xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21IT01](ma_lop) từ [thứ 2 tuần sau](time) đến [thứ 4 tuần sau](time) do [bận việc gia đình](reason) không có minh chứng
-      - thầy ơi cho em xin nghỉ môn [Kiểm thử phần mềm](ma_mon_hoc) lớp [DTH2151](ma_lop) ngày [mai](time) vì [đi khám bệnh](reason) không có giấy
+      - em xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](start_date) đến [ngày kia](end_date) vì [bị ốm](reason), không có minh chứng
+      - xin nghỉ môn [Lập trình Python](ma_mon_hoc) lớp [DTH2151](ma_lop) từ [mai](start_date) đến [ngày kia](end_date) vì [bị ốm](reason)
+      - em xin nghỉ môn [Cơ sở dữ liệu](ma_mon_hoc) lớp [CN2302C](ma_lop) từ [hôm nay](start_date) đến [ngày mai](end_date) vì [bị sốt](reason) không có minh chứng
+      - em muốn xin nghỉ môn [Mạng máy tính](ma_mon_hoc) lớp [DH21IT01](ma_lop) từ [thứ 2 tuần sau](start_date) đến [thứ 4 tuần sau](end_date) do [bận việc gia đình](reason) không có minh chứng
+      - thầy ơi cho em xin nghỉ môn [Kiểm thử phần mềm](ma_mon_hoc) lớp [DTH2151](ma_lop) ngày [mai](start_date) vì [đi khám bệnh](reason) không có giấy
       - em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om, khong co minh chung
       - em xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om khong co minh chung
       - xin nghi mon csdl lop cn2302c tu mai den ngay kia vi om
@@ -134,8 +134,8 @@ nlu:
       - xin nghi mon kiem thu phan mem lop dth2151 ngay mai vi di kham benh
       - e muon xin nghi mon csdl tu mai den ngay kia
       - cho e nghi mon csdl lop cn2302c tu mai den mốt
-      - em xin nghi mon [csdl](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](time) den [ngay kia](time) vi [om](reason) khong co minh chung
-      - em xin nghi mon [lap trinh python](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](time) den [ngay kia](time) vi [om](reason)
+      - em xin nghi mon [csdl](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](start_date) den [ngay kia](end_date) vi [om](reason) khong co minh chung
+      - em xin nghi mon [lap trinh python](ma_mon_hoc) lop [cn2302c](ma_lop) tu [mai](start_date) den [ngay kia](end_date) vi [om](reason)
       - thay oi cho e nghi 1 buoi dc ko
       - thay oi cho e nghi 1 buoi duoc khong
       - co oi cho em nghi 1 buoi voi
@@ -374,7 +374,7 @@ nlu:
       - sai rồi
       - chưa đúng
       - em muốn sửa lại
-      - hủy thao tác  # (hoặc có thể bỏ luôn cụm này nếu không cần thiết)
+      - hủy thao tác
       - không
       - không ạ
       - không lưu
@@ -384,6 +384,10 @@ nlu:
       - không đúng
       - sai
       - no
+      - thôi
+      - thôi đi
+      - hủy
+      - huỷ
 
   - intent: greet
     examples: |
@@ -481,6 +485,11 @@ nlu:
       - chơi game với mình không
       - abc xyz
       - 123 456
+      - xyz abc 789
+      - asdfghjkl
+      - qwerty
+      - test test test
+      - hello world foo bar
       - kết quả bóng đá đêm qua
       - giá vàng hôm nay bao nhiêu
       - tin tức thời sự mới nhất
@@ -492,3 +501,16 @@ nlu:
       - xem phim chiếu rạp
       - cho mình hỏi về du lịch
       - dịch giúp mình câu này
+      - bitcoin hôm nay tăng hay giảm
+      - công thức nấu phở
+      - lịch thi đấu ngoại hạng anh
+      - cách cài windows 11
+      - giá iPhone mới nhất
+      - xem điểm chứng khoán
+      - mẹo trang điểm
+      - học tiếng Anh giao tiếp
+      - đặt vé máy bay đi Đà Nẵng
+      - 111 222 333
+      - aaa bbb ccc
+      - !!! ???
+      - ...

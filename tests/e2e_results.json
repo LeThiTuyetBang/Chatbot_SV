@@ -1,14 +1,14 @@
 {
   "total_executed": 38,
-  "passed": 30,
-  "failed": 8,
+  "passed": 38,
+  "failed": 0,
   "skipped": 0,
-  "passed_chat": 25,
-  "passed_api": 5,
-  "failed_chat": 7,
-  "failed_api": 1,
-  "tcr": 78.94736842105263,
-  "average_turn_count": 3.2333333333333334,
+  "passed_chat": 32,
+  "passed_api": 6,
+  "failed_chat": 0,
+  "failed_api": 0,
+  "tcr": 100.0,
+  "average_turn_count": 2.973684210526316,
   "details": [
     {
       "id": 1,
@@ -38,30 +38,17 @@
       "id": 4,
       "name": "Nộp đơn dùng ngày tuyệt đối",
       "file": "04_ngay_tuyet_doi.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 5,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 3: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 5: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'",
-        "has_evidence mong đợi True nhưng thực tế False"
-      ]
+      "errors": []
     },
     {
-      "id": 5,
-      "name": "Nộp đơn rồi tra cứu",
+      "id": "?",
+      "name": "",
       "file": "05_nop_roi_tra_cuu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 5,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 3: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "Turn 5: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: [\"Mình chưa hiểu ngày bắt đầu. Bạn nhập lại dạng dd/mm/yyyy hoặc 'mai', 'thứ 2 tuần sau' nhé.\", 'Bạn cho mình ngày bắt đầu nghỉ nhé.']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "6",
@@ -112,14 +99,12 @@
       "errors": []
     },
     {
-      "id": 12,
-      "name": "Ngày không hợp lệ (31/02, 32/13)",
+      "id": "?",
+      "name": "",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['ngày kết thúc'] trong câu bot: ['Ngày bắt đầu không được nằm trong quá khứ. Bạn chọn từ hôm nay trở đi nhé.', 'Bạn cho mình ngày bắt đầu nghỉ nhé.']"
-      ]
+      "errors": []
     },
     {
       "id": 13,
@@ -189,31 +174,25 @@
       "id": 21,
       "name": "Hủy đơn đang ở trạng thái PENDING",
       "file": "21_huy_don_pending.yaml",
-      "pass": false,
-      "turn_count": 0,
-      "errors": [
-        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
     },
     {
       "id": 22,
       "name": "Cố hủy đơn đã APPROVED hoặc REJECTED",
       "file": "22_huy_don_da_xu_ly.yaml",
-      "pass": false,
-      "turn_count": 0,
-      "errors": [
-        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
     },
     {
       "id": 23,
       "name": "Hủy đơn gần nhất bằng câu 'hủy đơn vừa nộp'",
       "file": "23_huy_don_gan_nhat.yaml",
-      "pass": false,
-      "turn_count": 0,
-      "errors": [
-        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
     },
     {
       "id": "24",
@@ -227,11 +206,9 @@
       "id": "25",
       "name": "Giáo vụ từ chối đơn",
       "file": "25_giao_vu_tu_choi_don.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 0,
-      "errors": [
-        "Setup PENDING lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "errors": []
     },
     {
       "id": "26",
@@ -309,11 +286,9 @@
       "id": 35,
       "name": "Hủy đơn viết tắt",
       "file": "35_viet_tat_huy_don.yaml",
-      "pass": false,
-      "turn_count": 0,
-      "errors": [
-        "Setup lỗi: Setup PENDING qua API thất bại: status=400 body={\"message\":\"Ng\\u00e0y b\\u1eaft \\u0111\\u1ea7u kh\\u00f4ng \\u0111\\u01b0\\u1ee3c qu\\u00e1 xa trong t\\u01b0\\u01a1ng lai (t\\u1ed1i \\u0111a 90 ng\\u00e0y).\",\"ok\":false}\n"
-      ]
+      "pass": true,
+      "turn_count": 1,
+      "errors": []
     },
     {
       "id": 36,

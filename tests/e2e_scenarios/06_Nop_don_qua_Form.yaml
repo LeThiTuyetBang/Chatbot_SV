@@ -17,15 +17,16 @@ api_steps:
       role: "STUDENT"
 
   # 2. Nộp đơn qua Form (API)
+  # Môn + ngày khác #05 (Cơ sở dữ liệu 18–20/11) để không bị chồng lấn
   - method: POST
     endpoint: /api/student/requests
     body:
-      course_code: "Cơ sở dữ liệu"
+      course_code: "Mạng máy tính"
       class_code: "DTH2151"
-      start_date: "2026-11-20" # ngày tuyệt đối trong tương lai (tránh quá khứ / chồng lấn)
-      end_date: "2026-11-22"
+      start_date: "2026-11-25"
+      end_date: "2026-11-27"
       reason: "Đi khám bệnh"
-      evidence_url: "" # không có minh chứng
+      evidence_url: ""
     expected_status: 200
     # response message từ webapp.py: "Gửi đơn thành công."
 
@@ -36,4 +37,4 @@ final_check:
   expected_turn_count: 0
 
 result: Pass
-note: "Kiểm tra qua API Form web, không qua Rasa."
+note: "Kiểm tra qua API Form web, không qua Rasa. Môn/ngày tách biệt với kịch bản chat #05."
