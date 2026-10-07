@@ -11,7 +11,7 @@ api_steps:
     endpoint: /api/auth/login
     body:
       username: "066305014844"
-      password: "UTH@2026"
+      password: "MatKhauMoiCuaBan@2026"
     expected_status: 200
     expected_data:
       role: "STUDENT"
@@ -36,5 +36,4 @@ final_check:
   has_evidence: false
   expected_turn_count: 0
 
-result: Pass
 note: "Kiểm tra qua API Form web, không qua Rasa. Môn/ngày tách biệt với kịch bản chat #05."

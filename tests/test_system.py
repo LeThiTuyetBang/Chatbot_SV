@@ -11,9 +11,9 @@ from db.init_db import init_database
 from db.store import validate_date_range
 
 STUDENT_USER = os.getenv("E2E_STUDENT_USER", "066305014844")
-STUDENT_PASS = os.getenv("E2E_STUDENT_PASS", os.getenv("DEFAULT_PASSWORD", "UTH@2026"))
+STUDENT_PASS = os.getenv("E2E_STUDENT_PASS", os.getenv("DEFAULT_PASSWORD", "MatKhauMoiCuaBan@2026"))
 STAFF_USER = os.getenv("E2E_STAFF_USER", "gv_tien")
-STAFF_PASS = os.getenv("E2E_STAFF_PASS", os.getenv("DEFAULT_PASSWORD", "UTH@2026"))
+STAFF_PASS = os.getenv("E2E_STAFF_PASS", os.getenv("DEFAULT_PASSWORD", "MatKhauMoiCuaBan@2026"))
 
 
 def _future(days: int) -> str:

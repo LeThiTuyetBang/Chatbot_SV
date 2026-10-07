@@ -121,7 +121,7 @@ class TestSystemWithTempDB(unittest.TestCase):
         init_db_mod.init_database()
 
         # Lấy student_id thật từ user seed (không hardcode = 1)
-        student = store.get_user_by_credentials("066305014844", os.getenv("DEFAULT_PASSWORD", "UTH@2026"))
+        student = store.get_user_by_credentials("066305014844", os.getenv("DEFAULT_PASSWORD", "MatKhauMoiCuaBan@2026"))
         self.assertIsNotNone(student, "Seed student không tồn tại trong DB test")
         self.student_id = student["id"]
 

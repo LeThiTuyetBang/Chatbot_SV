@@ -8,8 +8,26 @@ turns: []
 api_steps:
   - method: POST
     endpoint: /api/auth/login
-    body: { username: "gv_tien", password: "UTH@2026" }
+    body: { username: "gv_tien", password: "MatKhauMoiCuaBan@2026" }
     expected_status: 200
+  - method: POST
+    endpoint: /api/admin/requests/{id}/reject
+    expected_status: 200
+    expected_db_status: "REJECTED"
+group: "Giáo vụ & Phân quyền"
+name: "Giáo vụ từ chối đơn"
+description: "API /api/admin/requests/<id>/reject → status = REJECTED + ghi lịch sử"
+
+turns: []
+
+api_steps:
+  - method: POST
+    endpoint: /api/auth/login
+    body:
+      username: "gv_tien"
+      password: "MatKhauMoiCuaBan@2026"          
+    expected_status: 200
+
   - method: POST
     endpoint: /api/admin/requests/{id}/reject
     expected_status: 200
@@ -18,7 +36,11 @@ api_steps:
 final_check:
   db_status: "REJECTED"
   has_history: true
+  expected_turn_count: 0
+
+final_check:
+  db_status: "REJECTED"
+  has_history: true
   # store.py: default_note = f"{user_name} đã từ chối đơn"
   expected_turn_count: 0
 
-result: Pass

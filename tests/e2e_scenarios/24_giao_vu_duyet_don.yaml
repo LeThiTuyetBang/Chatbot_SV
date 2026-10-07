@@ -3,14 +3,16 @@ group: "Giáo vụ & Phân quyền"
 name: "Giáo vụ đăng nhập → duyệt đơn PENDING"
 description: "API /api/admin/requests/<id>/approve → status = APPROVED + ghi lịch sử"
 
-# Không phải hội thoại chat, kiểm qua API (webapp.py)
 turns: []
 
 api_steps:
   - method: POST
     endpoint: /api/auth/login
-    body: { username: "gv_tien", password: "UTH@2026" }
+    body:
+      username: "gv_tien"
+      password: "MatKhauMoiCuaBan@2026"
     expected_status: 200
+
   - method: POST
     endpoint: /api/admin/requests/{id}/approve
     expected_status: 200
@@ -19,7 +21,4 @@ api_steps:
 final_check:
   db_status: "APPROVED"
   has_history: true
-  # store.py: default_note = f"{user_name} đã duyệt đơn"
   expected_turn_count: 0
-
-result: Pass

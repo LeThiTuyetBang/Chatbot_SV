@@ -39,3 +39,4 @@ turns:
 final_check:
   db_status: "PENDING"
   has_evidence: false
+  expected_turn_count: 8

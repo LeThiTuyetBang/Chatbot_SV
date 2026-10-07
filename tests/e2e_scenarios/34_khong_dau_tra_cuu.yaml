@@ -13,7 +13,6 @@ turns:
 final_check:
   expected_turn_count: 1
 
-result: Fail
 note: >
   Câu "xem trang thai don xin nghi" (không dấu) không được nhận là check_absence_status.
   Bot kích hoạt form xin nghỉ và hỏi mã môn.

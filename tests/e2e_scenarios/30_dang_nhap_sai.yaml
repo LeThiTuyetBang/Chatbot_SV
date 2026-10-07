@@ -14,10 +14,8 @@ api_steps:
 
   - method: POST
     endpoint: /api/auth/login
-    body: { username: "khong_ton_tai", password: "UTH@2026" }
+    body: { username: "khong_ton_tai", password: "MatKhauMoiCuaBan@2026" }
     expected_status: 401
 
 final_check:
   expected_turn_count: 0
-
-result: Pass

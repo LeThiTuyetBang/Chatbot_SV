@@ -1,7 +1,9 @@
 import sqlite3
 import os
 from werkzeug.security import generate_password_hash
+from dotenv import load_dotenv
 
+load_dotenv()
 # Xác định đường dẫn file CSDL nằm cùng thư mục với file script này
 DB_PATH = os.path.join(os.path.dirname(__file__), "chatbot.db")
 
@@ -75,7 +77,12 @@ def init_database():
     ''')
     # Tạo mật khẩu mặc định được băm an toàn (pbkdf2 + salt)
     # Lấy từ biến môi trường DEFAULT_PASSWORD, fallback chỉ dùng cho môi trường dev
-    default_password = os.getenv("DEFAULT_PASSWORD", "UTH@2026")
+    default_password = os.getenv("DEFAULT_PASSWORD")
+    if not default_password:
+        raise RuntimeError(
+            "Thiếu biến môi trường DEFAULT_PASSWORD. "
+            "Hãy tạo file .env hoặc export DEFAULT_PASSWORD=... trước khi chạy init_db."
+        )
     default_password_hash = generate_password_hash(default_password)
 
     # Chèn dữ liệu mẫu cho sinh viên thực hiện đề tài

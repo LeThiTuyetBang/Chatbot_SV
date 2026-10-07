@@ -8,7 +8,7 @@ turns: []
 api_steps:
   - method: POST
     endpoint: /api/auth/login
-    body: { username: "gv_tien", password: "UTH@2026" }
+    body: { username: "gv_tien", password: "MatKhauMoiCuaBan@2026" }
     expected_status: 200
   - method: GET
     endpoint: /api/admin/requests/{id}
@@ -17,5 +17,3 @@ api_steps:
 
 final_check:
   expected_turn_count: 0
-
-result: Pass

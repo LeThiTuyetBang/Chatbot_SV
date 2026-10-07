@@ -7,42 +7,19 @@ turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      - Môn: CTDL
-      - Lớp: CN2302C
-      - Từ: mai -> 2026-09-28
-      - Đến: ngày kia -> 2026-09-29
-      - Lý do: ốm
-      - Minh chứng: Không có
-
-      Bạn xác nhận để mình lưu đơn nhé?
     pass: true
 
   - user: "sửa ngày bắt đầu thành ngày mốt"
     expected_bot:
       - contains: ["Đã cập nhật thông tin đơn", "ngày mốt"]
-    actual_bot: |
-      Mình đã hiểu đơn của bạn như sau:
-      - Môn: CTDL
-      - Lớp: CN2302C
-      - Từ: ngày mốt -> 2026-09-29
-      - Đến: ngày kia -> 2026-09-29
-      - Lý do: ốm
-      - Minh chứng: Không có
-
-      Bạn xác nhận để mình lưu đơn nhé?
     pass: true
 
   - user: "đồng ý"
     expected_bot:
       - contains: ["Ghi nhận thành công", "PENDING"]
-    actual_bot: "Ghi nhận thành công đơn xin nghỉ môn CTDL từ ngày 2026-09-29 đến ngày 2026-09-29. Trạng thái hiện tại: Chờ duyệt (PENDING). Mã đơn của bạn là #18."
     pass: true
 
 final_check:
   db_status: "PENDING"
   start_date: "2026-09-29"
   expected_turn_count: 3
-
-result: Pass

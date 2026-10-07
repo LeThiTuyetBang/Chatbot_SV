@@ -48,5 +48,3 @@ turns:
 final_check:
   db_status: "PENDING"
   expected_turn_count: 8
-
-result: Pass

@@ -29,9 +29,15 @@ DB_PATH = Path(__file__).parent.parent / "db" / "chatbot.db"
 
 # Lấy từ biến môi trường, có fallback cho local test
 STUDENT_USER = os.getenv("E2E_STUDENT_USER", "066305014844")
-STUDENT_PASS = os.getenv("E2E_STUDENT_PASS", "UTH@2026")   # chỉ dùng khi chạy test local
+STUDENT_PASS = os.getenv("E2E_STUDENT_PASS") or os.getenv("DEFAULT_PASSWORD")
 STAFF_USER   = os.getenv("E2E_STAFF_USER", "gv_tien")
-STAFF_PASS   = os.getenv("E2E_STAFF_PASS", "UTH@2026")
+STAFF_PASS   = os.getenv("E2E_STAFF_PASS") or os.getenv("DEFAULT_PASSWORD")
+
+if not STUDENT_PASS or not STAFF_PASS:
+    raise RuntimeError(
+        "Thiếu E2E_STUDENT_PASS / E2E_STAFF_PASS hoặc DEFAULT_PASSWORD. "
+        "Hãy set biến môi trường trước khi chạy test."
+    )
 
 # Timeout mỗi request (giây)
 TIMEOUT = 30

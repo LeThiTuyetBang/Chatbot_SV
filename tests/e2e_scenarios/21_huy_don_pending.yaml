@@ -13,3 +13,4 @@ turns:
 
 final_check:
   db_status: "CANCELLED"
+  expected_turn_count: 1

@@ -18,5 +18,3 @@ turns:
 
 final_check:
   expected_turn_count: 2
-
-result: Pass
