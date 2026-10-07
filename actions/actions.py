@@ -1,6 +1,4 @@
 import re
-import logging
-logger = logging.getLogger(__name__)
 from datetime import date, timedelta
 from typing import Any, Text, Dict, List, Tuple, Optional
 from rasa_sdk import Action, Tracker
@@ -914,29 +912,6 @@ class ActionHandleAbsenceCorrection(Action):
             intent_name = tracker.latest_message.get("intent", {}).get("name")
             entities = tracker.latest_message.get("entities", [])
 
-            pure_cancel = {
-                "không", "khong", "ko", "no",
-                "hủy", "huy", "huỷ",
-                "thôi", "thoi",
-                "từ chối", "tu choi",
-                "làm lại", "lam lai",
-                "sai rồi", "sai roi",
-                "chưa đúng", "chua dung",
-                "không đúng", "khong dung",
-                "không đồng ý", "khong dong y",
-                "không lưu", "khong luu",
-            }
-
-            def _is_pure_cancel(t: str) -> bool:
-                if t in pure_cancel:
-                    return True
-                if re.fullmatch(
-                    r"(không|khong|ko|no|hủy|huy|thôi|thoi|sai rồi|sai roi)\s*(ạ|a|nhé|nhe|đi|di)?",
-                    t,
-                ):
-                    return True
-                return False
-
             has_update_entity = any(
                 e.get("entity") in [
                     "start_date", "end_date", "time",
@@ -949,9 +924,9 @@ class ActionHandleAbsenceCorrection(Action):
                 for kw in ["ngày", "môn", "lớp", "lý do", "ly do", "minh chứng", "http", "drive"]
             )
 
-            if _is_pure_cancel(text) or (
-                intent_name in ["deny", "cancel_absence"]
-                and not (has_update_entity or has_update_keyword)
+            # Hủy khi user nói rõ ràng, và không đang sửa thông tin
+            if _is_cancel_correction_text(text, intent_name) and not (
+                has_update_entity or has_update_keyword
             ):
                 dispatcher.utter_message(
                     text=(
@@ -959,18 +934,7 @@ class ActionHandleAbsenceCorrection(Action):
                         "Bạn có thể nhập thông tin mới nếu muốn tạo lại đơn nhé!"
                     )
                 )
-                return [
-                    SlotSet("ma_mon_hoc", None),
-                    SlotSet("ma_mon", None),
-                    SlotSet("ma_lop", None),
-                    SlotSet("start_date", None),
-                    SlotSet("end_date", None),
-                    SlotSet("reason", None),
-                    SlotSet("normalized_start_date", None),
-                    SlotSet("normalized_end_date", None),
-                    SlotSet("evidence_url", None),
-                    SlotSet("awaiting_request_confirmation", False),
-                ]
+                return _reset_absence_slots()
 
             slot_events = []
             updated_fields = []
@@ -1172,7 +1136,6 @@ class ActionHandleAbsenceCorrection(Action):
                         dispatcher.utter_message(
                             text=f"Ngày kết thúc ({end_show}) không được trước ngày bắt đầu ({start_show}). Bạn vui lòng chọn lại ngày kết thúc nhé."
                         )
-                        logger.warning(f"[DEBUG correction] LOI NGAY - slot_events bi bo = {slot_events}")
                         return [SlotSet("awaiting_request_confirmation", True)]
                 except Exception:
                     pass
@@ -1189,7 +1152,6 @@ class ActionHandleAbsenceCorrection(Action):
                 )
                 dispatcher.utter_message(text=preview_msg)
                 slot_events.append(SlotSet("awaiting_request_confirmation", True))
-                logger.warning(f"[DEBUG correction] slot_events CUOI CUNG = {slot_events}")
                 return slot_events
 
             dispatcher.utter_message(
@@ -1203,9 +1165,9 @@ class ActionHandleAbsenceCorrection(Action):
                 )
             )
             return [SlotSet("awaiting_request_confirmation", True)]
-        except Exception as e:
+        except Exception:
             dispatcher.utter_message(
-                text=f"Có lỗi xử lý thông tin: {str(e)}. Bạn thử gõ lại thông tin nhé."
+                text="Có lỗi khi xử lý thông tin. Bạn thử gõ lại thông tin cần sửa nhé."
             )
             return [SlotSet("awaiting_request_confirmation", True)]
 

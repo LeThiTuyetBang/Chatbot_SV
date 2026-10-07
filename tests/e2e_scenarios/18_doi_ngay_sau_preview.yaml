@@ -7,17 +7,14 @@ turns:
   - user: "Em xin nghỉ môn CTDL lớp CN2302C từ mai đến ngày kia vì ốm, không có minh chứng"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    pass: true
 
   - user: "sửa ngày bắt đầu thành ngày mốt"
     expected_bot:
       - contains: ["Đã cập nhật thông tin đơn", "ngày mốt"]
-    pass: true
 
   - user: "đồng ý"
     expected_bot:
       - contains: ["Ghi nhận thành công", "PENDING"]
-    pass: true
 
 final_check:
   db_status: "PENDING"

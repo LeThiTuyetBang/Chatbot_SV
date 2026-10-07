@@ -7,42 +7,38 @@ turns:
   - user: "em xin nghỉ học"
     expected_bot:
       - contains: ["mã môn hoặc tên môn"]
-    pass: true
+     
 
   - user: "Cơ sở dữ liệu"
     expected_bot:
       - contains: ["mã lớp"]
-    pass: true
+     
 
   - user: "CN2302C"
     expected_bot:
       - contains: ["ngày bắt đầu nghỉ"]
-    pass: true
 
   - user: "mai"
     expected_bot:
       - contains: ["ngày kết thúc nghỉ"]
-    pass: true
 
   - user: "ngày kia"
     expected_bot:
       - contains: ["lý do nghỉ học"]
-    pass: true
 
   - user: "Ốm"
     expected_bot:
       - contains: ["link ảnh minh chứng"]
-    pass: true
+
 
   - user: "không"
     expected_bot:
       - contains: ["Mình đã hiểu đơn của bạn như sau"]
-    pass: true
 
   - user: "đồng ý"
     expected_bot:
       - contains: ["Ghi nhận thành công", "PENDING"]
-    pass: true
+
 
 final_check:
   db_status: "PENDING"

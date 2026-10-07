@@ -8,7 +8,6 @@ turns:
     expected_bot:
       - contains: ["Danh sách các đơn nghỉ gần nhất", "đơn"]
     # action_check_absence_status
-    pass: true
 
 final_check:
   expected_turn_count: 1
