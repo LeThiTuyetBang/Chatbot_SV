@@ -712,7 +712,7 @@ async function openEditModal(requestId) {
     const studentName =
       req.student_name || req.student_username || `SV #${req.student_id}`;
 
-    els.editSummaryStudent.innerHTML = `<b>Sinh viên:</b> ${escapeHtml(studentName)} (${req.student_username || req.student_id})`;
+    els.editSummaryStudent.innerHTML = `<b>Sinh viên:</b> ${escapeHtml(studentName)} (${escapeHtml(req.student_username || req.student_id)})`;
     els.editSummaryCourse.innerHTML = `<b>Môn học / Lớp:</b> ${escapeHtml(req.course_code)} - ${escapeHtml(req.class_code)}`;
     els.editSummaryDates.innerHTML = `<b>Thời gian nghỉ:</b> ${formatDateDisplay(req.start_date)} đến ${formatDateDisplay(req.end_date)}`;
 

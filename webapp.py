@@ -39,6 +39,18 @@ app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("Thiếu biến môi trường SECRET_KEY. Hãy đặt SECRET_KEY trước khi chạy.")
 
+# Cookie session an toàn hơn (dev local vẫn dùng HTTP)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Rate limit đăng nhập đơn giản (in-memory)
+from collections import defaultdict
+from time import time
+
+_login_attempts = defaultdict(list)  # ip -> [timestamps]
+_LOGIN_MAX_ATTEMPTS = 5
+_LOGIN_WINDOW_SEC = 300  # 5 phút
+
 RASA_REST_URL = os.environ.get("RASA_REST_URL", "http://localhost:5005/webhooks/rest/webhook")
 
 # Thread-safe event bus for SSE Realtime
@@ -203,9 +215,27 @@ def login():
     if not username or not password:
         return _json_response(message="Thiếu tên đăng nhập hoặc mật khẩu.", ok=False, status_code=400)
 
+    # --- Rate limit theo IP ---
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr) or "unknown"
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    now = time()
+    attempts = [t for t in _login_attempts[ip] if now - t < _LOGIN_WINDOW_SEC]
+    _login_attempts[ip] = attempts
+    if len(attempts) >= _LOGIN_MAX_ATTEMPTS:
+        return _json_response(
+            message="Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau 5 phút.",
+            ok=False,
+            status_code=429,
+        )
+
     user = get_user_by_credentials(username, password)
     if not user:
+        _login_attempts[ip].append(now)
         return _json_response(message="Sai tên đăng nhập hoặc mật khẩu.", ok=False, status_code=401)
+
+    # Đăng nhập đúng → xóa lịch sử thử sai của IP này
+    _login_attempts.pop(ip, None)
 
     session["user_id"] = user["id"]
     session["username"] = user["username"]

@@ -1,20 +1,36 @@
+# Virtual environment
 venv/
+.venv/
+env/
+
+# Rasa
 .rasa/
 models/
 *.tar.gz
-*.pyc
-__pycache__/
-# SQLite Database
-db/*.db
-*.db
-# Security & Secrets
-credentials.yml
-.env
-
-# IDE & OS Files
-.vscode/
-.DS_Store
-# Bỏ qua thư mục báo cáo kết quả test của Rasa
 results/
 story_graph.dot
 *.dot
+
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# SQLite Database
+db/*.db
+*.db
+
+# Security & Secrets
+credentials.yml
+.env
+.env.*
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
