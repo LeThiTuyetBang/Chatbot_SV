@@ -831,6 +831,73 @@ class ActionResetAbsenceForm(Action):
         ]
 
 
+_CANCEL_EXACT = {
+    "không", "khong", "ko", "k", "no",
+    "hủy", "huy", "huỷ",
+    "thôi", "thoi",
+    "từ chối", "tu choi",
+    "làm lại", "lam lai",
+    "không đồng ý", "khong dong y",
+    "không lưu", "khong luu",
+    "không xác nhận", "khong xac nhan",
+    "hủy đơn", "huy don", "hủy đi", "huy di",
+}
+
+_CANCEL_FALSE_POSITIVE = re.compile(
+    r"(không|khong|ko)\s+(có|co|cần|can|phải|phai|được|duoc|phải|muốn|muon)"
+    r"|(không|khong)\s+(minh\s*chứng|minh\s*chung|link|ảnh|anh|giấy|giay)"
+    r"|(lý\s*do|ly\s*do|vì|vi|do)\s+.*(không|khong)",
+    re.IGNORECASE,
+)
+
+
+def _is_cancel_correction_text(text: str, intent_name: str | None) -> bool:
+    """
+    True chỉ khi user muốn HỦY / không xác nhận đơn đang preview.
+    Tránh: 'không có minh chứng', 'lý do: không khỏe'.
+    """
+    t = (text or "").strip().lower()
+    t = re.sub(r"\s+", " ", t)
+
+    if intent_name == "cancel_absence":
+        return True
+
+    if not t:
+        return False
+
+    if _CANCEL_FALSE_POSITIVE.search(t):
+        return False
+
+    if t in _CANCEL_EXACT:
+        return True
+
+    if intent_name == "deny":
+        if len(t.split()) <= 4 and t in _CANCEL_EXACT or t in {
+            "không", "khong", "ko", "no", "thôi", "hủy", "huy"
+        }:
+            return True
+        # deny + đúng cụm hủy ngắn
+        if t in _CANCEL_EXACT:
+            return True
+        return False
+
+    return False
+
+
+def _reset_absence_slots() -> List[Dict[Text, Any]]:
+    return [
+        SlotSet("ma_mon_hoc", None),
+        SlotSet("ma_mon", None),
+        SlotSet("ma_lop", None),
+        SlotSet("start_date", None),
+        SlotSet("end_date", None),
+        SlotSet("reason", None),
+        SlotSet("normalized_start_date", None),
+        SlotSet("normalized_end_date", None),
+        SlotSet("evidence_url", None),
+        SlotSet("awaiting_request_confirmation", False),
+    ]
+
 class ActionHandleAbsenceCorrection(Action):
     def name(self) -> Text:
         return "action_handle_absence_correction"
@@ -848,30 +915,27 @@ class ActionHandleAbsenceCorrection(Action):
             logger.warning(f"[DEBUG correction] text={text!r} entities={entities}")
             logger.warning(f"[DEBUG correction] reason_slot_TRUOC={tracker.get_slot('reason')!r}")
 
-            # Kiểm tra xem có entity hoặc từ khóa thông tin mới đi kèm không (môn, lớp, ngày, lý do, link)
             has_update_entity = any(
-                e.get("entity") in ["start_date", "end_date", "time", "ma_mon_hoc", "ma_mon", "ma_lop", "reason", "evidence_url"] 
+                e.get("entity") in [
+                    "start_date", "end_date", "time",
+                    "ma_mon_hoc", "ma_mon", "ma_lop", "reason", "evidence_url",
+                ]
                 for e in entities
             )
-            has_update_keyword = any(kw in text for kw in ["ngày", "môn", "lớp", "lý do", "ly do", "minh chứng", "http", "drive"])
+            has_update_keyword = any(
+                kw in text
+                for kw in ["ngày", "môn", "lớp", "lý do", "ly do", "minh chứng", "http", "drive"]
+            )
 
-            # Nếu user trả lời "không", "hủy", "không đồng ý", "thôi" mà KHÔNG CÓ thông tin sửa đi kèm -> HỦY ĐƠN & RESET FORM
-            if (intent_name in ["deny", "cancel_absence"] or any(kw == text or text.startswith(kw) for kw in ["không", "khong", "hủy", "huy", "thôi", "từ chối", "làm lại"])) and not (has_update_entity or has_update_keyword):
+            # CD8: chỉ hủy khi phủ định đúng ngữ cảnh
+            if _is_cancel_correction_text(text, intent_name) and not (
+                has_update_entity or has_update_keyword
+            ):
                 dispatcher.utter_message(
-                    text="Đã hủy đơn xin nghỉ học và không lưu thông tin. Bạn có thể nhập thông tin mới nếu muốn tạo lại đơn nhé!"
+                    text="Đã hủy đơn xin nghỉ học và không lưu thông tin. "
+                        "Bạn có thể nhập thông tin mới nếu muốn tạo lại đơn nhé!"
                 )
-                return [
-                    SlotSet("ma_mon_hoc", None),
-                    SlotSet("ma_mon", None),
-                    SlotSet("ma_lop", None),
-                    SlotSet("start_date", None),
-                    SlotSet("end_date", None),
-                    SlotSet("reason", None),
-                    SlotSet("normalized_start_date", None),
-                    SlotSet("normalized_end_date", None),
-                    SlotSet("evidence_url", None),
-                    SlotSet("awaiting_request_confirmation", False),
-                ]
+                return _reset_absence_slots()
 
             slot_events = []
             updated_fields = []
