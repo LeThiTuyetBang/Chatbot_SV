@@ -1,14 +1,14 @@
 {
   "total_executed": 38,
-  "passed": 18,
-  "failed": 20,
+  "passed": 38,
+  "failed": 0,
   "skipped": 0,
-  "passed_chat": 12,
+  "passed_chat": 32,
   "passed_api": 6,
-  "failed_chat": 20,
+  "failed_chat": 0,
   "failed_api": 0,
-  "tcr": 47.368421052631575,
-  "average_turn_count": 0.9444444444444444,
+  "tcr": 100.0,
+  "average_turn_count": 2.973684210526316,
   "details": [
     {
       "id": 1,
@@ -22,61 +22,33 @@
       "id": 2,
       "name": "Nộp đơn không có minh chứng",
       "file": "02_khong_minh_chung.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn hoặc tên môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 3: thiếu từ khóa ['ngày bắt đầu nghỉ'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['link ảnh minh chứng', \"gõ 'không'\"] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 8: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'",
-        "has_evidence mong đợi False nhưng thực tế True"
-      ]
+      "errors": []
     },
     {
       "id": 3,
       "name": "Nộp đơn dùng ngày tương đối",
       "file": "03_ngay_tuong_doi.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 7,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['ngày bắt đầu nghỉ'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": 4,
       "name": "Nộp đơn dùng ngày tuyệt đối",
       "file": "04_ngay_tuyet_doi.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 5,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['lý do'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['Ghi nhận thành công'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "?",
       "name": "",
       "file": "05_nop_roi_tra_cuu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 5,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['lý do'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['Ghi nhận thành công'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "6",
@@ -90,132 +62,89 @@
       "id": 7,
       "name": "Chỉ nói 'em xin nghỉ học' → bot hỏi lần lượt các slot",
       "file": "07_ChiNoi_EmXinNghiHoc.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn hoặc tên môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 3: thiếu từ khóa ['ngày bắt đầu nghỉ'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 8: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "08",
       "name": "Cung cấp thiếu ngày kết thúc",
       "file": "08_ThieuNgayKetThuc.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": "09",
       "name": "Cung cấp thiếu lý do",
       "file": "09_ThieuLyDo.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 10,
       "name": "Cung cấp thiếu mã lớp",
       "file": "10_thieu_ma_lop.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 11,
       "name": "Ngày kết thúc < ngày bắt đầu",
       "file": "11_ngay_ket_thuc_nho_hon_bat_dau.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 4,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['link ảnh minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 3: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": "?",
       "name": "",
       "file": "12_ngay_khong_hop_le.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['ngày kết thúc'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 13,
       "name": "Nhập ngày bằng câu không hiểu được",
       "file": "13_ngay_cau_khong_hieu.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 3,
-      "errors": [
-        "Turn 3: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 14,
       "name": "Mã môn không có trong lookup table",
       "file": "14_ma_mon_khong_co_trong_lookup.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['Mình đã hiểu'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 15,
       "name": "Nhập câu linh tinh khi đang ở trong form",
       "file": "15_nhap_cau_linh_tinh_trong_form.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 2: thiếu từ khóa ['mã lớp'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']",
-        "Turn 3: thiếu từ khóa ['ngày'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']",
-        "Turn 4: thiếu từ khóa ['ngày'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']",
-        "Turn 5: thiếu từ khóa ['ngày'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']",
-        "Turn 6: thiếu từ khóa ['lý do'] trong câu bot: ['Bạn cho mình biết mã lớp của bạn nhé.']",
-        "Turn 7: thiếu từ khóa ['ngày kết thúc'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 8: thiếu từ khóa ['ngày kết thúc'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 16,
       "name": "Đang điền form → nói 'thôi' / 'hủy'",
       "file": "16_doi_y_huy_khi_dang_dien_form.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 4,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 3: thiếu từ khóa ['ngày'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['ngày'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 17,
       "name": "Sau khi xem preview → nói 'sai rồi' / 'không'",
       "file": "17_sau_preview_noi_sai_roi.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['hủy', 'không lưu', 'nhập thông tin mới'] trong câu bot: ['Đã cập nhật thông tin đơn của bạn:\\n- Môn: ai\\n- Lớp: CN2302C\\n- Từ: mai -> 2026-10-08\\n- Đến: ngày kia -> 2026-10-09\\n- Lý do: ốm\\n- Minh chứng: Không có', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
-      ]
+      "errors": []
     },
     {
       "id": 18,
@@ -229,15 +158,9 @@
       "id": 19,
       "name": "Bắt đầu nộp đơn mới khi form cũ chưa kết thúc",
       "file": "19_bat_dau_don_moi_khi_form_cu_chua_xong.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 7,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn hoặc tên môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 3: thiếu từ khóa ['ngày bắt đầu nghỉ'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 5: thiếu từ khóa ['lý do nghỉ học'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 20,
@@ -339,32 +262,17 @@
       "id": 32,
       "name": "Sai chính tả tên môn",
       "file": "32_sai_chinh_ta_mon.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 2: thiếu từ khóa ['mã lớp'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']",
-        "Turn 3: thiếu từ khóa ['ngày bắt đầu'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 5: thiếu từ khóa ['lý do'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Mình đã hiểu'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 8: thiếu từ khóa ['Ghi nhận thành công'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 33,
       "name": "Cách nói thật của sinh viên (e / dc / thầy ơi)",
       "file": "33_cach_noi_that_sv.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 8,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn hoặc tên môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 3: thiếu từ khóa ['ngày bắt đầu'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 6: thiếu từ khóa ['minh chứng'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 7: thiếu từ khóa ['Mình đã hiểu đơn của bạn như sau', 'xác nhận'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 8: thiếu từ khóa ['Ghi nhận thành công', 'PENDING'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "DB status mong đợi 'PENDING' nhưng thực tế 'CANCELLED'"
-      ]
+      "errors": []
     },
     {
       "id": 34,
@@ -386,23 +294,17 @@
       "id": 36,
       "name": "Sai chính tả / cách viết ngày",
       "file": "36_sai_chinh_ta_ngay.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 4,
-      "errors": [
-        "Turn 3: thiếu từ khóa ['Mình đã hiểu'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']",
-        "Turn 4: thiếu từ khóa ['Ghi nhận thành công'] trong câu bot: ['Dạ, mình có thể giúp gì cho bạn? Bạn có thể gửi thông tin xin nghỉ học hoặc chọn các nút thao tác bên dưới nhé!']"
-      ]
+      "errors": []
     },
     {
       "id": 37,
       "name": "Câu mơ hồ / thiếu thông tin nặng",
       "file": "37_cau_mo_ho.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 1: thiếu từ khóa ['mã môn'] trong câu bot: ['Thiếu thông tin (môn học / lớp / lý do). Bạn vui lòng cung cấp đủ nhé.']",
-        "Turn 2: thiếu từ khóa ['mã lớp'] trong câu bot: ['Mình chưa hiểu rõ ý của bạn. Bạn có thể nói lại ngắn gọn hơn hoặc nhập theo cách khác được không?']"
-      ]
+      "errors": []
     },
     {
       "id": 38,

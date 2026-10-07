@@ -233,10 +233,10 @@ class ValidateAbsenceForm(FormValidationAction):
         for e in entities:
             if e.get("entity") == "ma_mon_hoc" and e.get("value"):
                 val = e.get("value").strip()
-        if not _is_class_code(val) or any(
-            val.lower() == sub.lower() for sub in _known_subjects()
-        ):
-            return {"ma_mon_hoc": val}
+                if not _is_class_code(val) or any(
+                    val.lower() == sub.lower() for sub in _known_subjects()
+                ):
+                    return {"ma_mon_hoc": val}
 
         # 4. Entity ma_mon: CHỈ chấp nhận nếu có từ "môn" phía trước hoặc không phải định dạng mã lớp
         for e in entities:
@@ -910,10 +910,32 @@ class ActionHandleAbsenceCorrection(Action):
     ) -> List[Dict[Text, Any]]:
         try:
             text = tracker.latest_message.get("text", "").strip().lower()
+            text = re.sub(r"[.!?…]+$", "", text).strip()
             intent_name = tracker.latest_message.get("intent", {}).get("name")
             entities = tracker.latest_message.get("entities", [])
-            logger.warning(f"[DEBUG correction] text={text!r} entities={entities}")
-            logger.warning(f"[DEBUG correction] reason_slot_TRUOC={tracker.get_slot('reason')!r}")
+
+            pure_cancel = {
+                "không", "khong", "ko", "no",
+                "hủy", "huy", "huỷ",
+                "thôi", "thoi",
+                "từ chối", "tu choi",
+                "làm lại", "lam lai",
+                "sai rồi", "sai roi",
+                "chưa đúng", "chua dung",
+                "không đúng", "khong dung",
+                "không đồng ý", "khong dong y",
+                "không lưu", "khong luu",
+            }
+
+            def _is_pure_cancel(t: str) -> bool:
+                if t in pure_cancel:
+                    return True
+                if re.fullmatch(
+                    r"(không|khong|ko|no|hủy|huy|thôi|thoi|sai rồi|sai roi)\s*(ạ|a|nhé|nhe|đi|di)?",
+                    t,
+                ):
+                    return True
+                return False
 
             has_update_entity = any(
                 e.get("entity") in [
@@ -927,15 +949,28 @@ class ActionHandleAbsenceCorrection(Action):
                 for kw in ["ngày", "môn", "lớp", "lý do", "ly do", "minh chứng", "http", "drive"]
             )
 
-            # CD8: chỉ hủy khi phủ định đúng ngữ cảnh
-            if _is_cancel_correction_text(text, intent_name) and not (
-                has_update_entity or has_update_keyword
+            if _is_pure_cancel(text) or (
+                intent_name in ["deny", "cancel_absence"]
+                and not (has_update_entity or has_update_keyword)
             ):
                 dispatcher.utter_message(
-                    text="Đã hủy đơn xin nghỉ học và không lưu thông tin. "
+                    text=(
+                        "Đã hủy đơn xin nghỉ học và không lưu thông tin. "
                         "Bạn có thể nhập thông tin mới nếu muốn tạo lại đơn nhé!"
+                    )
                 )
-                return _reset_absence_slots()
+                return [
+                    SlotSet("ma_mon_hoc", None),
+                    SlotSet("ma_mon", None),
+                    SlotSet("ma_lop", None),
+                    SlotSet("start_date", None),
+                    SlotSet("end_date", None),
+                    SlotSet("reason", None),
+                    SlotSet("normalized_start_date", None),
+                    SlotSet("normalized_end_date", None),
+                    SlotSet("evidence_url", None),
+                    SlotSet("awaiting_request_confirmation", False),
+                ]
 
             slot_events = []
             updated_fields = []
