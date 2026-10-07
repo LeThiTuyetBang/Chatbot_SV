@@ -13,7 +13,9 @@ import sqlite3
 from pathlib import Path
 import random
 from datetime import date, timedelta
+from dotenv import load_dotenv
 
+load_dotenv()
 import requests
 import yaml
 
