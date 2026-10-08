@@ -839,6 +839,10 @@ _CANCEL_EXACT = {
     "không lưu", "khong luu",
     "không xác nhận", "khong xac nhan",
     "hủy đơn", "huy don", "hủy đi", "huy di",
+    "sai rồi", "sai roi",
+    "sai",
+    "chưa đúng", "chua dung",
+    "không đúng", "khong dung",
 }
 
 _CANCEL_FALSE_POSITIVE = re.compile(
@@ -857,6 +861,24 @@ def _is_cancel_correction_text(text: str, intent_name: str | None) -> bool:
     t = (text or "").strip().lower()
     t = re.sub(r"\s+", " ", t)
 
+    # Chuẩn hóa không dấu để tránh lệch encoding (sai rồi vs sai roi)
+    _vi = str.maketrans({
+        "à": "a", "á": "a", "ả": "a", "ã": "a", "ạ": "a",
+        "ă": "a", "ằ": "a", "ắ": "a", "ẳ": "a", "ẵ": "a", "ặ": "a",
+        "â": "a", "ầ": "a", "ấ": "a", "ẩ": "a", "ẫ": "a", "ậ": "a",
+        "è": "e", "é": "e", "ẻ": "e", "ẽ": "e", "ẹ": "e",
+        "ê": "e", "ề": "e", "ế": "e", "ể": "e", "ễ": "e", "ệ": "e",
+        "ì": "i", "í": "i", "ỉ": "i", "ĩ": "i", "ị": "i",
+        "ò": "o", "ó": "o", "ỏ": "o", "õ": "o", "ọ": "o",
+        "ô": "o", "ồ": "o", "ố": "o", "ổ": "o", "ỗ": "o", "ộ": "o",
+        "ơ": "o", "ờ": "o", "ớ": "o", "ở": "o", "ỡ": "o", "ợ": "o",
+        "ù": "u", "ú": "u", "ủ": "u", "ũ": "u", "ụ": "u",
+        "ư": "u", "ừ": "u", "ứ": "u", "ử": "u", "ữ": "u", "ự": "u",
+        "ỳ": "y", "ý": "y", "ỷ": "y", "ỹ": "y", "ỵ": "y",
+        "đ": "d",
+    })
+    t_norm = t.translate(_vi)
+
     if intent_name == "cancel_absence":
         return True
 
@@ -866,16 +888,15 @@ def _is_cancel_correction_text(text: str, intent_name: str | None) -> bool:
     if _CANCEL_FALSE_POSITIVE.search(t):
         return False
 
-    if t in _CANCEL_EXACT:
+    if t in _CANCEL_EXACT or t_norm in _CANCEL_EXACT:
         return True
 
     if intent_name == "deny":
-        if len(t.split()) <= 4 and t in _CANCEL_EXACT or t in {
-            "không", "khong", "ko", "no", "thôi", "hủy", "huy"
-        }:
-            return True
-        # deny + đúng cụm hủy ngắn
-        if t in _CANCEL_EXACT:
+        short_ok = {
+            "không", "khong", "ko", "no", "thôi", "thoi", "hủy", "huy",
+            "sai", "sai roi", "chua dung", "khong dung",
+        }
+        if len(t_norm.split()) <= 4 and (t_norm in short_ok or t in _CANCEL_EXACT):
             return True
         return False
 
@@ -912,22 +933,28 @@ class ActionHandleAbsenceCorrection(Action):
             intent_name = tracker.latest_message.get("intent", {}).get("name")
             entities = tracker.latest_message.get("entities", [])
 
-            has_update_entity = any(
-                e.get("entity") in [
-                    "start_date", "end_date", "time",
-                    "ma_mon_hoc", "ma_mon", "ma_lop", "reason", "evidence_url",
-                ]
-                for e in entities
+            # --- Chặn hủy sớm (kịch bản #17): "sai rồi" / biến thể ---
+            # Không phụ thuộc encoding của _CANCEL_EXACT
+            _t = re.sub(r"\s+", " ", text)
+            _cancel_early = {
+                "sai rồi", "sai roi", "sai",
+                "chưa đúng", "chua dung",
+                "không đúng", "khong dung",
+                "không", "khong", "ko", "no",
+                "thôi", "thoi",
+                "hủy", "huy", "huỷ",
+                "không lưu", "khong luu",
+                "làm lại", "lam lai",
+            }
+            # Chuẩn hóa bỏ dấu tối thiểu cho "rồi" -> "roi"
+            _t_norm = (
+                _t.replace("ồ", "o").replace("ố", "o").replace("ộ", "o")
+                  .replace("ề", "e").replace("ế", "e")
+                  .replace("ư", "u").replace("ơ", "o")
+                  .replace("ă", "a").replace("â", "a")
+                  .replace("đ", "d")
             )
-            has_update_keyword = any(
-                kw in text
-                for kw in ["ngày", "môn", "lớp", "lý do", "ly do", "minh chứng", "http", "drive"]
-            )
-
-            # Hủy khi user nói rõ ràng, và không đang sửa thông tin
-            if _is_cancel_correction_text(text, intent_name) and not (
-                has_update_entity or has_update_keyword
-            ):
+            if _t in _cancel_early or _t_norm in _cancel_early:
                 dispatcher.utter_message(
                     text=(
                         "Đã hủy đơn xin nghỉ học và không lưu thông tin. "
@@ -947,7 +974,13 @@ class ActionHandleAbsenceCorrection(Action):
                     mon_updated = m_mon.group(1).strip()
             if not mon_updated:
                 for sub in _known_subjects():
-                    if re.search(r"\b" + re.escape(sub.lower()) + r"\b", text):
+                    # Không cho "ai" khớp trong "sai" / "mai"...
+                    pat = (
+                        r"(?<![A-Za-z0-9_À-ỹ])"
+                        + re.escape(sub.lower())
+                        + r"(?![A-Za-z0-9_À-ỹ])"
+                    )
+                    if re.search(pat, text, flags=re.IGNORECASE):
                         mon_updated = sub
                         break
             if not mon_updated:

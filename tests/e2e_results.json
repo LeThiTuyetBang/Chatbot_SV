@@ -1,14 +1,14 @@
 {
   "total_executed": 38,
-  "passed": 37,
-  "failed": 1,
+  "passed": 38,
+  "failed": 0,
   "skipped": 0,
-  "passed_chat": 31,
+  "passed_chat": 32,
   "passed_api": 6,
-  "failed_chat": 1,
+  "failed_chat": 0,
   "failed_api": 0,
-  "tcr": 97.36842105263158,
-  "average_turn_count": 3.0,
+  "tcr": 100.0,
+  "average_turn_count": 2.973684210526316,
   "details": [
     {
       "id": 1,
@@ -142,11 +142,9 @@
       "id": 17,
       "name": "Sau khi xem preview → nói 'sai rồi' / 'không'",
       "file": "17_sau_preview_noi_sai_roi.yaml",
-      "pass": false,
+      "pass": true,
       "turn_count": 2,
-      "errors": [
-        "Turn 2: thiếu từ khóa ['hủy', 'không lưu'] trong câu bot: ['Đã cập nhật thông tin đơn của bạn:\\n- Môn: ai\\n- Lớp: CN2302C\\n- Từ: mai -> 2026-10-09\\n- Đến: ngày kia -> 2026-10-10\\n- Lý do: ốm\\n- Minh chứng: Không có', 'Bạn xác nhận để mình lưu đơn nhé? (có / không / gõ thông tin cần sửa lại)']"
-      ]
+      "errors": []
     },
     {
       "id": 18,
